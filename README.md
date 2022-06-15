@@ -1,2 +1,2 @@
 # EcommerceAPI
-API to serve ecommerce webpages with AdonisJS and postgresql
+REST API server related to ecommerce webpages with AdonisJS and postgresql
