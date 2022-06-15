@@ -9,6 +9,10 @@
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write ."
   },
+  "engines": {
+    "node": "16.14",
+    "npm": "8.6.0"
+  },
   "eslintConfig": {
     "extends": [
       "plugin:adonis/typescriptApp",
