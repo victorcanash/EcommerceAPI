@@ -20,6 +20,19 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/', async () => {
-  return { hello: 'world' }
-})
+Route.group(() => {
+  Route.get('/', async () => {
+    return { hello: 'Welcome to Ecommerce API made by Victor Canas' }
+  })
+
+  Route.post('/register', 'UsersController.store')
+  Route.post('/login', 'AuthController.login')
+  Route.post('/logout', 'AuthController.logout')
+
+  Route.resource('/users', 'UsersController')
+    .except(['store'])
+    .middleware({
+      '*': ['auth:api', 'admin'],
+    })
+    .apiOnly()
+}).prefix('/api')
