@@ -32,7 +32,7 @@ Route.group(() => {
   Route.resource('/users', 'UsersController')
     .except(['store'])
     .middleware({
-      '*': ['auth:api', 'admin'],
+      '*': ['auth:api'],
     })
     .apiOnly()
 }).prefix('/api')
