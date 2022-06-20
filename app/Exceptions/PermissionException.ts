@@ -1,7 +1,6 @@
-import { Exception } from '@adonisjs/core/build/standalone'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import { BasicErrorResponse } from 'App/Exceptions/types'
+import BaseException from 'App/Exceptions/BaseException'
 
 /*
 |--------------------------------------------------------------------------
@@ -15,14 +14,17 @@ import { BasicErrorResponse } from 'App/Exceptions/types'
 | new PermissionException('message', 500, 'E_RUNTIME_EXCEPTION')
 |
 */
-export default class PermissionException extends Exception {
-  public async handle(error, { response }: HttpContextContract) {
-    return response.forbidden({
+export default class PermissionException extends BaseException {
+  public async handle(error, ctx: HttpContextContract) {
+    this.errorResponse = {
       code: 403,
       error: 'Permissions error',
       message: error.message,
-    } as BasicErrorResponse)
+    }
+    return super.handle(error, ctx)
   }
 
-  // public report(error: this, ctx: HttpContextContract) {}
+  public report() {
+    super.report()
+  }
 }

@@ -1,4 +1,4 @@
-import { ErrorNode } from 'App/Validators/Reporters/CustomReporter'
+import { FieldErrorNode } from 'App/Validators/Reporters/CustomReporter'
 
 /**
  * Error JSON response for Controllers
@@ -11,5 +11,6 @@ export type BasicErrorResponse = {
 
 export type ValidationErrorResponse = {
   code: number
-  errors: ErrorNode[]
+  error: string
+  fields: FieldErrorNode[]
 }
