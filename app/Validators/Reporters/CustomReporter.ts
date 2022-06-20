@@ -1,26 +1,26 @@
 import {
-  ValidationException,
+  // ValidationException,
   MessagesBagContract,
   ErrorReporterContract,
 } from '@ioc:Adonis/Core/Validator'
 
-import { ValidationErrorResponse } from 'App/Exceptions/types'
+import ValidationException from 'App/Exceptions/ValidationException'
 
 /**
  * The shape of an individual error
  */
-export type ErrorNode = {
-  message: string
-  field: string
+export type FieldErrorNode = {
+  error: string
+  name: string
 }
 
-export class CustomReporter implements ErrorReporterContract<{ errors: ErrorNode[] }> {
+export class CustomReporter implements ErrorReporterContract<{ errors: FieldErrorNode[] }> {
   public hasErrors = false
 
   /**
    * Tracking reported errors
    */
-  private errors: ErrorNode[] = []
+  private errors: FieldErrorNode[] = []
 
   constructor(private messages: MessagesBagContract, private bail: boolean) {}
 
@@ -50,7 +50,7 @@ export class CustomReporter implements ErrorReporterContract<{ errors: ErrorNode
     /**
      * Track error message
      */
-    this.errors.push({ message: errorMessage, field: pointer })
+    this.errors.push({ error: errorMessage, name: pointer })
 
     /**
      * Bail mode means stop validation on the first
@@ -65,16 +65,13 @@ export class CustomReporter implements ErrorReporterContract<{ errors: ErrorNode
    * Converts validation failures to an exception
    */
   public toError() {
-    throw new ValidationException(false, this.toJSON())
+    throw new ValidationException('', this.errors)
   }
 
   /**
    * Get error messages as JSON
    */
   public toJSON() {
-    return {
-      code: 422,
-      errors: this.errors,
-    } as ValidationErrorResponse
+    return { errors: this.errors }
   }
 }
