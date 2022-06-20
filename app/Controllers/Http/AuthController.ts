@@ -13,7 +13,7 @@ export default class AuthController {
 
     const user = await User.findBy('email', validatedData.email)
     if (!user) {
-      throw new ModelNotFoundException('Invalid email')
+      throw new ModelNotFoundException(`Invalid email ${validatedData.email} logging in user`)
     }
 
     try {
@@ -32,7 +32,7 @@ export default class AuthController {
         user: auth.user,
       } as AuthResponse)
     } catch (error) {
-      throw new ModelNotFoundException('Invalid password')
+      throw new ModelNotFoundException(`Invalid password ${validatedData.password} logging in user`)
     }
   }
 

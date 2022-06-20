@@ -31,7 +31,7 @@ export default class UsersController {
   public async show({ params: { id }, response }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
-      throw new ModelNotFoundException('Invalid id')
+      throw new ModelNotFoundException(`Invalid id ${id} getting user`)
     }
 
     return response.ok({
@@ -56,7 +56,7 @@ export default class UsersController {
   public async update({ params: { id }, request, response }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
-      throw new ModelNotFoundException('Invalid id')
+      throw new ModelNotFoundException(`Invalid id ${id} updating user`)
     }
 
     const validatedData = await request.validate(UpdateUserValidator)
@@ -74,7 +74,7 @@ export default class UsersController {
   public async destroy({ params: { id }, response }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
-      throw new ModelNotFoundException('Invalid id')
+      throw new ModelNotFoundException(`Invalid id ${id} destroying user`)
     }
 
     await user.delete()
