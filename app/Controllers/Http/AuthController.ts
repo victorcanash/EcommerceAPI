@@ -2,34 +2,46 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 
 import User from 'App/Models/User'
+import { BasicResponse, AuthResponse } from 'App/Controllers/Http/types'
+import LoginValidator from 'App/Validators/LoginValidator'
+import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class AuthController {
-  public async login({ request, response, auth }: HttpContextContract) {
-    const { email, password } = request.all()
+  public async login({ request, response, auth }: HttpContextContract): Promise<void> {
+    const validatedData = await request.validate(LoginValidator)
 
-    const user = await User.findBy('email', email)
-
+    const user = await User.findBy('email', validatedData.email)
     if (!user) {
-      return response.badRequest('Wrong email')
+      throw new ModelNotFoundException('Invalid email')
     }
 
     try {
-      const token = await auth.attempt(email, password, {
+      const token = await auth.attempt(validatedData.email, validatedData.password, {
         expiresIn: Env.get('TOKEN_EXPIRY', '7days'),
       })
 
       if (user.lockedOut) {
-        return response.forbidden('Locked out user')
+        throw new PermissionException('Locked out user')
       }
 
-      return response.created({ token: token, user: auth.user })
+      return response.created({
+        code: 201,
+        message: 'Successfully logged in',
+        token: token,
+        user: auth.user,
+      } as AuthResponse)
     } catch (error) {
-      return response.badRequest('Wrong password')
+      throw new ModelNotFoundException('Invalid password')
     }
   }
 
   public async logout({ response, auth }: HttpContextContract) {
     await auth.use('api').revoke()
-    return response.ok('Logged out')
+
+    return response.ok({
+      code: 200,
+      message: 'Successfully logged out',
+    } as BasicResponse)
   }
 }

@@ -6,7 +6,7 @@ import { Roles } from 'App/Models/Enums/Roles'
 export default class AdminMiddleware {
   public async handle({ auth }: HttpContextContract, next: () => Promise<void>) {
     if (auth.user?.role !== Roles.ADMIN) {
-      throw new PermissionException('You are not authorized', 403, 'E_UNAUTHORIZED')
+      throw new PermissionException('You need to be an admin')
     }
 
     await next()
