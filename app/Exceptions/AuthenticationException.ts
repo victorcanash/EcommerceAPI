@@ -12,14 +12,18 @@ import { BasicErrorResponse } from 'App/Exceptions/types'
 | a status code and error code for every exception.
 |
 | @example
-| new PermissionException('message', 500, 'E_RUNTIME_EXCEPTION')
+| new AuthenticationException('message', 500, 'E_RUNTIME_EXCEPTION')
 |
 */
-export default class PermissionException extends Exception {
+export default class AuthenticationException extends Exception {
   public async handle(error, { response }: HttpContextContract) {
-    return response.forbidden({
-      code: 403,
-      error: 'Permissions error',
+    /*return response.status(401).json({
+      error: 'Authentication error',
+      message: error.message,
+    })*/
+    return response.unauthorized({
+      code: 401,
+      error: 'Authentication error',
       message: error.message,
     } as BasicErrorResponse)
   }
