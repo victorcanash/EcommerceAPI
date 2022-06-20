@@ -3,21 +3,14 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
 
-export default class CreateUserValidator {
+export default class LoginValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter
 
   public schema = schema.create({
-    email: schema.string({}, [
-      rules.email(),
-      rules.maxLength(255),
-      rules.unique({ table: 'users', column: 'email' }),
-    ]),
+    email: schema.string({}, [rules.email(), rules.maxLength(255)]),
     password: schema.string(),
-    firstName: schema.string(),
-    lastName: schema.string(),
-    age: schema.number(),
   })
 
   public messages: CustomMessages = {}
