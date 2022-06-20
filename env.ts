@@ -28,6 +28,7 @@ export default Env.rules({
   PG_PASSWORD: Env.schema.string.optional(),
   PG_DB_NAME: Env.schema.string(),
   TOKEN_EXPIRY: Env.schema.string(),
+  LOG_LEVEL: Env.schema.string.optional(),
   DEV_CORS_ORIGIN: Env.schema.string.optional(),
   PROD_CORS_ORIGIN: Env.schema.string.optional(),
 })
