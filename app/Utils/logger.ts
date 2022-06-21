@@ -1,17 +1,25 @@
 import Logger from '@ioc:Adonis/Core/Logger'
 
-export const LogInfo = (message: string) => {
+/*const LogInfo = (message: string) => {
+  Logger.info(message)
+}*/
+
+const LogSuccess = (message: string) => {
   Logger.info(message)
 }
 
-export const LogSuccess = (message: string) => {
-  Logger.info(message)
-}
-
-export const LogWarning = (message: string) => {
+/*const LogWarning = (message: string) => {
   Logger.warn(message)
+}*/
+
+const LogError = (message: string) => {
+  Logger.error(message)
 }
 
-export const LogError = (message: string) => {
-  Logger.error(message)
+export const LogRouteSuccess = (route: string, message: string) => {
+  LogSuccess(`[Success ${route}] ${message}`)
+}
+
+export const LogExceptionError = (code: number, message: string) => {
+  LogError(`[Error ${code}] ${message}`)
 }

@@ -2,7 +2,7 @@ import { Exception } from '@adonisjs/core/build/standalone'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { BasicErrorResponse, ValidationErrorResponse } from 'App/Exceptions/types'
-import { LogError } from 'App/Utils/Logger'
+import { LogExceptionError } from 'App/Utils/Logger'
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +35,7 @@ export default class BaseException extends Exception {
   }
 
   public report() {
-    let logMessage = `[Error ${this.errorResponse.code}] ${this.errorResponse.error}: `
+    let logMessage = `${this.errorResponse.error}: `
 
     const basicErrorResponse = this.errorResponse as BasicErrorResponse
     if (basicErrorResponse.message) {
@@ -52,6 +52,6 @@ export default class BaseException extends Exception {
       })
     }
 
-    LogError(logMessage)
+    LogExceptionError(this.errorResponse.code, logMessage)
   }
 }

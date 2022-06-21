@@ -6,6 +6,7 @@ import SortValidator from 'App/Validators/SortValidator'
 import CreateUserValidator from 'App/Validators/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import { LogRouteSuccess } from 'App/Utils/Logger'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
@@ -19,9 +20,11 @@ export default class UsersController {
     const users = await User.query().orderBy(sortBy, order).paginate(page, limit)
     const result = users.toJSON()
 
+    const message = 'Successfully got users'
+    LogRouteSuccess('GET /api/users', message)
     return response.ok({
       code: 200,
-      message: 'Successfully got users',
+      message: message,
       users: result.data,
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
@@ -34,9 +37,11 @@ export default class UsersController {
       throw new ModelNotFoundException(`Invalid id ${id} getting user`)
     }
 
+    const message = 'Successfully got user'
+    LogRouteSuccess('GET /api/users/:id', message)
     return response.ok({
       code: 200,
-      message: 'Successfully got user',
+      message: message,
       user: user,
     } as UserResponse)
   }
@@ -46,9 +51,11 @@ export default class UsersController {
 
     const user = await User.create(validatedData)
 
+    const message = 'Successfully created user'
+    LogRouteSuccess('POST /api/register', message)
     return response.created({
       code: 201,
-      message: 'Successfully created user',
+      message: message,
       user: user,
     } as UserResponse)
   }
@@ -64,9 +71,11 @@ export default class UsersController {
     user.merge(validatedData)
     await user.save()
 
+    const message = 'Successfully updated user'
+    LogRouteSuccess('PUT /api/users/:id', message)
     return response.created({
       code: 201,
-      message: 'Successfully updated user',
+      message: message,
       user: user,
     } as UserResponse)
   }
@@ -79,9 +88,11 @@ export default class UsersController {
 
     await user.delete()
 
+    const message = 'Successfully deleted user'
+    LogRouteSuccess('DELETE /api/users/:id', message)
     return response.ok({
       code: 200,
-      message: 'Successfully deleted user',
+      message: message,
     } as BasicResponse)
   }
 }
