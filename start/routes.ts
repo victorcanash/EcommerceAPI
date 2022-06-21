@@ -27,7 +27,7 @@ Route.group(() => {
 
   Route.post('/register', 'UsersController.store')
   Route.post('/login', 'AuthController.login')
-  Route.post('/logout', 'AuthController.logout')
+  Route.post('/logout', 'AuthController.logout').middleware('auth:api')
 
   Route.resource('/users', 'UsersController')
     .except(['store'])
