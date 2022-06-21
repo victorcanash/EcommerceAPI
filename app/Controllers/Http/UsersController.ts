@@ -2,8 +2,8 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import User from 'App/Models/User'
 import { UsersResponse, UserResponse, BasicResponse } from 'App/Controllers/Http/types'
-import CreateUserValidator from 'App/Validators/CreateUserValidator'
 import SortValidator from 'App/Validators/SortValidator'
+import CreateUserValidator from 'App/Validators/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 

@@ -26,7 +26,7 @@ export default class ValidationException extends BaseException {
   public async handle(error, ctx: HttpContextContract) {
     this.errorResponse = {
       code: 422,
-      error: 'Validation error',
+      error: this.message,
       fields: this.fields,
     }
     return super.handle(error, ctx)

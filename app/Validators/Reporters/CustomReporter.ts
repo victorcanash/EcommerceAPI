@@ -17,6 +17,8 @@ export type FieldErrorNode = {
 export class CustomReporter implements ErrorReporterContract<{ errors: FieldErrorNode[] }> {
   public hasErrors = false
 
+  public validatorName = 'Validator'
+
   /**
    * Tracking reported errors
    */
@@ -65,7 +67,7 @@ export class CustomReporter implements ErrorReporterContract<{ errors: FieldErro
    * Converts validation failures to an exception
    */
   public toError() {
-    throw new ValidationException('', this.errors)
+    throw new ValidationException(`${this.validatorName} error`, this.errors)
   }
 
   /**

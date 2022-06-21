@@ -17,7 +17,7 @@ export default class AuthController {
     }
 
     try {
-      const token = await auth.attempt(validatedData.email, validatedData.password, {
+      const tokenData = await auth.attempt(validatedData.email, validatedData.password, {
         expiresIn: Env.get('TOKEN_EXPIRY', '7days'),
       })
 
@@ -28,8 +28,8 @@ export default class AuthController {
       return response.created({
         code: 201,
         message: 'Successfully logged in',
-        token: token,
-        user: auth.user,
+        token: tokenData.token,
+        user: user,
       } as AuthResponse)
     } catch (error) {
       throw new ModelNotFoundException(`Invalid password ${validatedData.password} logging in user`)
