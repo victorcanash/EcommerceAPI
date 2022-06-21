@@ -37,7 +37,7 @@ export default class UsersController {
       throw new ModelNotFoundException(`Invalid id ${id} getting user`)
     }
 
-    const message = 'Successfully got user'
+    const message = `Successfully got user by id ${id}`
     LogRouteSuccess('GET /api/users/:id', message)
     return response.ok({
       code: 200,
@@ -60,18 +60,20 @@ export default class UsersController {
     } as UserResponse)
   }
 
-  public async update({ params: { id }, request, response }: HttpContextContract) {
+  public async update({ params: { id }, request, response, bouncer }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
       throw new ModelNotFoundException(`Invalid id ${id} updating user`)
     }
+
+    await bouncer.with('UserPolicy').authorize('update', user)
 
     const validatedData = await request.validate(UpdateUserValidator)
 
     user.merge(validatedData)
     await user.save()
 
-    const message = 'Successfully updated user'
+    const message = `Successfully updated user by id ${id}`
     LogRouteSuccess('PUT /api/users/:id', message)
     return response.created({
       code: 201,
@@ -80,15 +82,17 @@ export default class UsersController {
     } as UserResponse)
   }
 
-  public async destroy({ params: { id }, response }: HttpContextContract) {
+  public async destroy({ params: { id }, response, bouncer }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
-      throw new ModelNotFoundException(`Invalid id ${id} destroying user`)
+      throw new ModelNotFoundException(`Invalid id ${id} deleting user`)
     }
+
+    await bouncer.with('UserPolicy').authorize('delete', user)
 
     await user.delete()
 
-    const message = 'Successfully deleted user'
+    const message = `Successfully deleted user by id ${id}`
     LogRouteSuccess('DELETE /api/users/:id', message)
     return response.ok({
       code: 200,

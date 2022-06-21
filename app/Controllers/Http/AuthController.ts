@@ -26,7 +26,7 @@ export default class AuthController {
         throw new PermissionException('Locked out user')
       }
 
-      const message = 'Successfully logged in'
+      const message = `Successfully logged in user with email ${user.email}`
       LogRouteSuccess('POST /api/login', message)
       return response.created({
         code: 201,
@@ -40,9 +40,10 @@ export default class AuthController {
   }
 
   public async logout({ response, auth }: HttpContextContract) {
+    const message = `Successfully logged out user with email ${auth.user?.email}`
+
     await auth.use('api').revoke()
 
-    const message = 'Successfully logged out'
     LogRouteSuccess('POST /api/logout', message)
     return response.ok({
       code: 200,
