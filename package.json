@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node ace serve --watch",
     "build": "node ace build --production",
+		"postbuild": "node ace swagger:generate && cp -a docs/ build/docs",
     "start": "node server.js",
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write ."
@@ -61,6 +62,7 @@
     "@adonisjs/core": "^5.8.3",
     "@adonisjs/lucid": "^18.0.1",
     "@adonisjs/repl": "^3.1.11",
+    "adonis5-swagger": "^1.4.1",
     "luxon": "^2.4.0",
     "pg": "^8.7.3",
     "phc-argon2": "^1.1.3",
