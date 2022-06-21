@@ -1,0 +1,12 @@
+import { BasePolicy as BouncerBasePolicy } from '@ioc:Adonis/Addons/Bouncer'
+
+import User from 'App/Models/User'
+import { Roles } from 'App/Models/Enums/Roles'
+
+export default class BasePolicy extends BouncerBasePolicy {
+  public async before(user: User | null) {
+    if (user?.role === Roles.ADMIN) {
+      return true
+    }
+  }
+}
