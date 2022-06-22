@@ -35,4 +35,36 @@ Route.group(() => {
       '*': ['auth:api'],
     })
     .apiOnly()
+
+  Route.resource('/products', 'ProductsController')
+    .middleware({
+      store: ['auth:api', 'admin'],
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
+    })
+    .apiOnly()
+
+  Route.resource('/pcategories', 'PCategoriesController')
+    .middleware({
+      store: ['auth:api', 'admin'],
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
+    })
+    .apiOnly()
+
+  Route.resource('/pdiscounts', 'PDiscountsController')
+    .middleware({
+      store: ['auth:api', 'admin'],
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
+    })
+    .apiOnly()
+
+  Route.resource('/pinventories', 'PInventoriesController')
+    .middleware({
+      store: ['auth:api', 'admin'],
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
+    })
+    .apiOnly()
 }).prefix('/api')
