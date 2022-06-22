@@ -2,7 +2,7 @@ import { Exception } from '@adonisjs/core/build/standalone'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { BasicErrorResponse, ValidationErrorResponse } from 'App/Exceptions/types'
-import { LogExceptionError } from 'App/Utils/Logger'
+import { LogRouteError } from 'App/Utils/Logger'
 
 /*
 |--------------------------------------------------------------------------
@@ -17,31 +17,31 @@ import { LogExceptionError } from 'App/Utils/Logger'
 |
 */
 export default class BaseException extends Exception {
-  protected errorResponse: BasicErrorResponse | ValidationErrorResponse
+  protected response: BasicErrorResponse | ValidationErrorResponse
 
-  public async handle(_error: any, { response }: HttpContextContract) {
-    switch (this.errorResponse.code) {
+  public async handle(error: this, { response }: HttpContextContract) {
+    switch (error.response.code) {
       case 401:
-        return response.unauthorized(this.errorResponse)
+        return response.unauthorized(error.response)
       case 403:
-        return response.forbidden(this.errorResponse)
+        return response.forbidden(error.response)
       case 404:
-        return response.notFound(this.errorResponse)
+        return response.notFound(error.response)
       case 422:
-        return response.unprocessableEntity(this.errorResponse)
+        return response.unprocessableEntity(error.response)
       default:
-        return response.badRequest(this.errorResponse)
+        return response.badRequest(error.response)
     }
   }
 
-  public report() {
-    let logMessage = `${this.errorResponse.error}: `
+  public report(error: this, { request }: HttpContextContract) {
+    let logMessage = `${error.response.error}: `
 
-    const basicErrorResponse = this.errorResponse as BasicErrorResponse
+    const basicErrorResponse = error.response as BasicErrorResponse
     if (basicErrorResponse.message) {
       logMessage += basicErrorResponse.message
     }
-    const validationErrorResponse = this.errorResponse as ValidationErrorResponse
+    const validationErrorResponse = error.response as ValidationErrorResponse
     if (validationErrorResponse.fields) {
       validationErrorResponse.fields.forEach((field, index) => {
         if (index === 0) {
@@ -52,6 +52,6 @@ export default class BaseException extends Exception {
       })
     }
 
-    LogExceptionError(this.errorResponse.code, logMessage)
+    LogRouteError(request, error.response.code, logMessage)
   }
 }

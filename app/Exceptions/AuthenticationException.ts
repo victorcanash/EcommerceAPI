@@ -15,8 +15,8 @@ import BaseException from 'App/Exceptions/BaseException'
 |
 */
 export default class AuthenticationException extends BaseException {
-  public async handle(error, ctx: HttpContextContract) {
-    this.errorResponse = {
+  public async handle(error: this, ctx: HttpContextContract) {
+    error.response = {
       code: 401,
       error: 'Authentication error',
       message: error.message,
@@ -24,7 +24,7 @@ export default class AuthenticationException extends BaseException {
     return super.handle(error, ctx)
   }
 
-  public report() {
-    super.report()
+  public report(error: this, ctx: HttpContextContract) {
+    super.report(error, ctx)
   }
 }

@@ -18,21 +18,21 @@ import { FieldErrorNode } from 'App/Validators/Reporters/CustomReporter'
 export default class ValidationException extends BaseException {
   private fields: FieldErrorNode[]
 
-  constructor(message: string, _fields: FieldErrorNode[]) {
+  constructor(message: string, fields: FieldErrorNode[]) {
     super(message)
-    this.fields = _fields
+    this.fields = fields
   }
 
-  public async handle(error, ctx: HttpContextContract) {
-    this.errorResponse = {
+  public async handle(error: this, ctx: HttpContextContract) {
+    error.response = {
       code: 422,
-      error: this.message,
-      fields: this.fields,
+      error: error.message,
+      fields: error.fields,
     }
     return super.handle(error, ctx)
   }
 
-  public report() {
-    super.report()
+  public report(error: this, ctx: HttpContextContract) {
+    super.report(error, ctx)
   }
 }

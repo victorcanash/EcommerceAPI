@@ -22,28 +22,28 @@ export default class UsersController {
     const users = await User.query().orderBy(sortBy, order).paginate(page, limit)
     const result = users.toJSON()
 
-    const message = 'Successfully got users'
-    LogRouteSuccess('GET /api/users', message)
+    const successMsg = 'Successfully got users'
+    LogRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
-      message: message,
+      message: successMsg,
       users: result.data,
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
     } as UsersResponse)
   }
 
-  public async show({ params: { id }, response }: HttpContextContract) {
+  public async show({ params: { id }, request, response }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
       throw new ModelNotFoundException(`Invalid id ${id} getting user`)
     }
 
-    const message = `Successfully got user by id ${id}`
-    LogRouteSuccess('GET /api/users/:id', message)
+    const successMsg = `Successfully got user by id ${id}`
+    LogRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
-      message: message,
+      message: successMsg,
       user: user,
     } as UserResponse)
   }
@@ -53,11 +53,11 @@ export default class UsersController {
 
     const user = await User.create(validatedData)
 
-    const message = 'Successfully created user'
-    LogRouteSuccess('POST /api/register', message)
+    const successMsg = 'Successfully created user'
+    LogRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
-      message: message,
+      message: successMsg,
       user: user,
     } as UserResponse)
   }
@@ -75,16 +75,16 @@ export default class UsersController {
     user.merge(validatedData)
     await user.save()
 
-    const message = `Successfully updated user by id ${id}`
-    LogRouteSuccess('PUT /api/users/:id', message)
+    const successMsg = `Successfully updated user by id ${id}`
+    LogRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
-      message: message,
+      message: successMsg,
       user: user,
     } as UserResponse)
   }
 
-  public async destroy({ params: { id }, response, bouncer }: HttpContextContract) {
+  public async destroy({ params: { id }, request, response, bouncer }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
       throw new ModelNotFoundException(`Invalid id ${id} deleting user`)
@@ -94,11 +94,11 @@ export default class UsersController {
 
     await user.delete()
 
-    const message = `Successfully deleted user by id ${id}`
-    LogRouteSuccess('DELETE /api/users/:id', message)
+    const successMsg = `Successfully deleted user by id ${id}`
+    LogRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
-      message: message,
+      message: successMsg,
     } as BasicResponse)
   }
 }
