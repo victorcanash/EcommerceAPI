@@ -1,3 +1,100 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class ProductsController {}
+import Product from 'App/Models/Product'
+import { ProductsResponse, ProductResponse, BasicResponse } from 'App/Controllers/Http/types'
+import PaginationValidator from 'App/Validators/List/PaginationValidator'
+import SortValidator from 'App/Validators/List/SortValidator'
+import CreateProductValidator from 'App/Validators/Product/CreateProductValidator'
+import UpdateProductValidator from 'App/Validators/Product/UpdateProductValidator'
+import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import { LogRouteSuccess } from 'App/Utils/Logger'
+
+export default class ProductsController {
+  public async index({ request, response }: HttpContextContract) {
+    const validatedPaginationData = await request.validate(PaginationValidator)
+    const page = validatedPaginationData.page || 1
+    const limit = validatedPaginationData.limit || 10
+
+    const validatedSortData = await request.validate(SortValidator)
+    const sortBy = validatedSortData.sort_by || 'id'
+    const order = validatedSortData.order || 'asc'
+
+    const products = await Product.query().orderBy(sortBy, order).paginate(page, limit)
+    const result = products.toJSON()
+
+    const successMsg = 'Successfully got products'
+    LogRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      products: result.data,
+      totalPages: Math.ceil(result.meta.total / limit),
+      currentPage: result.meta.current_page as number,
+    } as ProductsResponse)
+  }
+
+  public async show({ params: { id }, request, response }: HttpContextContract) {
+    const product = await Product.find(id)
+    if (!product) {
+      throw new ModelNotFoundException(`Invalid id ${id} getting product`)
+    }
+
+    const successMsg = `Successfully got product by id ${id}`
+    LogRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      product: product,
+    } as ProductResponse)
+  }
+
+  public async store({ request, response }: HttpContextContract) {
+    const validatedData = await request.validate(CreateProductValidator)
+
+    const product = await Product.create(validatedData)
+
+    const successMsg = 'Successfully created product'
+    LogRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      product: product,
+    } as ProductResponse)
+  }
+
+  public async update({ params: { id }, request, response }: HttpContextContract) {
+    const product = await Product.find(id)
+    if (!product) {
+      throw new ModelNotFoundException(`Invalid id ${id} updating product`)
+    }
+
+    const validatedData = await request.validate(UpdateProductValidator)
+
+    product.merge(validatedData)
+    await product.save()
+
+    const successMsg = `Successfully updated product by id ${id}`
+    LogRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      product: product,
+    } as ProductResponse)
+  }
+
+  public async destroy({ params: { id }, request, response }: HttpContextContract) {
+    const product = await Product.find(id)
+    if (!product) {
+      throw new ModelNotFoundException(`Invalid id ${id} deleting product`)
+    }
+
+    await product.delete()
+
+    const successMsg = `Successfully deleted product by id ${id}`
+    LogRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+    } as BasicResponse)
+  }
+}
