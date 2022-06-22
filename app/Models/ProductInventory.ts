@@ -5,6 +5,9 @@ import Product from 'App/Models/Product'
 
 export default class ProductInventory extends AppBaseModel {
   @column()
+  public productId: number
+
+  @column()
   public quantity: number
 
   @column()

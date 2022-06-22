@@ -7,6 +7,9 @@ import ProductDiscount from 'App/Models/ProductDiscount'
 
 export default class Product extends AppBaseModel {
   @column()
+  public categoryId: number
+
+  @column()
   public name: string
 
   @column()
