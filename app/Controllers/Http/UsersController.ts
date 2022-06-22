@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import User from 'App/Models/User'
 import { UsersResponse, UserResponse, BasicResponse } from 'App/Controllers/Http/types'
+import PaginationValidator from 'App/Validators/PaginationValidator'
 import SortValidator from 'App/Validators/SortValidator'
 import CreateUserValidator from 'App/Validators/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/UpdateUserValidator'
@@ -10,12 +11,13 @@ import { LogRouteSuccess } from 'App/Utils/Logger'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
-    const page = request.input('page', 1) ?? 1
-    const limit = request.input('limit', 10) ?? 10
+    const validatedPaginationData = await request.validate(PaginationValidator)
+    const page = validatedPaginationData.page || 1
+    const limit = validatedPaginationData.limit || 10
 
-    const validatedData = await request.validate(SortValidator)
-    const sortBy = validatedData.sort_by || 'id'
-    const order = validatedData.order || 'asc'
+    const validatedSortData = await request.validate(SortValidator)
+    const sortBy = validatedSortData.sort_by || 'id'
+    const order = validatedSortData.order || 'asc'
 
     const users = await User.query().orderBy(sortBy, order).paginate(page, limit)
     const result = users.toJSON()
