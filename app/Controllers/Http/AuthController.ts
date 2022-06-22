@@ -3,7 +3,7 @@ import Env from '@ioc:Adonis/Core/Env'
 
 import User from 'App/Models/User'
 import { BasicResponse, AuthResponse } from 'App/Controllers/Http/types'
-import LoginValidator from 'App/Validators/LoginValidator'
+import LoginValidator from 'App/Validators/User/LoginValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import { LogRouteSuccess } from 'App/Utils/Logger'
