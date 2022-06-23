@@ -1,4 +1,12 @@
-import { column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import {
+  column,
+  belongsTo,
+  BelongsTo,
+  hasMany,
+  HasMany,
+  hasOne,
+  HasOne,
+} from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductCategory from 'App/Models/ProductCategory'
@@ -21,12 +29,18 @@ export default class Product extends AppBaseModel {
   @column()
   public price: number
 
-  @belongsTo(() => ProductCategory)
+  @belongsTo(() => ProductCategory, {
+    foreignKey: 'categoryId',
+  })
   public category: BelongsTo<typeof ProductCategory>
 
   @hasMany(() => ProductInventory)
   public inventories: HasMany<typeof ProductInventory>
 
-  @hasMany(() => ProductDiscount)
-  public discounts: HasMany<typeof ProductDiscount>
+  @hasOne(() => ProductDiscount, {
+    onQuery: (query) => {
+      query.where('active', true).orderBy('id', 'desc').limit(1)
+    },
+  })
+  public discount: HasOne<typeof ProductDiscount>
 }
