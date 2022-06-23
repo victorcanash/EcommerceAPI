@@ -4,6 +4,7 @@ import Product from 'App/Models/Product'
 import { ProductsResponse, ProductResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
+import FilterProductValidator from 'App/Validators/Product/FilterProductValidator'
 import CreateProductValidator from 'App/Validators/Product/CreateProductValidator'
 import UpdateProductValidator from 'App/Validators/Product/UpdateProductValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
@@ -19,7 +20,28 @@ export default class ProductsController {
     const sortBy = validatedSortData.sort_by || 'id'
     const order = validatedSortData.order || 'asc'
 
-    const products = await Product.query().orderBy(sortBy, order).paginate(page, limit)
+    const validatedFilterData = await request.validate(FilterProductValidator)
+    const categoryId = validatedFilterData.category_id || -1
+    const ordersRemain = validatedFilterData.orders_remain || false
+
+    const products = await Product.query()
+      .whereHas('inventories', (query) => {
+        if (ordersRemain) {
+          query.where('quantity', '>', 0)
+        }
+      })
+      .whereHas('category', (query) => {
+        if (categoryId >= 0) {
+          query.where('id', categoryId)
+        }
+      })
+      .preload('discount')
+      .preload('inventories')
+      /*.preload('inventories', (query) => {
+        query.where('quantity', '>', 0)
+      })*/
+      .orderBy(sortBy, order)
+      .paginate(page, limit)
     const result = products.toJSON()
 
     const successMsg = 'Successfully got products'
