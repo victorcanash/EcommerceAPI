@@ -9,6 +9,7 @@ export default class FilterProductValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    keywords: schema.string.optional(),
     category_id: schema.number.optional([
       rules.exists({ table: 'product_categories', column: 'id' }),
     ]),

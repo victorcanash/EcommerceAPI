@@ -21,10 +21,21 @@ export default class ProductsController {
     const order = validatedSortData.order || 'asc'
 
     const validatedFilterData = await request.validate(FilterProductValidator)
+    const keywords = validatedFilterData.keywords || ''
     const categoryId = validatedFilterData.category_id || -1
     const ordersRemain = validatedFilterData.orders_remain || false
 
     const products = await Product.query()
+      .where((query) => {
+        query
+          .where('name', 'ILIKE', `%${keywords}%`)
+          .orWhere('description', 'ILIKE', `%${keywords}%`)
+          .orWhereHas('category', (query) => {
+            query
+              .where('name', 'ILIKE', `%${keywords}%`)
+              .orWhere('description', 'ILIKE', `%${keywords}%`)
+          })
+      })
       .whereHas('inventories', (query) => {
         if (ordersRemain) {
           query.where('quantity', '>', 0)
