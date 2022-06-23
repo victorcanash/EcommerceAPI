@@ -15,8 +15,8 @@ export default class extends BaseSchema {
       table.integer('quantity', 255).notNullable()
       table.string('size', 255).nullable()
 
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).notNullable()
+      table.timestamp('updated_at', { useTz: true }).notNullable()
     })
   }
 

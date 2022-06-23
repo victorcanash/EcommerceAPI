@@ -17,8 +17,8 @@ export default class extends BaseSchema {
       table.integer('discount_percent', 255).notNullable()
       table.boolean('active').defaultTo(true).notNullable()
 
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
+      table.timestamp('created_at', { useTz: true }).notNullable()
+      table.timestamp('updated_at', { useTz: true }).notNullable()
     })
   }
 
