@@ -1,8 +1,9 @@
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
+import { column, beforeSave, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import { Roles } from 'App/Models/Enums/Roles'
+import UserAddress from 'App/Models/UserAddress'
 
 export default class User extends AppBaseModel {
   @column()
@@ -28,6 +29,9 @@ export default class User extends AppBaseModel {
 
   @column()
   public lockedOut: boolean
+
+  @hasMany(() => UserAddress)
+  public addresses: HasMany<typeof UserAddress>
 
   @beforeSave()
   public static async hashPassword(user: User) {
