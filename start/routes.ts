@@ -32,7 +32,20 @@ Route.group(() => {
   Route.resource('/users', 'UsersController')
     .except(['store'])
     .middleware({
-      '*': ['auth:api'],
+      index: ['auth:api', 'admin'],
+      show: ['auth:api'],
+      update: ['auth:api'],
+      destroy: ['auth:api'],
+    })
+    .apiOnly()
+
+  Route.resource('/uaddresses', 'UAddressesController')
+    .middleware({
+      index: ['auth:api', 'admin'],
+      show: ['auth:api'],
+      store: ['auth:api'],
+      update: ['auth:api'],
+      destroy: ['auth:api'],
     })
     .apiOnly()
 

@@ -33,11 +33,13 @@ export default class UsersController {
     } as UsersResponse)
   }
 
-  public async show({ params: { id }, request, response }: HttpContextContract) {
+  public async show({ params: { id }, request, response, bouncer }: HttpContextContract) {
     const user = await User.find(id)
     if (!user) {
       throw new ModelNotFoundException(`Invalid id ${id} getting user`)
     }
+
+    await bouncer.with('UserPolicy').authorize('view', user)
 
     const successMsg = `Successfully got user by id ${id}`
     LogRouteSuccess(request, successMsg)
