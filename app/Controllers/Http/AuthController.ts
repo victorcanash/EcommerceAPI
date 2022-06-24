@@ -26,7 +26,7 @@ export default class AuthController {
         throw new PermissionException('Locked out user')
       }
 
-      user.load('addresses')
+      await user.load('addresses')
 
       const successMsg = `Successfully logged in user with email ${user.email}`
       LogRouteSuccess(request, successMsg)
