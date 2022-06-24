@@ -1,4 +1,5 @@
 import User from 'App/Models/User'
+import UserAddress from 'App/Models/UserAddress'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductDiscount from 'App/Models/ProductDiscount'
@@ -38,6 +39,26 @@ export type UsersResponse = {
   code: number
   message: string
   users: User[]
+  totalPages: number
+  currentPage: number
+}
+
+/**
+ * User address JSON response for Controllers
+ */
+export type UAddressResponse = {
+  code: number
+  message: string
+  userAddress: UserAddress
+}
+
+/**
+ * User addresses JSON response for Controllers
+ */
+export type UAddressesResponse = {
+  code: number
+  message: string
+  userAddresses: UserAddress[]
   totalPages: number
   currentPage: number
 }
