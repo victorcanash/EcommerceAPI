@@ -8,13 +8,18 @@ export default class UserPolicy extends BasePolicy {
       return true
     }
 
-    throw new PermissionException('You are not this user or you need to be an admin to update user')
+    throw new PermissionException(
+      'You are not this user or you need to be an admin to update this user'
+    )
   }
+
   public async delete(user: User, userDelete: User) {
     if (user.id === userDelete.id) {
       return true
     }
 
-    throw new PermissionException('You are not this user or you need to be an admin to delete user')
+    throw new PermissionException(
+      'You are not this user or you need to be an admin to delete this user'
+    )
   }
 }
