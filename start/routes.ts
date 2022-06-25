@@ -49,6 +49,16 @@ Route.group(() => {
     })
     .apiOnly()
 
+  Route.resource('/upayments', 'UPaymentsController')
+    .middleware({
+      index: ['auth:api', 'admin'],
+      show: ['auth:api'],
+      store: ['auth:api'],
+      update: ['auth:api'],
+      destroy: ['auth:api'],
+    })
+    .apiOnly()
+
   Route.resource('/products', 'ProductsController')
     .middleware({
       store: ['auth:api', 'admin'],
