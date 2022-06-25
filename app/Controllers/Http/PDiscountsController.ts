@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreatePDiscountValidator from 'App/Validators/Product/CreatePDiscountValidator'
 import UpdatePDiscountValidator from 'App/Validators/Product/UpdatePDiscountValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { LogRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/Utils/Logger'
 
 export default class PDiscountsController {
   public async index({ request, response }: HttpContextContract) {
@@ -25,7 +25,7 @@ export default class PDiscountsController {
     const result = productDiscounts.toJSON()
 
     const successMsg = 'Successfully got product discounts'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -42,7 +42,7 @@ export default class PDiscountsController {
     }
 
     const successMsg = `Successfully got product discount by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -56,7 +56,7 @@ export default class PDiscountsController {
     const productDiscount = await ProductDiscount.create(validatedData)
 
     const successMsg = 'Successfully created product discount'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -76,7 +76,7 @@ export default class PDiscountsController {
     await productDiscount.save()
 
     const successMsg = `Successfully updated product discount by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -93,7 +93,7 @@ export default class PDiscountsController {
     await productDiscount.delete()
 
     const successMsg = `Successfully deleted product discount by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,

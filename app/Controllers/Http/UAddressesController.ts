@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUAddressValidator from 'App/Validators/User/CreateUAddressValidator'
 import UpdateUAddressValidator from 'App/Validators/User/UpdateUAddressValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { LogRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/Utils/Logger'
 
 export default class UAddressesController {
   public async index({ request, response }: HttpContextContract) {
@@ -23,7 +23,7 @@ export default class UAddressesController {
     const result = userAddresses.toJSON()
 
     const successMsg = 'Successfully got user addresses'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -42,7 +42,7 @@ export default class UAddressesController {
     await bouncer.with('UAddressPolicy').authorize('view', userAddress)
 
     const successMsg = `Successfully got user address by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -63,7 +63,7 @@ export default class UAddressesController {
     })
 
     const successMsg = 'Successfully created user address'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -85,7 +85,7 @@ export default class UAddressesController {
     await userAddress.save()
 
     const successMsg = `Successfully updated user address by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -104,7 +104,7 @@ export default class UAddressesController {
     await userAddress.delete()
 
     const successMsg = `Successfully deleted user address by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,

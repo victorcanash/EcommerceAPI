@@ -8,7 +8,7 @@ import FilterProductValidator from 'App/Validators/Product/FilterProductValidato
 import CreateProductValidator from 'App/Validators/Product/CreateProductValidator'
 import UpdateProductValidator from 'App/Validators/Product/UpdateProductValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { LogRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/Utils/Logger'
 
 export default class ProductsController {
   public async index({ request, response }: HttpContextContract) {
@@ -56,7 +56,7 @@ export default class ProductsController {
     const result = products.toJSON()
 
     const successMsg = 'Successfully got products'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -73,7 +73,7 @@ export default class ProductsController {
     }
 
     const successMsg = `Successfully got product by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -87,7 +87,7 @@ export default class ProductsController {
     const product = await Product.create(validatedData)
 
     const successMsg = 'Successfully created product'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -107,7 +107,7 @@ export default class ProductsController {
     await product.save()
 
     const successMsg = `Successfully updated product by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -124,7 +124,7 @@ export default class ProductsController {
     await product.delete()
 
     const successMsg = `Successfully deleted product by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,

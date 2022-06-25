@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreatePInventoryValidator from 'App/Validators/Product/CreatePInventoryValidator'
 import UpdatePInventoryValidator from 'App/Validators/Product/UpdatePInventoryValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { LogRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/Utils/Logger'
 
 export default class PInventoriesController {
   public async index({ request, response }: HttpContextContract) {
@@ -25,7 +25,7 @@ export default class PInventoriesController {
     const result = productInventories.toJSON()
 
     const successMsg = 'Successfully got product inventories'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -42,7 +42,7 @@ export default class PInventoriesController {
     }
 
     const successMsg = `Successfully got product inventory by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -56,7 +56,7 @@ export default class PInventoriesController {
     const productInventory = await ProductInventory.create(validatedData)
 
     const successMsg = 'Successfully created product inventory'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -76,7 +76,7 @@ export default class PInventoriesController {
     await productInventory.save()
 
     const successMsg = `Successfully updated product inventory by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -93,7 +93,7 @@ export default class PInventoriesController {
     await productInventory.delete()
 
     const successMsg = `Successfully deleted product inventory by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,

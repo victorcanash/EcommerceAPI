@@ -6,7 +6,7 @@ import { BasicResponse, AuthResponse } from 'App/Controllers/Http/types'
 import LoginValidator from 'App/Validators/User/LoginValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
-import { LogRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/Utils/Logger'
 
 export default class AuthController {
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
@@ -29,7 +29,7 @@ export default class AuthController {
       await user.load('addresses')
 
       const successMsg = `Successfully logged in user with email ${user.email}`
-      LogRouteSuccess(request, successMsg)
+      logRouteSuccess(request, successMsg)
       return response.created({
         code: 201,
         message: successMsg,
@@ -46,7 +46,7 @@ export default class AuthController {
 
     await auth.use('api').revoke()
 
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,

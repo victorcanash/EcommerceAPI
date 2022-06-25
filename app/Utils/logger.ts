@@ -1,26 +1,26 @@
 import Logger from '@ioc:Adonis/Core/Logger'
 import type { RequestContract } from '@ioc:Adonis/Core/Request'
 
-/*const LogInfo = (message: string) => {
+/*const logInfo = (message: string) => {
   Logger.info(message)
 }*/
 
-const LogSuccess = (message: string) => {
+const logSuccess = (message: string) => {
   Logger.info(message)
 }
 
-/*const LogWarning = (message: string) => {
+/*const logWarning = (message: string) => {
   Logger.warn(message)
 }*/
 
-const LogError = (message: string) => {
+const logError = (message: string) => {
   Logger.error(message)
 }
 
-export const LogRouteSuccess = (request: RequestContract, message: string) => {
-  LogSuccess(`[Success ${request.method()} ${request.url(true)}] ${message}`)
+export const logRouteSuccess = (request: RequestContract, message: string) => {
+  logSuccess(`[Success ${request.method()} ${request.url(true)}] ${message}`)
 }
 
-export const LogRouteError = (request: RequestContract, code: number, message: string) => {
-  LogError(`[Error ${request.method()} ${request.url(true)}] ${code} ${message}`)
+export const logRouteError = (request: RequestContract, code: number, message: string) => {
+  logError(`[Error ${request.method()} ${request.url(true)}] ${code} ${message}`)
 }

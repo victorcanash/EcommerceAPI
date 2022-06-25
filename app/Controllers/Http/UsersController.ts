@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { LogRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/Utils/Logger'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
@@ -23,7 +23,7 @@ export default class UsersController {
     const result = users.toJSON()
 
     const successMsg = 'Successfully got users'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -42,7 +42,7 @@ export default class UsersController {
     await bouncer.with('UserPolicy').authorize('view', user)
 
     const successMsg = `Successfully got user by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
@@ -56,7 +56,7 @@ export default class UsersController {
     const user = await User.create(validatedData)
 
     const successMsg = 'Successfully created user'
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -78,7 +78,7 @@ export default class UsersController {
     await user.save()
 
     const successMsg = `Successfully updated user by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
@@ -97,7 +97,7 @@ export default class UsersController {
     await user.delete()
 
     const successMsg = `Successfully deleted user by id ${id}`
-    LogRouteSuccess(request, successMsg)
+    logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
