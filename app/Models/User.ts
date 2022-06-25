@@ -4,6 +4,7 @@ import { column, beforeSave, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import { Roles } from 'App/Models/Enums/Roles'
 import UserAddress from 'App/Models/UserAddress'
+import UserPayment from 'App/Models/UserPayment'
 
 export default class User extends AppBaseModel {
   @column()
@@ -32,6 +33,9 @@ export default class User extends AppBaseModel {
 
   @hasMany(() => UserAddress)
   public addresses: HasMany<typeof UserAddress>
+
+  @hasMany(() => UserPayment)
+  public payments: HasMany<typeof UserPayment>
 
   @beforeSave()
   public static async hashPassword(user: User) {
