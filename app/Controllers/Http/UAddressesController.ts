@@ -52,15 +52,9 @@ export default class UAddressesController {
 
   public async store({ request, response, auth }: HttpContextContract) {
     const validatedData = await request.validate(CreateUAddressValidator)
+    validatedData.userId = auth.user?.id
 
-    const userAddress = await UserAddress.create({
-      userId: auth.user?.id,
-      addressLine: validatedData.addressLine,
-      additionalInfo: validatedData.additionalInfo,
-      postalCode: validatedData.postalCode,
-      city: validatedData.city,
-      country: validatedData.country,
-    })
+    const userAddress = await UserAddress.create(validatedData)
 
     const successMsg = 'Successfully created user address'
     logRouteSuccess(request, successMsg)

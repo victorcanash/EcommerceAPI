@@ -10,7 +10,8 @@ export default class extends BaseSchema {
       table.string('address_line', 255).notNullable()
       table.string('additional_info', 255).notNullable()
       table.string('postal_code', 255).notNullable()
-      table.string('city', 255).notNullable()
+      table.string('locality', 255).notNullable()
+      table.string('administrative_area', 255).notNullable()
       table.string('country', 255).notNullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()

@@ -12,7 +12,8 @@ export default class CreateUAddressValidator {
     addressLine: schema.string.optional(),
     additionalInfo: schema.string.optional(),
     postalCode: schema.string.optional(),
-    city: schema.string.optional(),
+    locality: schema.string.optional(),
+    administrativeArea: schema.string.optional(),
     country: schema.string.optional(),
   })
 

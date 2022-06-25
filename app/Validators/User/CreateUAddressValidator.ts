@@ -9,10 +9,12 @@ export default class CreateUAddressValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    userId: schema.number.optional(),
     addressLine: schema.string(),
     additionalInfo: schema.string(),
     postalCode: schema.string(),
-    city: schema.string(),
+    locality: schema.string(),
+    administrativeArea: schema.string(),
     country: schema.string(),
   })
 

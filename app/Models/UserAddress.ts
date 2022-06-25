@@ -17,7 +17,10 @@ export default class UserAddress extends AppBaseModel {
   public postalCode: string
 
   @column()
-  public city: string
+  public locality: string
+
+  @column()
+  public administrativeArea: string
 
   @column()
   public country: string
