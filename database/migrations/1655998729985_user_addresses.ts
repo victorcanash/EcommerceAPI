@@ -13,7 +13,7 @@ export default class extends BaseSchema {
       table.string('locality', 255).notNullable()
       table.string('administrative_area', 255).notNullable()
       table.string('country', 255).notNullable()
-      table.string('type', 255).notNullable()
+      table.string('type', 255).nullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

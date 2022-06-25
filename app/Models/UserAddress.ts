@@ -26,7 +26,7 @@ export default class UserAddress extends AppBaseModel {
   public country: string
 
   @column()
-  public type: string
+  public type?: string
 
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>

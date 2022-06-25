@@ -16,7 +16,7 @@ export default class CreateUAddressValidator {
     locality: schema.string(),
     administrativeArea: schema.string(),
     country: schema.string(),
-    type: schema.string(),
+    type: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}
