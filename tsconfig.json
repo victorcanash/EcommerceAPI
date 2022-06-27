@@ -32,7 +32,8 @@
       "@adonisjs/lucid",
       "@adonisjs/auth",
       "@adonisjs/bouncer",
-      "adonis5-swagger"
+      "adonis5-swagger",
+      "@adonisjs/drive-s3"
     ]
   }
 }
