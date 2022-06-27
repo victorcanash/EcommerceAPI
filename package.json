@@ -1,5 +1,6 @@
 {
-  "name": "ecommerce-api",
+  "name": "ecommerce-vc-api",
+  "description": "Ecommerce API made by Victor Canas",
   "version": "1.0.0",
   "private": true,
   "scripts": {
