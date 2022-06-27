@@ -1,12 +1,14 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Cart from 'App/Models/Cart'
+import User from 'App/Models/User'
 import { CartsResponse, CartResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import CreateCartValidator from 'App/Validators/Cart/CreateCartValidator'
 import UpdateCartValidator from 'App/Validators/Cart/UpdateCartValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import PermissionException from 'App/Exceptions/PermissionException'
 import { logRouteSuccess } from 'App/Utils/Logger'
 
 export default class CartsController {
@@ -50,12 +52,18 @@ export default class CartsController {
     } as CartResponse)
   }
 
-  public async store({ request, response, auth, bouncer }: HttpContextContract) {
-    await bouncer.with('CartPolicy').authorize('create')
+  public async store({ request, response, auth }: HttpContextContract) {
+    const user = await User.find(auth.user?.id)
+    if (!user) {
+      throw new ModelNotFoundException(`Invalid auth id ${auth.user?.id} creating cart`)
+    }
+    await user.load('cart')
+    if (user.cart) {
+      throw new PermissionException('You already have an existing cart to create a new one')
+    }
 
     const validatedData = await request.validate(CreateCartValidator)
     validatedData.userId = auth.user?.id
-    validatedData.total ? validatedData.total : 0
 
     const cart = await Cart.create(validatedData)
 
