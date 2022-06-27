@@ -12,7 +12,9 @@ export default class UpdateUPaymentValidator {
     type: schema.string.optional(),
     provider: schema.string.optional(),
     accountNumber: schema.string.optional(),
-    expiry: schema.date.optional(),
+    expiry: schema.date.optional({
+      format: 'yy-MM',
+    }),
   })
 
   public messages: CustomMessages = {}

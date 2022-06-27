@@ -13,7 +13,9 @@ export default class CreateUPaymentValidator {
     type: schema.string(),
     provider: schema.string(),
     accountNumber: schema.string(),
-    expiry: schema.date(),
+    expiry: schema.date({
+      format: 'yy-MM',
+    }),
   })
 
   public messages: CustomMessages = {}
