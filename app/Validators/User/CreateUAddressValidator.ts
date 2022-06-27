@@ -11,7 +11,7 @@ export default class CreateUAddressValidator {
   public schema = schema.create({
     userId: schema.number.optional(),
     addressLine: schema.string(),
-    additionalInfo: schema.string(),
+    additionalInfo: schema.string.optional(),
     postalCode: schema.string(),
     locality: schema.string(),
     administrativeArea: schema.string(),
