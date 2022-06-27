@@ -15,5 +15,5 @@ export default class Cart extends AppBaseModel {
   public user: BelongsTo<typeof User>
 
   @hasMany(() => CartItem)
-  public cartItems: HasMany<typeof CartItem>
+  public items: HasMany<typeof CartItem>
 }

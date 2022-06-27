@@ -28,6 +28,10 @@ export default class AuthController {
 
       await user.load('addresses')
       await user.load('payments')
+      await user.load('cart')
+      if (user.cart) {
+        await user.cart.load('items')
+      }
 
       const successMsg = `Successfully logged in user with email ${user.email}`
       logRouteSuccess(request, successMsg)
