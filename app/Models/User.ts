@@ -1,10 +1,11 @@
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import { column, beforeSave, hasMany, HasMany, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import { Roles } from 'App/Models/Enums/Roles'
 import UserAddress from 'App/Models/UserAddress'
 import UserPayment from 'App/Models/UserPayment'
+import Cart from 'App/Models/Cart'
 
 export default class User extends AppBaseModel {
   @column()
@@ -36,6 +37,9 @@ export default class User extends AppBaseModel {
 
   @hasMany(() => UserPayment)
   public payments: HasMany<typeof UserPayment>
+
+  @hasOne(() => Cart)
+  public cart: HasOne<typeof Cart>
 
   @beforeSave()
   public static async hashPassword(user: User) {

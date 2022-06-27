@@ -23,7 +23,7 @@ export default class AuthController {
       })
 
       if (user.lockedOut) {
-        throw new PermissionException('Locked out user')
+        throw new PermissionException('You are locked out')
       }
 
       await user.load('addresses')

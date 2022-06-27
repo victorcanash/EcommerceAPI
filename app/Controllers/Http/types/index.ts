@@ -1,6 +1,8 @@
 import User from 'App/Models/User'
 import UserAddress from 'App/Models/UserAddress'
 import UserPayment from 'App/Models/UserPayment'
+import Cart from 'App/Models/Cart'
+import CartItem from 'App/Models/CartItem'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductDiscount from 'App/Models/ProductDiscount'
@@ -80,6 +82,46 @@ export type UPaymentsResponse = {
   code: number
   message: string
   userPayments: UserPayment[]
+  totalPages: number
+  currentPage: number
+}
+
+/**
+ * Cart JSON response for Controllers
+ */
+export type CartResponse = {
+  code: number
+  message: string
+  cart: Cart
+}
+
+/**
+ * Carts JSON response for Controllers
+ */
+export type CartsResponse = {
+  code: number
+  message: string
+  carts: Cart[]
+  totalPages: number
+  currentPage: number
+}
+
+/**
+ * Cart item JSON response for Controllers
+ */
+export type CItemResponse = {
+  code: number
+  message: string
+  cartItem: CartItem
+}
+
+/**
+ * Cart items JSON response for Controllers
+ */
+export type CItemsResponse = {
+  code: number
+  message: string
+  cartItems: CartItem[]
   totalPages: number
   currentPage: number
 }
