@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUAddressValidator from 'App/Validators/User/CreateUAddressValidator'
 import UpdateUAddressValidator from 'App/Validators/User/UpdateUAddressValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { logRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/utils/logger'
 
 export default class UAddressesController {
   public async index({ request, response }: HttpContextContract) {

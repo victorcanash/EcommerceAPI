@@ -9,7 +9,7 @@ import CreateCartValidator from 'App/Validators/Cart/CreateCartValidator'
 import UpdateCartValidator from 'App/Validators/Cart/UpdateCartValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
-import { logRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/utils/logger'
 
 export default class CartsController {
   public async index({ request, response }: HttpContextContract) {

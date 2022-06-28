@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreatePDiscountValidator from 'App/Validators/Product/CreatePDiscountValidator'
 import UpdatePDiscountValidator from 'App/Validators/Product/UpdatePDiscountValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { logRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/utils/logger'
 
 export default class PDiscountsController {
   public async index({ request, response }: HttpContextContract) {

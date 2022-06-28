@@ -9,7 +9,7 @@ import CreateCItemValidator from 'App/Validators/Cart/CreateCItemValidator'
 import UpdateCItemValidator from 'App/Validators/Cart/UpdateCItemValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
-import { logRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/utils/logger'
 
 export default class CItemsController {
   public async index({ request, response }: HttpContextContract) {

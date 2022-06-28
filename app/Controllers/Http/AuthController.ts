@@ -6,7 +6,7 @@ import { BasicResponse, AuthResponse } from 'App/Controllers/Http/types'
 import LoginValidator from 'App/Validators/User/LoginValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
-import { logRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/utils/logger'
 
 export default class AuthController {
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {

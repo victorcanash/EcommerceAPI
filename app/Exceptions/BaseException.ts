@@ -2,7 +2,7 @@ import { Exception } from '@adonisjs/core/build/standalone'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { BasicErrorResponse, ValidationErrorResponse } from 'App/Exceptions/types'
-import { logRouteError } from 'App/Utils/Logger'
+import { logRouteError } from 'App/utils/logger'
 
 /*
 |--------------------------------------------------------------------------

@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreatePCategoryValidator from 'App/Validators/Product/CreatePCategoryValidator'
 import UpdatePCategoryValidator from 'App/Validators/Product/UpdatePCategoryValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { logRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/utils/logger'
 
 export default class PCategoriesController {
   public async index({ request, response }: HttpContextContract) {
