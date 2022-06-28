@@ -29,6 +29,9 @@ export default class Product extends AppBaseModel {
   @column()
   public price: number
 
+  @column()
+  public images: string
+
   @belongsTo(() => ProductCategory, {
     foreignKey: 'categoryId',
   })
