@@ -147,6 +147,15 @@ export type ProductsResponse = {
 }
 
 /**
+ * Product images JSON response for Controllers
+ */
+export type PImagesResponse = {
+  code: number
+  message: string
+  productImages: string[]
+}
+
+/**
  * Product category JSON response for Controllers
  */
 export type PCategoryResponse = {

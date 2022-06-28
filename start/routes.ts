@@ -21,65 +21,57 @@
 import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
-  Route.get('/', async () => {
+  Route.get('', async () => {
     return { hello: 'Welcome to Ecommerce API made by Victor Canas' }
   })
 
-  Route.post('/register', 'UsersController.store')
-  Route.post('/login', 'AuthController.login')
-  Route.post('/logout', 'AuthController.logout').middleware('auth:api')
+  // User routes
 
-  Route.resource('/users', 'UsersController')
+  Route.post('register', 'UsersController.store')
+  Route.post('login', 'AuthController.login')
+  Route.post('logout', 'AuthController.logout').middleware('auth:api')
+
+  Route.resource('users', 'UsersController')
     .except(['store'])
     .middleware({
-      index: ['auth:api', 'admin'],
-      show: ['auth:api'],
-      update: ['auth:api'],
-      destroy: ['auth:api'],
+      '*': ['auth:api'],
+      'index': ['admin'],
     })
     .apiOnly()
 
-  Route.resource('/uaddresses', 'UAddressesController')
+  Route.resource('uaddresses', 'UAddressesController')
     .middleware({
-      index: ['auth:api', 'admin'],
-      show: ['auth:api'],
-      store: ['auth:api'],
-      update: ['auth:api'],
-      destroy: ['auth:api'],
+      '*': ['auth:api'],
+      'index': ['admin'],
     })
     .apiOnly()
 
-  Route.resource('/upayments', 'UPaymentsController')
+  Route.resource('upayments', 'UPaymentsController')
     .middleware({
-      index: ['auth:api', 'admin'],
-      show: ['auth:api'],
-      store: ['auth:api'],
-      update: ['auth:api'],
-      destroy: ['auth:api'],
+      '*': ['auth:api'],
+      'index': ['admin'],
     })
     .apiOnly()
 
-  Route.resource('/carts', 'CartsController')
+  // Cart routes
+
+  Route.resource('carts', 'CartsController')
     .middleware({
-      index: ['auth:api', 'admin'],
-      show: ['auth:api'],
-      store: ['auth:api'],
-      update: ['auth:api'],
-      destroy: ['auth:api'],
+      '*': ['auth:api'],
+      'index': ['admin'],
     })
     .apiOnly()
 
-  Route.resource('/citems', 'CItemsController')
+  Route.resource('citems', 'CItemsController')
     .middleware({
-      index: ['auth:api', 'admin'],
-      show: ['auth:api'],
-      store: ['auth:api'],
-      update: ['auth:api'],
-      destroy: ['auth:api'],
+      '*': ['auth:api'],
+      'index': ['admin'],
     })
     .apiOnly()
 
-  Route.resource('/products', 'ProductsController')
+  // Product routes
+
+  Route.resource('products', 'ProductsController')
     .middleware({
       store: ['auth:api', 'admin'],
       update: ['auth:api', 'admin'],
@@ -87,7 +79,15 @@ Route.group(() => {
     })
     .apiOnly()
 
-  Route.resource('/pcategories', 'PCategoriesController')
+  Route.resource('products.images', 'PImagesController')
+    .except(['index', 'update'])
+    .middleware({
+      store: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
+    })
+    .apiOnly()
+
+  Route.resource('pcategories', 'PCategoriesController')
     .middleware({
       store: ['auth:api', 'admin'],
       update: ['auth:api', 'admin'],
@@ -95,7 +95,7 @@ Route.group(() => {
     })
     .apiOnly()
 
-  Route.resource('/pdiscounts', 'PDiscountsController')
+  Route.resource('pdiscounts', 'PDiscountsController')
     .middleware({
       store: ['auth:api', 'admin'],
       update: ['auth:api', 'admin'],
@@ -103,11 +103,11 @@ Route.group(() => {
     })
     .apiOnly()
 
-  Route.resource('/pinventories', 'PInventoriesController')
+  Route.resource('pinventories', 'PInventoriesController')
     .middleware({
       store: ['auth:api', 'admin'],
       update: ['auth:api', 'admin'],
       destroy: ['auth:api', 'admin'],
     })
     .apiOnly()
-}).prefix('/api')
+}).prefix('api')
