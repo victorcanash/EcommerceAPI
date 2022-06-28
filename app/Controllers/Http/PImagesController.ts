@@ -6,7 +6,8 @@ import { PImagesResponse } from 'App/Controllers/Http/types'
 import UploadPImagesValidator from 'App/Validators/Product/UploadPImagesValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
-import { logRouteSuccess } from 'App/Utils/Logger'
+import { logRouteSuccess } from 'App/Utils/logger'
+import { generateUniqueFilename } from 'App/Utils/uploader'
 
 export default class ProductsController {
   public async show({ params: { product_id, id }, request, response }: HttpContextContract) {
@@ -15,14 +16,14 @@ export default class ProductsController {
       throw new ModelNotFoundException(`Invalid product id ${product_id} getting product image`)
     }
 
-    const productImages = product.images ? product.images.split(',') : ([] as string[])
+    const productImages = product.imageNames
     if (!productImages || productImages.length <= id) {
       throw new FileNotFoundException(`Invalid image id ${id} getting product image`)
     }
 
     if (!(await Drive.exists(productImages[id]))) {
       throw new FileNotFoundException(
-        `Not found image name ${productImages[id]} in the drive getting product image`
+        `Not found image name ${productImages[id]} in drive disk getting product image`
       )
     }
     const readableStream = await Drive.getStream(productImages[id])
@@ -40,11 +41,10 @@ export default class ProductsController {
 
     const validatedData = await request.validate(UploadPImagesValidator)
 
-    const productImages = product.images ? product.images.split(',') : ([] as string[])
+    const productImages = product.imageNames
 
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
-    validatedData.images.forEach((image, index) => {
-      const imageName = `${uniqueSuffix}${index}-${image.clientName}`
+    validatedData.images.forEach((image) => {
+      const imageName = generateUniqueFilename(image.clientName)
       image.moveToDisk('./', {
         name: imageName,
       })
@@ -71,7 +71,7 @@ export default class ProductsController {
       throw new ModelNotFoundException(`Invalid product id ${product_id} deleting product image`)
     }
 
-    const productImages = product.images ? product.images.split(',') : ([] as string[])
+    const productImages = product.imageNames
     if (!productImages || productImages.length <= id) {
       throw new FileNotFoundException(`Invalid image id ${id} deleting product image`)
     }
@@ -80,7 +80,7 @@ export default class ProductsController {
       await Drive.delete(productImages[id])
     } else {
       throw new FileNotFoundException(
-        `Not found image name ${productImages[id]} in the drive deleting product image`
+        `Not found image name ${productImages[id]} in drive disk deleting product image`
       )
     }
     productImages.splice(id, 1)
