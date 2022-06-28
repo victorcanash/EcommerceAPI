@@ -6,6 +6,7 @@ import {
   HasMany,
   hasOne,
   HasOne,
+  computed,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
@@ -29,8 +30,13 @@ export default class Product extends AppBaseModel {
   @column()
   public price: number
 
-  @column()
+  @column({ serializeAs: null })
   public images: string
+
+  @computed()
+  public get imageNames() {
+    return this.images ? this.images.split(',') : ([] as string[])
+  }
 
   @belongsTo(() => ProductCategory, {
     foreignKey: 'categoryId',
