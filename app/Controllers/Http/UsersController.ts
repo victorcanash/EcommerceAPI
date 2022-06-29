@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { logRouteSuccess } from 'App/utils/logger'
+import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {

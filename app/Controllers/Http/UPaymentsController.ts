@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUPaymentValidator from 'App/Validators/User/CreateUPaymentValidator'
 import UpdateUPaymentValidator from 'App/Validators/User/UpdateUPaymentValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { logRouteSuccess } from 'App/utils/logger'
+import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class UPaymentsController {
   public async index({ request, response }: HttpContextContract) {

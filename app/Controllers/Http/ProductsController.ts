@@ -8,7 +8,7 @@ import FilterProductValidator from 'App/Validators/Product/FilterProductValidato
 import CreateProductValidator from 'App/Validators/Product/CreateProductValidator'
 import UpdateProductValidator from 'App/Validators/Product/UpdateProductValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { logRouteSuccess } from 'App/utils/logger'
+import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class ProductsController {
   public async index({ request, response }: HttpContextContract) {

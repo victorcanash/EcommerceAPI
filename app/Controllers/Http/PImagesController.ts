@@ -6,8 +6,8 @@ import { PImagesResponse } from 'App/Controllers/Http/types'
 import UploadPImagesValidator from 'App/Validators/Product/UploadPImagesValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
-import { logRouteSuccess } from 'App/utils/logger'
-import { generateUniqueFilename } from 'App/utils/uploader'
+import { logRouteSuccess } from 'App/Utils/logger'
+import { generateUniqueFilename } from 'App/Utils/uploader'
 
 export default class ProductsController {
   public async show({ params: { product_id, id }, request, response }: HttpContextContract) {

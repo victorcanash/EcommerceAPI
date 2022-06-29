@@ -7,7 +7,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreatePInventoryValidator from 'App/Validators/Product/CreatePInventoryValidator'
 import UpdatePInventoryValidator from 'App/Validators/Product/UpdatePInventoryValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import { logRouteSuccess } from 'App/utils/logger'
+import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PInventoriesController {
   public async index({ request, response }: HttpContextContract) {
