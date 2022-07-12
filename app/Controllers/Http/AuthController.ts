@@ -2,7 +2,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 
 import User from 'App/Models/User'
-import { BasicResponse, AuthResponse } from 'App/Controllers/Http/types'
+import { BasicResponse, AuthResponse, UserResponse } from 'App/Controllers/Http/types'
 import LoginValidator from 'App/Validators/User/LoginValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -56,5 +56,27 @@ export default class AuthController {
       code: 200,
       message: successMsg,
     } as BasicResponse)
+  }
+
+  public async logged({ request, response, auth }: HttpContextContract) {
+    const user = await User.find(auth.user?.id)
+    if (!user) {
+      throw new ModelNotFoundException(`Invalid auth id ${auth.user?.id} getting logged user`)
+    }
+
+    await user.load('addresses')
+    await user.load('payments')
+    await user.load('cart')
+    if (user.cart) {
+      await user.cart.load('items')
+    }
+
+    const successMsg = `Successfully got logged user`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      user: user,
+    } as UserResponse)
   }
 }
