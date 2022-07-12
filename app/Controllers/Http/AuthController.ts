@@ -12,26 +12,27 @@ export default class AuthController {
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
     const validatedData = await request.validate(LoginValidator)
 
-    const user = await User.findBy('email', validatedData.email)
+    const user = await User.query()
+      .where('email', validatedData.email)
+      .preload('addresses')
+      .preload('payments')
+      .preload('cart', (query) => {
+        query.preload('items', (query) => {
+          query.preload('product')
+        })
+      })
+      .first()
     if (!user) {
       throw new ModelNotFoundException(`Invalid email ${validatedData.email} logging in user`)
+    }
+    if (user.lockedOut) {
+      throw new PermissionException('You are locked out')
     }
 
     try {
       const tokenData = await auth.attempt(validatedData.email, validatedData.password, {
         expiresIn: Env.get('TOKEN_EXPIRY', '7days'),
       })
-
-      if (user.lockedOut) {
-        throw new PermissionException('You are locked out')
-      }
-
-      await user.load('addresses')
-      await user.load('payments')
-      await user.load('cart')
-      if (user.cart) {
-        await user.cart.load('items')
-      }
 
       const successMsg = `Successfully logged in user with email ${user.email}`
       logRouteSuccess(request, successMsg)
@@ -59,16 +60,18 @@ export default class AuthController {
   }
 
   public async logged({ request, response, auth }: HttpContextContract) {
-    const user = await User.find(auth.user?.id)
+    const user = await User.query()
+      .where('email', auth.user?.email)
+      .preload('addresses')
+      .preload('payments')
+      .preload('cart', (query) => {
+        query.preload('items', (query) => {
+          query.preload('product')
+        })
+      })
+      .first()
     if (!user) {
-      throw new ModelNotFoundException(`Invalid auth id ${auth.user?.id} getting logged user`)
-    }
-
-    await user.load('addresses')
-    await user.load('payments')
-    await user.load('cart')
-    if (user.cart) {
-      await user.cart.load('items')
+      throw new ModelNotFoundException(`Invalid auth email ${auth.user?.email} getting logged user`)
     }
 
     const successMsg = `Successfully got logged user`

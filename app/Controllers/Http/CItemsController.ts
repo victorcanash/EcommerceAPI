@@ -53,11 +53,10 @@ export default class CItemsController {
   }
 
   public async store({ request, response, auth }: HttpContextContract) {
-    const user = await User.find(auth.user?.id)
+    const user = await User.query().where('id', auth.user?.id).preload('cart').first()
     if (!user) {
       throw new ModelNotFoundException(`Invalid auth id ${auth.user?.id} creating cart item`)
     }
-    await user.load('cart')
     if (!user.cart) {
       throw new PermissionException(`You don't have an existing cart to create a new cart item`)
     }
