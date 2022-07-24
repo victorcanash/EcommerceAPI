@@ -23,7 +23,7 @@ export default class AuthController {
       })
       .first()
     if (!user) {
-      throw new ModelNotFoundException(`Invalid email ${validatedData.email} logging in user`)
+      throw new ModelNotFoundException(`Invalid email logging in user`)
     }
     if (user.lockedOut) {
       throw new PermissionException('You are locked out')
@@ -43,7 +43,7 @@ export default class AuthController {
         user: user,
       } as AuthResponse)
     } catch (error) {
-      throw new ModelNotFoundException(`Invalid password ${validatedData.password} logging in user`)
+      throw new ModelNotFoundException(`Invalid password logging in user`)
     }
   }
 
