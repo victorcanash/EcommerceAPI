@@ -12,7 +12,7 @@ export default class CreatePImagesValidator {
     images: schema.array().members(
       schema.file({
         size: '2mb',
-        extnames: ['jpg', 'gif', 'png'],
+        extnames: ['jpg', 'jpeg', 'gif', 'png'],
       })
     ),
   })
