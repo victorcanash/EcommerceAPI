@@ -22,7 +22,7 @@ export default class ProductsController {
 
     const validatedFilterData = await request.validate(FilterProductValidator)
     const keywords = validatedFilterData.keywords || ''
-    const categoryId = validatedFilterData.category_id || -1
+    const categoryName = validatedFilterData.category_name || 'all'
     const ordersRemain = validatedFilterData.orders_remain || false
 
     const products = await Product.query()
@@ -42,8 +42,8 @@ export default class ProductsController {
         }
       })
       .whereHas('category', (query) => {
-        if (categoryId >= 0) {
-          query.where('id', categoryId)
+        if (categoryName !== 'all') {
+          query.where('name', categoryName)
         }
       })
       .preload('discount')

@@ -10,8 +10,8 @@ export default class FilterProductValidator {
 
   public schema = schema.create({
     keywords: schema.string.optional(),
-    category_id: schema.number.optional([
-      rules.exists({ table: 'product_categories', column: 'id' }),
+    category_name: schema.string.optional([
+      rules.exists({ table: 'product_categories', column: 'name' }),
     ]),
     orders_remain: schema.boolean.optional(),
   })
