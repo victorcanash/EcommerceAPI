@@ -67,7 +67,11 @@ export default class ProductsController {
   }
 
   public async show({ params: { id }, request, response }: HttpContextContract) {
-    const product = await Product.find(id)
+    const product = await Product.query()
+      .where('id', id)
+      .preload('discount')
+      .preload('inventories')
+      .first()
     if (!product) {
       throw new ModelNotFoundException(`Invalid id ${id} getting product`)
     }
