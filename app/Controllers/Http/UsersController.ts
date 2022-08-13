@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import User from 'App/Models/User'
+import Cart from 'App/Models/Cart'
 import { UsersResponse, UserResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
@@ -54,6 +55,8 @@ export default class UsersController {
     const validatedData = await request.validate(CreateUserValidator)
 
     const user = await User.create(validatedData)
+
+    await Cart.create({ userId: user.id, total: 0 })
 
     const successMsg = 'Successfully created user'
     logRouteSuccess(request, successMsg)
