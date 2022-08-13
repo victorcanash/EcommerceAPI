@@ -17,7 +17,7 @@ export default class UsersController {
     const limit = validatedPaginationData.limit || 10
 
     const validatedSortData = await request.validate(SortValidator)
-    const sortBy = validatedSortData.sort_by || 'id'
+    const sortBy = validatedSortData.sortBy || 'id'
     const order = validatedSortData.order || 'asc'
 
     const users = await User.query().orderBy(sortBy, order).paginate(page, limit)

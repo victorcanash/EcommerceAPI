@@ -16,7 +16,7 @@ export default class PInventoriesController {
     const limit = validatedPaginationData.limit || 10
 
     const validatedSortData = await request.validate(SortValidator)
-    const sortBy = validatedSortData.sort_by || 'id'
+    const sortBy = validatedSortData.sortBy || 'id'
     const order = validatedSortData.order || 'asc'
 
     const productInventories = await ProductInventory.query()

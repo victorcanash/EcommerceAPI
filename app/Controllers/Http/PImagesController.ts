@@ -9,7 +9,7 @@ import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 import { logRouteSuccess } from 'App/Utils/logger'
 import { generateUniqueFilename } from 'App/Utils/uploader'
 
-export default class ProductsController {
+export default class PImagesController {
   public async show({ params: { product_id, id }, request, response }: HttpContextContract) {
     const product = await Product.find(product_id)
     if (!product) {

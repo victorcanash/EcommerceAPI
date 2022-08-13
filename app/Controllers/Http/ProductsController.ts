@@ -17,13 +17,13 @@ export default class ProductsController {
     const limit = validatedPaginationData.limit || 10
 
     const validatedSortData = await request.validate(SortValidator)
-    const sortBy = validatedSortData.sort_by || 'id'
+    const sortBy = validatedSortData.sortBy || 'id'
     const order = validatedSortData.order || 'asc'
 
     const validatedFilterData = await request.validate(FilterProductValidator)
     const keywords = validatedFilterData.keywords || ''
-    const categoryName = validatedFilterData.category_name || 'all'
-    const ordersRemain = validatedFilterData.orders_remain || false
+    const categoryName = validatedFilterData.categoryName || 'all'
+    const ordersRemain = validatedFilterData.ordersRemain || false
 
     const products = await Product.query()
       .where((query) => {

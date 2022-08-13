@@ -18,7 +18,7 @@ export default class CartsController {
     const limit = validatedPaginationData.limit || 10
 
     const validatedSortData = await request.validate(SortValidator)
-    const sortBy = validatedSortData.sort_by || 'id'
+    const sortBy = validatedSortData.sortBy || 'id'
     const order = validatedSortData.order || 'asc'
 
     const carts = await Cart.query().orderBy(sortBy, order).paginate(page, limit)
