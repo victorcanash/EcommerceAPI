@@ -11,6 +11,7 @@ export default class CreateCItemValidator {
   public schema = schema.create({
     cartId: schema.number.optional(),
     productId: schema.number([rules.exists({ table: 'products', column: 'id' })]),
+    inventoryId: schema.number([rules.exists({ table: 'product_inventories', column: 'id' })]),
     quantity: schema.number.optional(),
   })
 
