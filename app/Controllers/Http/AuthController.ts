@@ -19,6 +19,7 @@ export default class AuthController {
       .preload('cart', (query) => {
         query.preload('items', (query) => {
           query.preload('product')
+          query.preload('inventory')
         })
       })
       .first()
@@ -67,6 +68,7 @@ export default class AuthController {
       .preload('cart', (query) => {
         query.preload('items', (query) => {
           query.preload('product')
+          query.preload('inventory')
         })
       })
       .first()
