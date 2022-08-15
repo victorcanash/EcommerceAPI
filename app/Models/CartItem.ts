@@ -24,6 +24,8 @@ export default class CartItem extends AppBaseModel {
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
 
-  @belongsTo(() => ProductInventory)
+  @belongsTo(() => ProductInventory, {
+    foreignKey: 'inventoryId',
+  })
   public inventory: BelongsTo<typeof ProductInventory>
 }
