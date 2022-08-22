@@ -9,7 +9,7 @@ import PermissionException from 'App/Exceptions/PermissionException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class AuthController {
-  public static readonly tokenCookie = 'access_token'
+  private readonly tokenCookie = 'access_token'
 
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
     const validatedData = await request.validate(LoginValidator)
@@ -36,7 +36,7 @@ export default class AuthController {
       const tokenData = await auth.attempt(validatedData.email, validatedData.password, {
         expiresIn: Env.get('TOKEN_EXPIRY', '7days'),
       })
-      response.cookie(AuthController.tokenCookie, tokenData.token, {
+      response.cookie(this.tokenCookie, tokenData.token, {
         httpOnly: true,
         secure: Env.get('NODE_ENV') === 'production',
       })
@@ -58,7 +58,7 @@ export default class AuthController {
     const successMsg = `Successfully logged out user with email ${auth.user?.email}`
 
     await auth.use('api').revoke()
-    response.clearCookie(AuthController.tokenCookie)
+    response.clearCookie(this.tokenCookie)
 
     logRouteSuccess(request, successMsg)
     return response.ok({
