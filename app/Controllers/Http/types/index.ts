@@ -142,6 +142,7 @@ export type ProductsResponse = {
   code: number
   message: string
   products: Product[]
+  category: ProductCategory | null
   totalPages: number
   currentPage: number
 }

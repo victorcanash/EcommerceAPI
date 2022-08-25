@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Product from 'App/Models/Product'
+import ProductCategory from 'App/Models/ProductCategory'
 import { ProductsResponse, ProductResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
@@ -55,12 +56,18 @@ export default class ProductsController {
       .paginate(page, limit)
     const result = products.toJSON()
 
+    let category: ProductCategory | null = null
+    if (categoryName !== 'all') {
+      category = await ProductCategory.findBy('name', categoryName)
+    }
+
     const successMsg = 'Successfully got products'
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
       products: result.data,
+      category: category,
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
     } as ProductsResponse)
