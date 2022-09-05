@@ -68,7 +68,7 @@ export default class StripeController {
         customer_email: user.email,
         success_url: Env.get('STRIPE_SUCCESS_ENDPOINT', ''),
         cancel_url: Env.get('STRIPE_CANCEL_ENDPOINT', ''),
-        shipping_address_collection: { allowed_countries: 'ES' },
+        // shipping_address_collection: { allowed_countries: 'ES' },
       })
 
       const successMsg = `Successfully created checkout session with id ${session.id}`
