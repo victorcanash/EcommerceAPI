@@ -13,6 +13,7 @@ import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
+import { roundTwoDecimals } from 'App/Utils/numbers'
 
 export default class Product extends AppBaseModel {
   @column()
@@ -52,4 +53,13 @@ export default class Product extends AppBaseModel {
     },
   })
   public discount: HasOne<typeof ProductDiscount>
+
+  @computed()
+  public get realPrice() {
+    if (this.discount) {
+      const discount = (this.discount.discountPercent / 100) * this.price
+      return roundTwoDecimals(this.price - discount)
+    }
+    return this.price
+  }
 }
