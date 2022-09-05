@@ -68,13 +68,14 @@ export default class StripeController {
         customer_email: user.email,
         success_url: `${request.header('origin')}/${Env.get('STRIPE_SUCCESS_ENDPOINT', '')}`,
         cancel_url: `${request.header('origin')}/${Env.get('STRIPE_CANCEL_ENDPOINT', '')}`,
+        shipping_address_collection: { allowed_countries: 'ES' },
       })
 
       const successMsg = `Successfully created checkout session with id ${session.id}`
       logRouteSuccess(request, successMsg)
       return response.created({
         code: 201,
-        message: successMsg,
+        message: request.header('origin'),
         sessionId: session.id,
       } as StripeResponse)
     } catch (error) {
