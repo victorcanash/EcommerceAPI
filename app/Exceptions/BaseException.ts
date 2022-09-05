@@ -29,6 +29,8 @@ export default class BaseException extends Exception {
         return response.notFound(error.response)
       case 422:
         return response.unprocessableEntity(error.response)
+      case 500:
+        return response.internalServerError(error.response)
       default:
         return response.badRequest(error.response)
     }
