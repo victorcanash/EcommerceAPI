@@ -66,8 +66,8 @@ export default class StripeController {
         mode: 'payment',
         line_items: lineItems,
         customer_email: user.email,
-        success_url: `${request.header('origin')}/${Env.get('STRIPE_SUCCESS_ENDPOINT', '')}`,
-        cancel_url: `${request.header('origin')}/${Env.get('STRIPE_CANCEL_ENDPOINT', '')}`,
+        success_url: Env.get('STRIPE_SUCCESS_ENDPOINT', ''),
+        cancel_url: Env.get('STRIPE_CANCEL_ENDPOINT', ''),
         shipping_address_collection: { allowed_countries: 'ES' },
       })
 
@@ -75,7 +75,7 @@ export default class StripeController {
       logRouteSuccess(request, successMsg)
       return response.created({
         code: 201,
-        message: request.header('origin'),
+        message: successMsg,
         sessionId: session.id,
       } as StripeResponse)
     } catch (error) {
