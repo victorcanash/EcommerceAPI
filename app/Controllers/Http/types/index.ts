@@ -215,3 +215,12 @@ export type PInventoriesResponse = {
   totalPages: number
   currentPage: number
 }
+
+/**
+ * Stripe JSON response for Controllers
+ */
+export type StripeResponse = {
+  code: number
+  message: string
+  sessionId: string
+}

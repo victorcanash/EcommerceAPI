@@ -37,4 +37,7 @@ export default Env.rules({
   S3_BUCKET: Env.schema.string(),
   S3_REGION: Env.schema.string(),
   S3_ENDPOINT: Env.schema.string.optional(),
+  STRIPE_SECRET: Env.schema.string(),
+  STRIPE_SUCCESS_ENDPOINT: Env.schema.string(),
+  STRIPE_CANCEL_ENDPOINT: Env.schema.string(),
 })

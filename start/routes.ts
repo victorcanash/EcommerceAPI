@@ -111,4 +111,10 @@ Route.group(() => {
       destroy: ['auth:api', 'admin'],
     })
     .apiOnly()
+
+  // Stripe routes
+
+  Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
+    'auth:api'
+  )
 }).prefix('api')
