@@ -88,9 +88,9 @@ export default class StripeController {
         shipping_address_collection: {
           allowed_countries: ['ES'],
         },
-        payment_intent_data: {
+        /*payment_intent_data: {
           setup_future_usage: 'on_session',
-        },
+        },*/
         phone_number_collection: {
           enabled: true,
         },
