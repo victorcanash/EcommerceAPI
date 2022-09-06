@@ -60,12 +60,29 @@ export default class StripeController {
       }
     })
 
-    // Creating checkout session
     try {
+      // Adding customer
+      const customersListResponse = await stripeAPI.customers.list({
+        email: user.email,
+      })
+      let customer
+      if (customersListResponse.data && customersListResponse.data.length > 0) {
+        customer = customersListResponse.data[0]
+      } else {
+        customer = await stripeAPI.customers.create({
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+        })
+      }
+      if (!customer) {
+        throw new InternalServerException('Cannot get customer to create a new checkout session')
+      }
+
+      // Creating checkout session
       const session = await stripeAPI.checkout.sessions.create({
         mode: 'payment',
         line_items: lineItems,
-        customer_email: user.email,
+        customer: customer.id,
         success_url: Env.get('STRIPE_SUCCESS_ENDPOINT', ''),
         cancel_url: Env.get('STRIPE_CANCEL_ENDPOINT', ''),
         shipping_address_collection: { allowed_countries: ['ES'] },
