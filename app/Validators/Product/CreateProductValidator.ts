@@ -10,7 +10,7 @@ export default class CreateProductValidator {
 
   public schema = schema.create({
     categoryId: schema.number([rules.exists({ table: 'product_categories', column: 'id' })]),
-    name: schema.string(),
+    name: schema.string({}, [rules.unique({ table: 'products', column: 'name' })]),
     description: schema.string(),
     sku: schema.string(),
     price: schema.number(),

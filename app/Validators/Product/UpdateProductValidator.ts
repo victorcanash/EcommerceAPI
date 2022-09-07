@@ -12,7 +12,7 @@ export default class UpdateProductValidator {
     categoryId: schema.number.optional([
       rules.exists({ table: 'product_categories', column: 'id' }),
     ]),
-    name: schema.string.optional(),
+    name: schema.string.optional({}, [rules.unique({ table: 'products', column: 'name' })]),
     description: schema.string.optional(),
     sku: schema.string.optional(),
     price: schema.number.optional(),
