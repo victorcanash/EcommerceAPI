@@ -117,4 +117,5 @@ Route.group(() => {
   Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
     'auth:api'
   )
+  Route.post('stripe/webhooks', 'StripeController.webhooks')
 }).prefix('api')

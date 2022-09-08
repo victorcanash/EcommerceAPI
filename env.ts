@@ -40,4 +40,5 @@ export default Env.rules({
   STRIPE_SECRET: Env.schema.string(),
   STRIPE_SUCCESS_ENDPOINT: Env.schema.string(),
   STRIPE_CANCEL_ENDPOINT: Env.schema.string(),
+  STRIPE_WEBHOOKS_SECRET: Env.schema.string(),
 })
