@@ -1,5 +1,6 @@
 import Hash from '@ioc:Adonis/Core/Hash'
 import { column, beforeSave, hasMany, HasMany, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
+import { DateTime } from 'luxon'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import { Roles } from 'App/Models/Enums/Roles'
@@ -27,7 +28,7 @@ export default class User extends AppBaseModel {
   public lastName: string
 
   @column()
-  public age: number
+  public birthday: DateTime
 
   @column()
   public lockedOut: boolean

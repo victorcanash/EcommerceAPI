@@ -27,6 +27,15 @@ export type AuthResponse = {
 }
 
 /**
+ * Check admin role JSON response for Controllers
+ */
+export type IsAdminResponse = {
+  code: number
+  message: string
+  isAdmin: boolean
+}
+
+/**
  * User JSON response for Controllers
  */
 export type UserResponse = {

@@ -1,4 +1,5 @@
 import { column, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import { DateTime } from 'luxon'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import { OrderStatus } from 'App/Models/Enums/OrderStatus'
@@ -12,7 +13,7 @@ export default class Order extends AppBaseModel {
   public sessionId: string
 
   @column()
-  public deliveredDate?: Date
+  public deliveredDate?: DateTime
 
   @column()
   public customerEmail: string

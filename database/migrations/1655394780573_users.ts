@@ -14,7 +14,7 @@ export default class UsersSchema extends BaseSchema {
       table.enu('role', Object.values(Roles)).defaultTo(Roles.USER).notNullable()
       table.string('first_name', 255).notNullable()
       table.string('last_name', 255).notNullable()
-      table.integer('age', 255).notNullable()
+      table.date('birthday').notNullable()
       table.boolean('locked_out').defaultTo(false).notNullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()

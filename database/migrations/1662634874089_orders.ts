@@ -13,7 +13,7 @@ export default class extends BaseSchema {
 
       table.string('session_id', 255).notNullable()
 
-      table.timestamp('delivered_date', { useTz: true }).nullable()
+      table.date('delivered_date').nullable()
 
       table.string('customer_email', 255).notNullable()
       table.string('customer_phone', 255).notNullable()

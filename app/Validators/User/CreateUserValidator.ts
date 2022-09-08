@@ -17,7 +17,9 @@ export default class CreateUserValidator {
     password: schema.string(),
     firstName: schema.string(),
     lastName: schema.string(),
-    age: schema.number(),
+    birthday: schema.date({
+      format: 'yyyy-MM-dd',
+    }),
   })
 
   public messages: CustomMessages = {}
