@@ -1,5 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
+import Hash from '@ioc:Adonis/Core/Hash'
 
 import User from 'App/Models/User'
 import {
@@ -8,8 +9,8 @@ import {
   IsAdminResponse,
   UserResponse,
 } from 'App/Controllers/Http/types'
-import LoginValidator from 'App/Validators/User/LoginValidator'
-import UpdateAuthValidator from 'App/Validators/User/UpdateAuthValidator'
+import LoginValidator from 'App/Validators/Auth/LoginValidator'
+import UpdateAuthValidator from 'App/Validators/Auth/UpdateAuthValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -83,8 +84,13 @@ export default class AuthController {
 
     const validatedData = await request.validate(UpdateAuthValidator)
 
-    if (validatedData.email && user.email !== validatedData.email) {
-      const userWithEmail = await User.query().where('email', validatedData.email).first()
+    const verifiedPassword = await Hash.verify(user.password, validatedData.password)
+    if (!verifiedPassword) {
+      throw new BadRequestException('Invalid password to update user email and/or password')
+    }
+
+    if (validatedData.newEmail && user.email !== validatedData.newEmail) {
+      const userWithEmail = await User.query().where('email', validatedData.newEmail).first()
       if (userWithEmail) {
         throw new BadRequestException('Email must be unique to update user email and password')
       }
@@ -92,7 +98,12 @@ export default class AuthController {
 
     await auth.use('api').revoke()
 
-    user.merge(validatedData)
+    if (validatedData.newEmail) {
+      user.email = validatedData.newEmail
+    }
+    if (validatedData.newPassword) {
+      user.password = validatedData.newPassword
+    }
     await user.save()
 
     const tokenData = await auth.use('api').generate(user, {
