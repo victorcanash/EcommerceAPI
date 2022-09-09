@@ -30,9 +30,9 @@ Route.group(() => {
   Route.post('register', 'UsersController.store')
   Route.post('login', 'AuthController.login')
   Route.post('logout', 'AuthController.logout').middleware('auth:api')
-  Route.get('logged', 'AuthController.logged').middleware('auth:api')
-  Route.get('admin', 'AuthController.isAdmin').middleware('auth:api')
+  Route.get('auth', 'AuthController.getLogged').middleware('auth:api')
   Route.put('auth/:id', 'AuthController.update').middleware('auth:api')
+  Route.get('auth/admin', 'AuthController.isAdmin').middleware('auth:api')
 
   Route.resource('users', 'UsersController')
     .except(['store'])

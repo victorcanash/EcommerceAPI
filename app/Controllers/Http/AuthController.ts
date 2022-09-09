@@ -20,7 +20,7 @@ export default class AuthController {
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
     const validatedData = await request.validate(LoginValidator)
 
-    const user = await this.getUserWithAll(validatedData.email)
+    const user = await this.getAllDataUser(validatedData.email)
     if (!user) {
       throw new ModelNotFoundException(`Invalid email logging in user`)
     }
@@ -58,8 +58,8 @@ export default class AuthController {
     } as BasicResponse)
   }
 
-  public async logged({ request, response, auth }: HttpContextContract) {
-    const user = await this.getUserWithAll(auth.user?.email)
+  public async getLogged({ request, response, auth }: HttpContextContract) {
+    const user = await this.getAllDataUser(auth.user?.email)
     if (!user) {
       throw new ModelNotFoundException(`Invalid auth email ${auth.user?.email} getting logged user`)
     }
@@ -71,19 +71,6 @@ export default class AuthController {
       message: successMsg,
       user: user,
     } as UserResponse)
-  }
-
-  public async isAdmin({ request, response, auth }: HttpContextContract) {
-    const user = await User.query().where('email', auth.user?.email).first()
-
-    let isAdmin = user && user.role === Roles.ADMIN ? true : false
-    const successMsg = 'Successfully checked if user is admin'
-    logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
-      message: successMsg,
-      isAdmin: isAdmin,
-    } as IsAdminResponse)
   }
 
   public async update({ params: { id }, request, response, auth, bouncer }: HttpContextContract) {
@@ -122,7 +109,20 @@ export default class AuthController {
     } as AuthResponse)
   }
 
-  private async getUserWithAll(email: string) {
+  public async isAdmin({ request, response, auth }: HttpContextContract) {
+    const user = await User.query().where('email', auth.user?.email).first()
+
+    let isAdmin = user && user.role === Roles.ADMIN ? true : false
+    const successMsg = 'Successfully checked if user is admin'
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      isAdmin: isAdmin,
+    } as IsAdminResponse)
+  }
+
+  private async getAllDataUser(email: string) {
     const user = await User.query()
       .where('email', email)
       .preload('addresses')

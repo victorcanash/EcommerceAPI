@@ -18,7 +18,7 @@ export default class User extends AppBaseModel {
   @column()
   public rememberMeToken?: string
 
-  @column()
+  @column({ serializeAs: null })
   public role: Roles
 
   @column()
