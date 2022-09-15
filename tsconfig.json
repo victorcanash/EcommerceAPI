@@ -34,7 +34,8 @@
       "@adonisjs/bouncer",
       "adonis5-swagger",
       "@adonisjs/drive-s3",
-      "@types/url-parse"
+      "@types/url-parse",
+      "@adonisjs/mail"
     ]
   }
 }

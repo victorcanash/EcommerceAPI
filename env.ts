@@ -41,4 +41,9 @@ export default Env.rules({
   STRIPE_SUCCESS_ENDPOINT: Env.schema.string(),
   STRIPE_CANCEL_ENDPOINT: Env.schema.string(),
   STRIPE_WEBHOOKS_SECRET: Env.schema.string(),
+  SMTP_HOST: Env.schema.string({ format: 'host' }),
+  SMTP_PORT: Env.schema.number(),
+  SMTP_USERNAME: Env.schema.string(),
+  SMTP_PASSWORD: Env.schema.string(),
+  DEFAULT_FROM_EMAIL: Env.schema.string(),
 })
