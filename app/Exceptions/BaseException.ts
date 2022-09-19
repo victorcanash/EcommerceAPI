@@ -27,6 +27,8 @@ export default class BaseException extends Exception {
         return response.forbidden(error.response)
       case 404:
         return response.notFound(error.response)
+      case 409:
+        return response.conflict(error.response)
       case 422:
         return response.unprocessableEntity(error.response)
       case 500:
