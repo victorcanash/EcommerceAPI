@@ -1,6 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
+import { DateTime } from 'luxon'
 
 import User from 'App/Models/User'
 import {
@@ -11,9 +12,11 @@ import {
 } from 'App/Controllers/Http/types'
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
 import UpdateAuthValidator from 'App/Validators/Auth/UpdateAuthValidator'
+import ConfirmEmailValidator from 'App/Validators/Auth/ConfirmEmailValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
+import ConflictException from 'App/Exceptions/ConflictException'
 import { logRouteSuccess } from 'App/Utils/logger'
 import { Roles } from 'App/Models/Enums/Roles'
 
@@ -25,13 +28,16 @@ export default class AuthController {
     if (!user) {
       throw new ModelNotFoundException(`Invalid email logging in user`)
     }
+    if (!user.isActivated) {
+      throw new PermissionException('You need to activate your account')
+    }
     if (user.lockedOut) {
       throw new PermissionException('You are locked out')
     }
 
     try {
-      const tokenData = await auth.attempt(validatedData.email, validatedData.password, {
-        expiresIn: Env.get('TOKEN_EXPIRY', '7days'),
+      const tokenData = await auth.use('api').attempt(validatedData.email, validatedData.password, {
+        expiresIn: Env.get('API_TOKEN_EXPIRY', '7days'),
       })
 
       const successMsg = `Successfully logged in user with email ${user.email}`
@@ -53,8 +59,8 @@ export default class AuthController {
     await auth.use('api').revoke()
 
     logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
+    return response.created({
+      code: 201,
       message: successMsg,
     } as BasicResponse)
   }
@@ -107,7 +113,7 @@ export default class AuthController {
     await user.save()
 
     const tokenData = await auth.use('api').generate(user, {
-      expiresIn: Env.get('TOKEN_EXPIRY', '7days'),
+      expiresIn: Env.get('API_TOKEN_EXPIRY', '7days'),
     })
 
     const successMsg = `Successfully updated user email and/or password by id ${id}`
@@ -131,6 +137,62 @@ export default class AuthController {
       message: successMsg,
       isAdmin: isAdmin,
     } as IsAdminResponse)
+  }
+
+  public async sendConfirmationEmail({ response, request, auth }: HttpContextContract) {
+    const validatedData = await request.validate(ConfirmEmailValidator)
+
+    const user = await User.findBy('email', validatedData.email)
+    if (!user) {
+      throw new ModelNotFoundException(
+        `Invalid email ${validatedData.email} to send confirmation email`
+      )
+    }
+
+    const tokenData = await auth.use('verify').generate(user, {
+      expiresIn: Env.get('VERIFY_TOKEN_EXPIRY', '3h'),
+    })
+
+    await user.sendVerificationEmail(
+      validatedData.appName,
+      validatedData.appDomain,
+      validatedData.url + `?token=${tokenData.token}`
+    )
+
+    const successMsg = `Successfully sent confirmation email to ${user.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+    } as BasicResponse)
+  }
+
+  public async verifyEmail({ response, request, auth }: HttpContextContract) {
+    const validToken = await auth.use('verify').check()
+    if (!validToken) {
+      throw new PermissionException('Token is missing or has expirated to verify email')
+    }
+
+    const user = await User.findBy('email', auth.use('verify').user?.email)
+    if (!user) {
+      throw new ModelNotFoundException('Invalid email to verify')
+    }
+    if (user.isActivated) {
+      throw new ConflictException(`User with email ${user.email} was already verified`)
+    }
+
+    user.emailVerifiedAt = DateTime.local()
+    user.isActivated = true
+    await user.save()
+
+    await auth.use('verify').revoke()
+
+    const successMsg = `Successfully verified email ${user.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+    } as BasicResponse)
   }
 
   private async getAllDataUser(email: string) {

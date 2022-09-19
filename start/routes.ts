@@ -33,6 +33,8 @@ Route.group(() => {
   Route.get('auth', 'AuthController.getLogged').middleware('auth:api')
   Route.put('auth/:id', 'AuthController.update').middleware('auth:api')
   Route.get('auth/admin', 'AuthController.isAdmin').middleware('auth:api')
+  Route.post('auth/email/send', 'AuthController.sendConfirmationEmail')
+  Route.put('auth/email/verify', 'AuthController.verifyEmail')
 
   Route.resource('users', 'UsersController')
     .except(['store'])
