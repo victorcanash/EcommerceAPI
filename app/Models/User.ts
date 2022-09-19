@@ -2,7 +2,6 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import { column, beforeSave, hasMany, HasMany, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Env from '@ioc:Adonis/Core/Env'
-import Route from '@ioc:Adonis/Core/Route'
 import { DateTime } from 'luxon'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
