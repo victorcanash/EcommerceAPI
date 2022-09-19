@@ -17,6 +17,7 @@ import Env from '@ioc:Adonis/Core/Env'
 export default Env.rules({
   HOST: Env.schema.string.optional({ format: 'host' }),
   PORT: Env.schema.number.optional(),
+  APP_URL: Env.schema.string({ format: 'url', tld: false, protocol: false }),
   APP_KEY: Env.schema.string(),
   APP_NAME: Env.schema.string(),
   DRIVE_DISK: Env.schema.enum(['local', 's3'] as const),
