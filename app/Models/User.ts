@@ -1,5 +1,8 @@
 import Hash from '@ioc:Adonis/Core/Hash'
 import { column, beforeSave, hasMany, HasMany, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
+import Mail from '@ioc:Adonis/Addons/Mail'
+import Env from '@ioc:Adonis/Core/Env'
+import Route from '@ioc:Adonis/Core/Route'
 import { DateTime } from 'luxon'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
@@ -12,11 +15,17 @@ export default class User extends AppBaseModel {
   @column()
   public email: string
 
+  @column()
+  public emailVerifiedAt?: DateTime
+
   @column({ serializeAs: null })
   public password: string
 
   @column()
   public rememberMeToken?: string
+
+  @column()
+  public isActivated: boolean
 
   @column({ serializeAs: null })
   public role: Roles
@@ -47,5 +56,16 @@ export default class User extends AppBaseModel {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password)
     }
+  }
+
+  public async sendVerificationEmail(appName: string, appDomain: string, url: string) {
+    const currentYear = new Date().getFullYear()
+    Mail.send((message) => {
+      message
+        .from(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(this.email)
+        .subject('Please verify your email')
+        .htmlView('emails/auth/verify', { user: this, appName, appDomain, url, currentYear })
+    })
   }
 }
