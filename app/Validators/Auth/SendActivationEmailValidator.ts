@@ -1,16 +1,18 @@
-import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
+import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
 
-export default class UpdateAuthValidator {
+export default class SendActivationEmailValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter
 
   public schema = schema.create({
-    newEmail: schema.string.optional({}, [rules.email(), rules.maxLength(255)]),
-    newPassword: schema.string.optional(),
+    email: schema.string({}, [rules.email(), rules.maxLength(255)]),
+    appName: schema.string(),
+    appDomain: schema.string(),
+    url: schema.string(),
   })
 
   public messages: CustomMessages = {}

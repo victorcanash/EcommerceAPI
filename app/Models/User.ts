@@ -57,14 +57,50 @@ export default class User extends AppBaseModel {
     }
   }
 
-  public async sendVerificationEmail(appName: string, appDomain: string, url: string) {
+  public async sendActivationEmail(appName: string, appDomain: string, url: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
         .from(Env.get('DEFAULT_FROM_EMAIL'))
         .to(this.email)
         .subject('Please verify your email')
-        .htmlView('emails/auth/verify', { user: this, appName, appDomain, url, currentYear })
+        .htmlView('emails/auth/activate', { user: this, appName, appDomain, url, currentYear })
+    })
+  }
+
+  public async sendResetEmail(appName: string, appDomain: string, url: string) {
+    const currentYear = new Date().getFullYear()
+    Mail.send((message) => {
+      message
+        .from(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(this.email)
+        .subject('Please add your new password')
+        .htmlView('emails/auth/update-password', {
+          user: this,
+          appName,
+          appDomain,
+          url,
+          currentYear,
+        })
+    })
+  }
+
+  public async sendUpdateEmail(
+    appName: string,
+    appDomain: string,
+    url: string,
+    email: string,
+    revert = false
+  ) {
+    const currentYear = new Date().getFullYear()
+    const template = revert ? 'emails/auth/revert-update-email' : 'emails/auth/update-email'
+    const subject = revert ? 'Revert your new email' : 'Please verify your new email'
+    Mail.send((message) => {
+      message
+        .from(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(email)
+        .subject(subject)
+        .htmlView(template, { user: this, appName, appDomain, url, currentYear })
     })
   }
 }

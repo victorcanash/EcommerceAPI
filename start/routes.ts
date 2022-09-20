@@ -28,13 +28,16 @@ Route.group(() => {
   // User routes
 
   Route.post('register', 'UsersController.store')
+  Route.put('activate', 'AuthController.activate')
   Route.post('login', 'AuthController.login')
   Route.post('logout', 'AuthController.logout').middleware('auth:api')
   Route.get('auth', 'AuthController.getLogged').middleware('auth:api')
-  Route.put('auth/:id', 'AuthController.update').middleware('auth:api')
   Route.get('auth/admin', 'AuthController.isAdmin').middleware('auth:api')
-  Route.post('auth/email/send', 'AuthController.sendConfirmationEmail')
-  Route.put('auth/email/verify', 'AuthController.verifyEmail')
+  Route.put('auth/:id', 'AuthController.update')
+
+  Route.post('auth/send-email/activation', 'AuthController.sendActivationEmail')
+  Route.post('auth/send-email/reset', 'AuthController.sendResetEmail')
+  Route.post('auth/send-email/update', 'AuthController.sendUpdateEmail').middleware('auth:api')
 
   Route.resource('users', 'UsersController')
     .except(['store'])

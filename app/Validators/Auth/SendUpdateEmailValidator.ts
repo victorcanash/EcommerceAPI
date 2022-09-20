@@ -3,16 +3,18 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
 
-export default class ConfirmEmailValidator {
+export default class SendUpdateEmailValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter
 
   public schema = schema.create({
-    email: schema.string({}, [rules.email(), rules.maxLength(255)]),
     appName: schema.string(),
     appDomain: schema.string(),
     url: schema.string(),
+    password: schema.string(),
+    newEmail: schema.string.optional({}, [rules.email(), rules.maxLength(255)]),
+    revertEmail: schema.boolean.optional(),
   })
 
   public messages: CustomMessages = {}

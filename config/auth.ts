@@ -102,7 +102,7 @@ const authConfig: AuthConfig = {
       },
     },
 
-    verify: {
+    activation: {
       driver: 'oat',
 
       /*
@@ -119,9 +119,79 @@ const authConfig: AuthConfig = {
       |
       */
       tokenProvider: {
-        type: 'verify',
+        type: 'api',
         driver: 'database',
-        table: 'api_tokens',
+        table: 'activation_tokens',
+        foreignKey: 'user_id',
+      },
+
+      provider: {
+        /*
+        |--------------------------------------------------------------------------
+        | Driver
+        |--------------------------------------------------------------------------
+        |
+        | Name of the driver
+        |
+        */
+        driver: 'database',
+
+        /*
+        |--------------------------------------------------------------------------
+        | Identifier key
+        |--------------------------------------------------------------------------
+        |
+        | The identifier key is the unique key inside the defined database table.
+        | In most cases specifying the primary key is the right choice.
+        |
+        */
+        identifierKey: 'id',
+
+        /*
+        |--------------------------------------------------------------------------
+        | Uids
+        |--------------------------------------------------------------------------
+        |
+        | Uids are used to search a user against one of the mentioned columns. During
+        | login, the auth module will search the user mentioned value against one
+        | of the mentioned columns to find their user record.
+        |
+        */
+        uids: ['email'],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Database table
+        |--------------------------------------------------------------------------
+        |
+        | The database table to query. Make sure the database table has a `password`
+        | field and `remember_me_token` column.
+        |
+        */
+        usersTable: 'users',
+      },
+    },
+
+    update: {
+      driver: 'oat',
+
+      /*
+      |--------------------------------------------------------------------------
+      | Tokens provider
+      |--------------------------------------------------------------------------
+      |
+      | Uses SQL database for managing tokens. Use the "database" driver, when
+      | tokens are the secondary mode of authentication.
+      | For example: The Github personal tokens
+      |
+      | The foreignKey column is used to make the relationship between the user
+      | and the token. You are free to use any column name here.
+      |
+      */
+      tokenProvider: {
+        type: 'api',
+        driver: 'database',
+        table: 'update_tokens',
         foreignKey: 'user_id',
       },
 
