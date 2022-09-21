@@ -24,11 +24,6 @@ import { Roles } from 'App/Models/Enums/Roles'
 
 export default class AuthController {
   public async activate({ response, request, auth }: HttpContextContract) {
-    const validToken = await auth.use('activation').check()
-    if (!validToken) {
-      throw new PermissionException('Token is missing or has expirated to activate user')
-    }
-
     const user = await User.findBy('email', auth.use('activation').user?.email)
     if (!user) {
       throw new ModelNotFoundException('Invalid email to activate user')
@@ -84,7 +79,7 @@ export default class AuthController {
   }
 
   public async logout({ request, response, auth }: HttpContextContract) {
-    const successMsg = `Successfully logged out user with email ${auth.user?.email}`
+    const successMsg = `Successfully logged out user with email ${auth.use('api').user?.email}`
 
     await auth.use('api').revoke()
 
@@ -96,9 +91,11 @@ export default class AuthController {
   }
 
   public async getLogged({ request, response, auth }: HttpContextContract) {
-    const user = await this.getAllDataUser(auth.user?.email)
+    const user = await this.getAllDataUser(auth.use('api').user?.email)
     if (!user) {
-      throw new ModelNotFoundException(`Invalid auth email ${auth.user?.email} to get logged user`)
+      throw new ModelNotFoundException(
+        `Invalid auth email ${auth.use('api').user?.email} to get logged user`
+      )
     }
 
     const successMsg = `Successfully got logged user`
@@ -111,7 +108,7 @@ export default class AuthController {
   }
 
   public async isAdmin({ request, response, auth }: HttpContextContract) {
-    const user = await User.query().where('email', auth.user?.email).first()
+    const user = await User.query().where('email', auth.use('api').user?.email).first()
 
     let isAdmin = user && user.role === Roles.ADMIN ? true : false
     const successMsg = 'Successfully checked if user is admin'
@@ -141,7 +138,13 @@ export default class AuthController {
       ? await User.find(id)
       : await User.findBy('email', auth.use('update').user?.email)
     if (!user) {
-      throw new ModelNotFoundException(`Invalid id ${id} updating user email and/or password`)
+      if (isAdmin) {
+        throw new ModelNotFoundException(`Invalid id ${id} updating user email and/or password`)
+      } else {
+        throw new ModelNotFoundException(
+          `Invalid auth email ${auth.use('update').user?.email} updating user email and/or password`
+        )
+      }
     }
 
     const validatedData = await request.validate(UpdateAuthValidator)

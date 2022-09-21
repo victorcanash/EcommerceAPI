@@ -3,6 +3,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 // import { AuthenticationException } from '@adonisjs/auth/build/standalone'
 
 import AuthenticationException from 'App/Exceptions/AuthenticationException'
+import PermissionException from 'App/Exceptions/PermissionException'
 
 /**
  * Auth middleware is meant to restrict un-authenticated access to a given route
@@ -45,6 +46,14 @@ export default class AuthMiddleware {
          */
         auth.defaultGuard = guard
         return true
+      } else {
+        if (guard.includes('api')) {
+          throw new AuthenticationException('You need to be logged')
+        } else if (guard.includes('activation')) {
+          throw new PermissionException('Activation Token is missing or has expirated')
+        } else if (guard.includes('update')) {
+          throw new PermissionException('Update Token is missing or has expirated')
+        }
       }
     }
 
@@ -57,7 +66,6 @@ export default class AuthMiddleware {
       guardLastAttempted,
       this.redirectTo
     )*/
-    throw new AuthenticationException('You need to be logged')
   }
 
   /**

@@ -28,7 +28,7 @@ Route.group(() => {
   // User routes
 
   Route.post('register', 'UsersController.store')
-  Route.put('activate', 'AuthController.activate')
+  Route.put('activate', 'AuthController.activate').middleware('auth:activation')
   Route.post('login', 'AuthController.login')
   Route.post('logout', 'AuthController.logout').middleware('auth:api')
   Route.get('auth', 'AuthController.getLogged').middleware('auth:api')
