@@ -24,12 +24,15 @@ import { Roles } from 'App/Models/Enums/Roles'
 
 export default class AuthController {
   public async activate({ response, request, auth }: HttpContextContract) {
-    const user = await User.findBy('email', auth.use('activation').user?.email)
+    const user = await this.getAllDataUser(auth.use('activation').user?.email)
     if (!user) {
       throw new ModelNotFoundException('Invalid email to activate user')
     }
     if (user.isActivated) {
       throw new ConflictException(`User with email ${user.email} was already activated`)
+    }
+    if (user.lockedOut) {
+      throw new PermissionException('You are locked out')
     }
 
     user.emailVerifiedAt = DateTime.local()
