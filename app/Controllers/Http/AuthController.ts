@@ -38,13 +38,18 @@ export default class AuthController {
 
     await auth.use('activation').revoke()
 
+    const tokenData = await auth.use('api').generate(user, {
+      expiresIn: Env.get('API_TOKEN_EXPIRY', '7days'),
+    })
+
     const successMsg = `Successfully activated user with email ${user.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
+      token: tokenData.token,
       user: user,
-    } as UserResponse)
+    } as AuthResponse)
   }
 
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
