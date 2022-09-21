@@ -238,10 +238,10 @@ export default class AuthController {
   }
 
   public async sendUpdateEmail({ response, request, auth }: HttpContextContract) {
-    const user = await User.findBy('email', auth.user?.email)
+    const user = await User.findBy('email', auth.use('api').user?.email)
     if (!user) {
       throw new ModelNotFoundException(
-        `Invalid auth email ${auth.user?.email} to send update email`
+        `Invalid auth email ${auth.use('api').user?.email} to send update email`
       )
     }
 
