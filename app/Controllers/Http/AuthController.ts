@@ -43,7 +43,8 @@ export default class AuthController {
     return response.created({
       code: 201,
       message: successMsg,
-    } as BasicResponse)
+      user: user,
+    } as UserResponse)
   }
 
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
