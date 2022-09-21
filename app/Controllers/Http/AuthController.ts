@@ -26,7 +26,7 @@ export default class AuthController {
   public async activate({ response, request, auth }: HttpContextContract) {
     const user = await this.getAllDataUser(auth.use('activation').user?.email)
     if (!user) {
-      throw new ModelNotFoundException('Invalid email to activate user')
+      throw new ModelNotFoundException('Invalid auth email to activate user')
     }
     if (user.isActivated) {
       throw new ConflictException(`User with email ${user.email} was already activated`)
@@ -63,7 +63,7 @@ export default class AuthController {
       throw new ModelNotFoundException(`Invalid email to login user`)
     }
     if (!user.isActivated) {
-      throw new PermissionException('You need to activate your account')
+      throw new PermissionException('You have to activate your account')
     }
     if (user.lockedOut) {
       throw new PermissionException('You are locked out')
