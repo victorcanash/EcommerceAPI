@@ -24,7 +24,7 @@ import { Roles } from 'App/Models/Enums/Roles'
 
 export default class AuthController {
   public async activate({ response, request, auth }: HttpContextContract) {
-    const user = await this.getAllDataUser(auth.use('activation').user?.email)
+    const user = await User.findBy('email', auth.use('activation').user?.email)
     if (!user) {
       throw new ModelNotFoundException('Invalid auth email to activate user')
     }
@@ -41,18 +41,12 @@ export default class AuthController {
 
     await auth.use('activation').revoke()
 
-    const tokenData = await auth.use('api').generate(user, {
-      expiresIn: Env.get('API_TOKEN_EXPIRY', '7days'),
-    })
-
     const successMsg = `Successfully activated user with email ${user.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
-      token: tokenData.token,
-      user: user,
-    } as AuthResponse)
+    } as BasicResponse)
   }
 
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
