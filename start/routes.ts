@@ -44,20 +44,19 @@ Route.group(() => {
     .middleware({
       '*': ['auth:api'],
       'index': ['admin'],
+      'show': ['admin'],
     })
     .apiOnly()
 
   Route.resource('uaddresses', 'UAddressesController')
     .middleware({
-      '*': ['auth:api'],
-      'index': ['admin'],
+      '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
   Route.resource('upayments', 'UPaymentsController')
     .middleware({
-      '*': ['auth:api'],
-      'index': ['admin'],
+      '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
@@ -65,8 +64,7 @@ Route.group(() => {
 
   Route.resource('carts', 'CartsController')
     .middleware({
-      '*': ['auth:api'],
-      'index': ['admin'],
+      '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
@@ -74,6 +72,7 @@ Route.group(() => {
     .middleware({
       '*': ['auth:api'],
       'index': ['admin'],
+      'show': ['admin'],
     })
     .apiOnly()
 
@@ -97,6 +96,7 @@ Route.group(() => {
 
   Route.resource('pcategories', 'PCategoriesController')
     .middleware({
+      show: ['auth:api', 'admin'],
       store: ['auth:api', 'admin'],
       update: ['auth:api', 'admin'],
       destroy: ['auth:api', 'admin'],
@@ -105,17 +105,13 @@ Route.group(() => {
 
   Route.resource('pdiscounts', 'PDiscountsController')
     .middleware({
-      store: ['auth:api', 'admin'],
-      update: ['auth:api', 'admin'],
-      destroy: ['auth:api', 'admin'],
+      '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
   Route.resource('pinventories', 'PInventoriesController')
     .middleware({
-      store: ['auth:api', 'admin'],
-      update: ['auth:api', 'admin'],
-      destroy: ['auth:api', 'admin'],
+      '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
