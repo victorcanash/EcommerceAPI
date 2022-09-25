@@ -4,6 +4,7 @@ import ProductDiscount from 'App/Models/ProductDiscount'
 import { PDiscountsResponse, PDiscountResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
+import FilterPDiscountValidator from 'App/Validators/Product/FilterPDiscountValidator'
 import CreatePDiscountValidator from 'App/Validators/Product/CreatePDiscountValidator'
 import UpdatePDiscountValidator from 'App/Validators/Product/UpdatePDiscountValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
@@ -19,7 +20,15 @@ export default class PDiscountsController {
     const sortBy = validatedSortData.sortBy || 'id'
     const order = validatedSortData.order || 'asc'
 
+    const validatedFilterData = await request.validate(FilterPDiscountValidator)
+    const productId = validatedFilterData.productId || -1
+
     const productDiscounts = await ProductDiscount.query()
+      .whereHas('product', (query) => {
+        if (productId !== -1) {
+          query.where('id', productId)
+        }
+      })
       .orderBy(sortBy, order)
       .paginate(page, limit)
     const result = productDiscounts.toJSON()
