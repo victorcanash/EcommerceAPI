@@ -47,7 +47,7 @@ export default class ProductsController {
           query.where('name', categoryName)
         }
       })
-      .preload('discount')
+      .preload('activeDiscount')
       .preload('inventories')
       /*.preload('inventories', (query) => {
         query.where('quantity', '>', 0)
@@ -76,7 +76,7 @@ export default class ProductsController {
   public async show({ params: { id }, request, response }: HttpContextContract) {
     const product = await Product.query()
       .where('id', id)
-      .preload('discount')
+      .preload('activeDiscount')
       .preload('inventories')
       .first()
     if (!product) {

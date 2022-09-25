@@ -52,12 +52,12 @@ export default class Product extends AppBaseModel {
       query.where('active', true).orderBy('id', 'desc').limit(1)
     },
   })
-  public discount: HasOne<typeof ProductDiscount>
+  public activeDiscount: HasOne<typeof ProductDiscount>
 
   @computed()
   public get realPrice() {
-    if (this.discount) {
-      const discount = (this.discount.discountPercent / 100) * this.price
+    if (this.activeDiscount) {
+      const discount = (this.activeDiscount.discountPercent / 100) * this.price
       return roundTwoDecimals(this.price - discount)
     }
     return this.price
