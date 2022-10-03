@@ -14,7 +14,7 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
       table.string('name', 255).notNullable()
       table.string('description', 255).notNullable()
-      table.integer('discount_percent', 255).notNullable()
+      table.float('discount_percent', 255).notNullable()
       table.boolean('active').defaultTo(true).notNullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()
