@@ -49,7 +49,7 @@ export default class Product extends AppBaseModel {
 
   @hasOne(() => ProductDiscount, {
     onQuery: (query) => {
-      query.where('active', true).orderBy('id', 'desc').limit(1)
+      query.where('active', true).orderBy('id', 'desc')
     },
   })
   public activeDiscount: HasOne<typeof ProductDiscount>
