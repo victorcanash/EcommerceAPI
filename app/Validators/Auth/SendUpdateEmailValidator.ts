@@ -13,7 +13,11 @@ export default class SendUpdateEmailValidator {
     appDomain: schema.string(),
     url: schema.string(),
     password: schema.string(),
-    newEmail: schema.string.optional({}, [rules.email(), rules.maxLength(255)]),
+    newEmail: schema.string.optional({}, [
+      rules.email(),
+      rules.unique({ table: 'users', column: 'email' }),
+      rules.maxLength(255),
+    ]),
     revertEmail: schema.boolean.optional(),
   })
 

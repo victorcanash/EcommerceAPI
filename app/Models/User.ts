@@ -68,7 +68,7 @@ export default class User extends AppBaseModel {
     })
   }
 
-  public async sendResetEmail(appName: string, appDomain: string, url: string) {
+  public async sendResetPswEmail(appName: string, appDomain: string, url: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message

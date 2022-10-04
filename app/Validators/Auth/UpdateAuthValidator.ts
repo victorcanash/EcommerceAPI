@@ -9,7 +9,11 @@ export default class UpdateAuthValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    newEmail: schema.string.optional({}, [rules.email(), rules.maxLength(255)]),
+    newEmail: schema.string.optional({}, [
+      rules.email(),
+      rules.unique({ table: 'users', column: 'email' }),
+      rules.maxLength(255),
+    ]),
     newPassword: schema.string.optional(),
   })
 

@@ -36,7 +36,7 @@ Route.group(() => {
   Route.put('auth/:id', 'AuthController.update')
 
   Route.post('auth/send-email/activation', 'AuthController.sendActivationEmail')
-  Route.post('auth/send-email/reset', 'AuthController.sendResetEmail')
+  Route.post('auth/send-email/reset', 'AuthController.sendResetPswEmail')
   Route.post('auth/send-email/update', 'AuthController.sendUpdateEmail').middleware('auth:api')
 
   Route.resource('users', 'UsersController')

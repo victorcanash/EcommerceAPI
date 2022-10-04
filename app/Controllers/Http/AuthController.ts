@@ -13,7 +13,7 @@ import {
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
 import UpdateAuthValidator from 'App/Validators/Auth/UpdateAuthValidator'
 import SendActivationEmailValidator from 'App/Validators/Auth/SendActivationEmailValidator'
-import SendResetEmailValidator from 'App/Validators/Auth/SendResetEmailValidator'
+import SendResetPswEmailValidator from 'App/Validators/Auth/SendResetPswEmailValidator'
 import SendUpdateEmailValidator from 'App/Validators/Auth/SendUpdateEmailValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
@@ -154,13 +154,6 @@ export default class AuthController {
     const newEmail = isAdmin ? validatedData.newEmail : auth.use('update').token?.meta?.new_email
     const newPassword = validatedData.newPassword
 
-    if (newEmail && user.email !== newEmail) {
-      const userWithEmail = await User.query().where('email', newEmail).first()
-      if (userWithEmail) {
-        throw new BadRequestException('Email must be unique to update user email and password')
-      }
-    }
-
     if (newEmail) {
       user.email = newEmail
     }
@@ -214,25 +207,27 @@ export default class AuthController {
     } as BasicResponse)
   }
 
-  public async sendResetEmail({ response, request, auth }: HttpContextContract) {
-    const validatedData = await request.validate(SendResetEmailValidator)
+  public async sendResetPswEmail({ response, request, auth }: HttpContextContract) {
+    const validatedData = await request.validate(SendResetPswEmailValidator)
 
     const user = await User.findBy('email', validatedData.email)
     if (!user) {
-      throw new ModelNotFoundException(`Invalid email ${validatedData.email} to send reset email`)
+      throw new ModelNotFoundException(
+        `Invalid email ${validatedData.email} to send reset psw email`
+      )
     }
 
     const tokenData = await auth.use('update').generate(user, {
       expiresIn: Env.get('UPDATE_TOKEN_EXPIRY', '3h'),
     })
 
-    await user.sendResetEmail(
+    await user.sendResetPswEmail(
       validatedData.appName,
       validatedData.appDomain,
       validatedData.url + `?token=${tokenData.token}`
     )
 
-    const successMsg = `Successfully sent reset email to ${user.email}`
+    const successMsg = `Successfully sent reset psw email to ${user.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
@@ -253,13 +248,6 @@ export default class AuthController {
     const verifiedPassword = await Hash.verify(user.password, validatedData.password)
     if (!verifiedPassword) {
       throw new BadRequestException('Invalid password to send update email')
-    }
-
-    if (validatedData.newEmail && user.email !== validatedData.newEmail) {
-      const userWithEmail = await User.query().where('email', validatedData.newEmail).first()
-      if (userWithEmail) {
-        throw new BadRequestException('Email must be unique to send update email')
-      }
     }
 
     const tokenData = await auth.use('update').generate(user, {
