@@ -8,9 +8,13 @@ export default class UpdatePCategoryValidator {
 
   public reporter = CustomReporter
 
+  public refs = schema.refs({
+    id: this.ctx.params.id,
+  })
+
   public schema = schema.create({
     name: schema.string.optional({}, [
-      rules.unique({ table: 'product_categories', column: 'name' }),
+      rules.unique({ table: 'product_categories', column: 'name', whereNot: { id: this.refs.id } }),
     ]),
     description: schema.string.optional(),
   })
