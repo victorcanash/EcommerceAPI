@@ -47,6 +47,9 @@ export default class Product extends AppBaseModel {
   @hasMany(() => ProductInventory)
   public inventories: HasMany<typeof ProductInventory>
 
+  @hasMany(() => ProductDiscount)
+  public discounts: HasMany<typeof ProductDiscount>
+
   @hasOne(() => ProductDiscount, {
     onQuery: (query) => {
       query.where('active', true).orderBy('id', 'desc')

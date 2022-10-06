@@ -6,6 +6,7 @@ import { ProductsResponse, ProductResponse, BasicResponse } from 'App/Controller
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterProductValidator from 'App/Validators/Product/FilterProductValidator'
+import LoadProductValidator from 'App/Validators/Product/LoadProductValidator'
 import CreateProductValidator from 'App/Validators/Product/CreateProductValidator'
 import UpdateProductValidator from 'App/Validators/Product/UpdateProductValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
@@ -25,6 +26,10 @@ export default class ProductsController {
     const keywords = validatedFilterData.keywords || ''
     const categoryName = validatedFilterData.categoryName || 'all'
     const ordersRemain = validatedFilterData.ordersRemain || false
+
+    const validatedLoadData = await request.validate(LoadProductValidator)
+    const inventories = validatedLoadData.inventories || true
+    const discounts = validatedLoadData.discounts || false
 
     const products = await Product.query()
       .where((query) => {
@@ -48,12 +53,17 @@ export default class ProductsController {
         }
       })
       .preload('activeDiscount')
-      .preload('inventories')
-      /*.preload('inventories', (query) => {
-        query.where('quantity', '>', 0)
-      })*/
+      .where((query) => {
+        if (inventories) {
+          query.preload('inventories')
+        }
+        if (discounts) {
+          query.preload('discounts')
+        }
+      })
       .orderBy(sortBy, order)
       .paginate(page, limit)
+
     const result = products.toJSON()
 
     let category: ProductCategory | null = null
@@ -74,10 +84,21 @@ export default class ProductsController {
   }
 
   public async show({ params: { id }, request, response }: HttpContextContract) {
+    const validatedLoadData = await request.validate(LoadProductValidator)
+    const inventories = validatedLoadData.inventories || true
+    const discounts = validatedLoadData.discounts || false
+
     const product = await Product.query()
       .where('id', id)
       .preload('activeDiscount')
-      .preload('inventories')
+      .where((query) => {
+        if (inventories) {
+          query.preload('inventories')
+        }
+        if (discounts) {
+          query.preload('discounts')
+        }
+      })
       .first()
     if (!product) {
       throw new ModelNotFoundException(`Invalid id ${id} getting product`)
