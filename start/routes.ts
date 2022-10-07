@@ -85,6 +85,8 @@ Route.group(() => {
       destroy: ['auth:api', 'admin'],
     })
     .apiOnly()
+  Route.get('products/admin', 'ProductsController.indexAdmin').middleware(['auth:api', 'admin'])
+  Route.get('products/admin/:id', 'ProductsController.showAdmin').middleware(['auth:api', 'admin'])
 
   Route.resource('products.images', 'PImagesController')
     .except(['index', 'update'])
