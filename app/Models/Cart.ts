@@ -14,6 +14,10 @@ export default class Cart extends AppBaseModel {
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
 
-  @hasMany(() => CartItem)
+  @hasMany(() => CartItem, {
+    onQuery: (query) => {
+      query.orderBy('id', 'asc')
+    },
+  })
   public items: HasMany<typeof CartItem>
 }

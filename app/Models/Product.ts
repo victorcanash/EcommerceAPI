@@ -44,10 +44,18 @@ export default class Product extends AppBaseModel {
   })
   public category: BelongsTo<typeof ProductCategory>
 
-  @hasMany(() => ProductInventory)
+  @hasMany(() => ProductInventory, {
+    onQuery: (query) => {
+      query.orderBy('id', 'asc')
+    },
+  })
   public inventories: HasMany<typeof ProductInventory>
 
-  @hasMany(() => ProductDiscount)
+  @hasMany(() => ProductDiscount, {
+    onQuery: (query) => {
+      query.orderBy('id', 'asc')
+    },
+  })
   public discounts: HasMany<typeof ProductDiscount>
 
   @hasOne(() => ProductDiscount, {
