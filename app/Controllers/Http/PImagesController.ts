@@ -3,9 +3,9 @@ import Drive from '@ioc:Adonis/Core/Drive'
 
 import Product from 'App/Models/Product'
 import { PImagesResponse } from 'App/Controllers/Http/types'
-import UploadPImagesValidator from 'App/Validators/Product/UploadPImagesValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
+import BadRequestException from 'App/Exceptions/BadRequestException'
 import { logRouteSuccess } from 'App/Utils/logger'
 import { generateUniqueFilename } from 'App/Utils/uploader'
 
@@ -39,11 +39,17 @@ export default class PImagesController {
       throw new ModelNotFoundException(`Invalid product id ${product_id} uploading product images`)
     }
 
-    const validatedData = await request.validate(UploadPImagesValidator)
+    const validatedData = await request.files('images', {
+      size: '2mb',
+      extnames: ['jpg', 'jpeg', 'gif', 'png'],
+    })
+    if (validatedData.length < 1) {
+      throw new BadRequestException('Images field must contain at least 1 file')
+    }
 
     const productImages = product.imageNames
 
-    validatedData.images.forEach((image) => {
+    validatedData.forEach((image) => {
       const imageName = generateUniqueFilename(image.clientName)
       image.moveToDisk('./', {
         name: imageName,
@@ -58,7 +64,7 @@ export default class PImagesController {
 
     const successMsg = `Successfully uploaded product images by product id ${product_id}`
     logRouteSuccess(request, successMsg)
-    return response.ok({
+    return response.created({
       code: 201,
       message: successMsg,
       productImages: productImages,
