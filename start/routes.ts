@@ -118,10 +118,15 @@ Route.group(() => {
     })
     .apiOnly()
 
+  // Paypal routes
+
+  Route.post('paypal/checkout-order', 'PaypalController.checkoutOrder').middleware('auth:api')
+  Route.post('paypal/capture-order', 'PaypalController.captureOrder').middleware('auth:api')
+
   // Stripe routes
 
-  Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
+  /*Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
     'auth:api'
   )
-  Route.post('stripe/webhooks', 'StripeController.webhooks')
+  Route.post('stripe/webhooks', 'StripeController.webhooks')*/
 }).prefix('api')

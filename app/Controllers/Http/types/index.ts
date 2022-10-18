@@ -226,10 +226,28 @@ export type PInventoriesResponse = {
 }
 
 /**
+ * Paypal checkout order JSON response for Controllers
+ */
+export type PaypalCheckoutOrderResponse = {
+  code: number
+  message: string
+  checkoutUrl: string
+}
+
+/**
+ * Paypal capture order JSON response for Controllers
+ */
+export type PaypalCaptureOrderResponse = {
+  code: number
+  message: string
+  data: any
+}
+
+/**
  * Stripe JSON response for Controllers
  */
-export type StripeResponse = {
+/*export type StripeResponse = {
   code: number
   message: string
   sessionId: string
-}
+}*/
