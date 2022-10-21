@@ -280,7 +280,9 @@ export default class AuthController {
       .preload('payments')
       .preload('cart', (query) => {
         query.preload('items', (query) => {
-          query.preload('product')
+          query.preload('product', (query) => {
+            query.preload('activeDiscount')
+          })
           query.preload('inventory')
         })
       })
