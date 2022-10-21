@@ -9,7 +9,13 @@ export default class SortValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    sortBy: schema.enum.optional(['id', 'firstName', 'lastName', 'createdAt', 'updatedAt']),
+    sortBy: schema.enum.optional([
+      'id',
+      'firstName',
+      'lastName',
+      'createdAt',
+      'updatedAt',
+    ] as const),
     order: schema.enum.optional(['asc', 'desc'] as const),
   })
 

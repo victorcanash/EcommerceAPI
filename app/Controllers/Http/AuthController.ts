@@ -3,7 +3,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
 
-import User from 'App/Models/User'
+import UsersService from 'App/Services/UsersService'
 import {
   BasicResponse,
   AuthResponse,
@@ -24,15 +24,16 @@ import { Roles } from 'App/Models/Enums/Roles'
 
 export default class AuthController {
   public async activate({ response, request, auth }: HttpContextContract) {
-    const user = await User.findBy('email', auth.use('activation').user?.email)
+    const email = await UsersService.getAuthEmail(auth, 'activation')
+    const user = await UsersService.getUserByEmail(email, false)
     if (!user) {
       throw new ModelNotFoundException('Invalid auth email to activate user')
     }
     if (user.isActivated) {
-      throw new ConflictException(`User with email ${user.email} was already activated`)
+      throw new ConflictException(`User with email ${email} was already activated`)
     }
     if (user.lockedOut) {
-      throw new PermissionException('You are locked out')
+      throw new PermissionException(`User with email ${email} is locked out`)
     }
 
     user.emailVerifiedAt = DateTime.local()
@@ -41,7 +42,7 @@ export default class AuthController {
 
     await auth.use('activation').revoke()
 
-    const successMsg = `Successfully activated user with email ${user.email}`
+    const successMsg = `Successfully activated user with email ${email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
@@ -52,7 +53,7 @@ export default class AuthController {
   public async login({ request, response, auth }: HttpContextContract): Promise<void> {
     const validatedData = await request.validate(LoginValidator)
 
-    const user = await this.getAllDataUser(validatedData.email)
+    const user = await UsersService.getUserByEmail(validatedData.email, true)
     if (!user) {
       throw new ModelNotFoundException(`Invalid email to login user`)
     }
@@ -82,7 +83,8 @@ export default class AuthController {
   }
 
   public async logout({ request, response, auth }: HttpContextContract) {
-    const successMsg = `Successfully logged out user with email ${auth.use('api').user?.email}`
+    const email = await UsersService.getAuthEmail(auth, 'api')
+    const successMsg = `Successfully logged out user with email ${email}`
 
     await auth.use('api').revoke()
 
@@ -94,11 +96,10 @@ export default class AuthController {
   }
 
   public async getLogged({ request, response, auth }: HttpContextContract) {
-    const user = await this.getAllDataUser(auth.use('api').user?.email)
+    const email = await UsersService.getAuthEmail(auth, 'api')
+    const user = await UsersService.getUserByEmail(email, true)
     if (!user) {
-      throw new ModelNotFoundException(
-        `Invalid auth email ${auth.use('api').user?.email} to get logged user`
-      )
+      throw new ModelNotFoundException(`Invalid auth email ${email} to get logged user`)
     }
 
     const successMsg = `Successfully got logged user`
@@ -111,7 +112,8 @@ export default class AuthController {
   }
 
   public async isAdmin({ request, response, auth }: HttpContextContract) {
-    const user = await User.query().where('email', auth.use('api').user?.email).first()
+    const email = await UsersService.getAuthEmail(auth, 'api')
+    const user = await UsersService.getUserByEmail(email, false)
 
     let isAdmin = user && user.role === Roles.ADMIN ? true : false
     const successMsg = 'Successfully checked if user is admin'
@@ -137,15 +139,16 @@ export default class AuthController {
       }
     }
 
+    const email = await UsersService.getAuthEmail(auth, 'update')
     const user = isAdmin
-      ? await User.find(id)
-      : await User.findBy('email', auth.use('update').user?.email)
+      ? await UsersService.getUserById(id, false)
+      : await UsersService.getUserByEmail(email, false)
     if (!user) {
       if (isAdmin) {
         throw new ModelNotFoundException(`Invalid id ${id} updating user email and/or password`)
       } else {
         throw new ModelNotFoundException(
-          `Invalid auth email ${auth.use('update').user?.email} updating user email and/or password`
+          `Invalid auth email ${email} updating user email and/or password`
         )
       }
     }
@@ -182,7 +185,7 @@ export default class AuthController {
   public async sendActivationEmail({ response, request, auth }: HttpContextContract) {
     const validatedData = await request.validate(SendActivationEmailValidator)
 
-    const user = await User.findBy('email', validatedData.email)
+    const user = await UsersService.getUserByEmail(validatedData.email, false)
     if (!user) {
       throw new ModelNotFoundException(
         `Invalid email ${validatedData.email} to send activation email`
@@ -210,7 +213,7 @@ export default class AuthController {
   public async sendResetPswEmail({ response, request, auth }: HttpContextContract) {
     const validatedData = await request.validate(SendResetPswEmailValidator)
 
-    const user = await User.findBy('email', validatedData.email)
+    const user = await UsersService.getUserByEmail(validatedData.email, false)
     if (!user) {
       throw new ModelNotFoundException(
         `Invalid email ${validatedData.email} to send reset psw email`
@@ -236,11 +239,10 @@ export default class AuthController {
   }
 
   public async sendUpdateEmail({ response, request, auth }: HttpContextContract) {
-    const user = await User.findBy('email', auth.use('api').user?.email)
+    const email = await UsersService.getAuthEmail(auth, 'api')
+    const user = await UsersService.getUserByEmail(email, false)
     if (!user) {
-      throw new ModelNotFoundException(
-        `Invalid auth email ${auth.use('api').user?.email} to send update email`
-      )
+      throw new ModelNotFoundException(`Invalid auth email ${email} to send update email`)
     }
 
     const validatedData = await request.validate(SendUpdateEmailValidator)
@@ -271,23 +273,5 @@ export default class AuthController {
       code: 201,
       message: successMsg,
     } as BasicResponse)
-  }
-
-  private async getAllDataUser(email: string) {
-    const user = await User.query()
-      .where('email', email)
-      .preload('addresses')
-      .preload('payments')
-      .preload('cart', (query) => {
-        query.preload('items', (query) => {
-          query.preload('product', (query) => {
-            query.preload('activeDiscount')
-          })
-          query.preload('inventory')
-        })
-      })
-      .first()
-
-    return user
   }
 }

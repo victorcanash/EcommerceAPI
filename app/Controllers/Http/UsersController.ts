@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import User from 'App/Models/User'
-import Cart from 'App/Models/Cart'
+import UsersService from 'App/Services/UsersService'
 import { UsersResponse, UserResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
@@ -20,8 +19,7 @@ export default class UsersController {
     const sortBy = validatedSortData.sortBy || 'id'
     const order = validatedSortData.order || 'asc'
 
-    const users = await User.query().orderBy(sortBy, order).paginate(page, limit)
-    const result = users.toJSON()
+    const result = await UsersService.getUsers(sortBy, order, page, limit)
 
     const successMsg = 'Successfully got users'
     logRouteSuccess(request, successMsg)
@@ -35,7 +33,7 @@ export default class UsersController {
   }
 
   public async show({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const user = await User.find(id)
+    const user = await UsersService.getUserById(id, false)
     if (!user) {
       throw new ModelNotFoundException(`Invalid id ${id} getting user`)
     }
@@ -54,9 +52,7 @@ export default class UsersController {
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateUserValidator)
 
-    const user = await User.create(validatedData)
-
-    await Cart.create({ userId: user.id, total: 0 })
+    const user = await UsersService.createUser(validatedData)
 
     const successMsg = 'Successfully created user'
     logRouteSuccess(request, successMsg)
@@ -68,7 +64,7 @@ export default class UsersController {
   }
 
   public async update({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const user = await User.find(id)
+    const user = await UsersService.getUserById(id, false)
     if (!user) {
       throw new ModelNotFoundException(`Invalid id ${id} updating user`)
     }
@@ -90,7 +86,7 @@ export default class UsersController {
   }
 
   public async destroy({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const user = await User.find(id)
+    const user = await UsersService.getUserById(id, false)
     if (!user) {
       throw new ModelNotFoundException(`Invalid id ${id} deleting user`)
     }
