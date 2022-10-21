@@ -127,13 +127,13 @@ export type CItemResponse = {
 /**
  * Cart items JSON response for Controllers
  */
-export type CItemsResponse = {
+/*export type CItemsResponse = {
   code: number
   message: string
   cartItems: CartItem[]
   totalPages: number
   currentPage: number
-}
+}*/
 
 /**
  * Product JSON response for Controllers
@@ -240,7 +240,7 @@ export type PaypalCheckoutOrderResponse = {
 export type PaypalCaptureOrderResponse = {
   code: number
   message: string
-  data: any
+  paypalOrder: any
 }
 
 /**

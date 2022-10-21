@@ -4,20 +4,21 @@ import Env from '@ioc:Adonis/Core/Env'
 import axios, { AxiosResponse } from 'axios'
 
 import User from 'App/Models/User'
-import Order from 'App/Models/Order'
-import OrderItem from 'App/Models/OrderItem'
-import { OrderStatus } from 'App/Models/Enums/OrderStatus'
 import { PaypalCheckoutOrderResponse, PaypalCaptureOrderResponse } from 'App/Controllers/Http/types'
 import CheckoutPaypalOrderValidator from 'App/Validators/Paypal/CheckoutPaypalOrderValidator'
 import CapturePaypalOrderValidator from 'App/Validators/Paypal/CapturePaypalOrderValidator'
+import RefundPaypalOrderValidator from 'App/Validators/Paypal/RefundPaypalOrderValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PaypalController {
+  private readonly defaultCurrencyCode = 'EUR'
+
+  // Create checkout order
   public async checkoutOrder({ request, response, auth }: HttpContextContract) {
-    // Load cart by user
+    // Load user
     const user = await User.query()
       .where('email', auth.user?.email)
       .preload('cart', (query) => {
@@ -40,9 +41,9 @@ export default class PaypalController {
 
     // Validate
     const validatedData = await request.validate(CheckoutPaypalOrderValidator)
-    const currencyCode = validatedData.currencyCode || 'EUR'
+    const currencyCode = validatedData.currencyCode || this.defaultCurrencyCode
 
-    // Check cart items and create order
+    // Check cart items and create paypal order
     const items: any[] = []
     let totalItemsAmount = 0
     let totalItemsTax = 0
@@ -79,8 +80,8 @@ export default class PaypalController {
         totalItemsTax += 0 * item.quantity
       }
     })
-    // Create order
-    const order = {
+    // Create paypal order
+    const paypalOrder = {
       intent: 'CAPTURE',
       purchase_units: [
         {
@@ -151,7 +152,7 @@ export default class PaypalController {
     // Call create order endpoint of paypal API
     let checkoutUrl = ''
     await axios
-      .post(`${Env.get('PAYPAL_API')}/v2/checkout/orders`, order, {
+      .post(`${Env.get('PAYPAL_API')}/v2/checkout/orders`, paypalOrder, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${paypalToken}`,
@@ -180,7 +181,9 @@ export default class PaypalController {
     } as PaypalCheckoutOrderResponse)
   }
 
+  // When order is paid
   public async captureOrder({ request, response, auth }: HttpContextContract) {
+    // Validate
     const validatedData = await request.validate(CapturePaypalOrderValidator)
 
     // Get auth token of paypal API
@@ -192,7 +195,7 @@ export default class PaypalController {
     }
 
     // Call capture order endpoint of paypal API
-    let responseData
+    let paypalOrder
     await axios
       .post(
         `${Env.get('PAYPAL_API')}/v2/checkout/orders/${validatedData.orderToken}/capture`,
@@ -201,12 +204,13 @@ export default class PaypalController {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${paypalToken}`,
+            'Prefer': 'return=representation',
           },
         }
       )
       .then((response: AxiosResponse) => {
         if (response.status === 201) {
-          responseData = response.data
+          paypalOrder = response.data
         }
       })
       .catch((error: Error) => {
@@ -218,7 +222,86 @@ export default class PaypalController {
     return response.created({
       code: 201,
       message: successMsg,
-      data: responseData,
+      paypalOrder: paypalOrder,
+    } as PaypalCaptureOrderResponse)
+  }
+
+  public async refundOrder({ request, response, auth }: HttpContextContract) {
+    // Validate
+    const validatedData = await request.validate(RefundPaypalOrderValidator)
+    const currencyCode = validatedData.currencyCode || this.defaultCurrencyCode
+
+    // Get auth token of paypal API
+    let paypalToken = ''
+    try {
+      paypalToken = await this.generatePaypalToken()
+    } catch (error) {
+      throw new InternalServerException(error.message)
+    }
+
+    // Call get order details endpoint of paypal API
+    let captureId
+    await axios
+      .post(
+        `${Env.get('PAYPAL_API')}/v2/checkout/orders/${validatedData.paypalOrderId}`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${paypalToken}`,
+            'Prefer': 'return=representation',
+          },
+        }
+      )
+      .then((response: AxiosResponse) => {
+        if (response.status === 201) {
+          let captures = response.data.purchase_units?.payments?.captures
+          if (captures.length > 0 && captures[0].id) {
+            captureId = response.data.purchase_units.payments.captures[0].id
+          } else {
+            throw new InternalServerException('No capture found')
+          }
+        } else {
+          throw new InternalServerException('Something went wrong')
+        }
+      })
+      .catch((error: Error) => {
+        throw new InternalServerException(error.message)
+      })
+
+    // Call refund order endpoint of paypal API
+    const payload = {
+      amount: {
+        value: validatedData.amount,
+        currency_code: currencyCode,
+      },
+      // invoice_id: '',
+      note_to_payer: validatedData.noteToPlayer,
+    }
+    let paypalOrder
+    await axios
+      .post(`${Env.get('PAYPAL_API')}/v2/payments/captures/${captureId}/refund`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${paypalToken}`,
+          'Prefer': 'return=representation',
+        },
+      })
+      .then((response: AxiosResponse) => {
+        if (response.status === 201) {
+          paypalOrder = response.data
+        }
+      })
+      .catch((error: Error) => {
+        throw new InternalServerException(error.message)
+      })
+
+    const successMsg = `Successfully refunded paypal order for user with email ${auth.user?.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      paypalOrder: paypalOrder,
     } as PaypalCaptureOrderResponse)
   }
 
@@ -246,154 +329,7 @@ export default class PaypalController {
     return paypalToken
   }
 
-  /*public async createCheckoutSession({ request, response, auth }: HttpContextContract) {
-    // Load cart by user
-    const user = await User.query()
-      .where('email', auth.user?.email)
-      .preload('cart', (query) => {
-        query.preload('items', (query) => {
-          query.preload('product')
-          query.preload('inventory')
-        })
-      })
-      .first()
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid auth email ${auth.user?.email} getting logged user`)
-    }
-    if (!user.cart || user.cart.items.length < 1) {
-      throw new PermissionException('No items to create a checkout session')
-    }
-
-    // Check if there are the quantity desired by user and if there are items with 0 quantity
-    // Create lineItems for the checkout session
-    const lineItems: any[] = []
-    user.cart.items.forEach(async (item) => {
-      if (item.quantity > item.inventory.quantity) {
-        item.quantity = item.inventory.quantity
-        if (item.quantity > 0) {
-          await item.save()
-        }
-      }
-      if (item.quantity < 1) {
-        await item.delete()
-      } else {
-        lineItems.push({
-          quantity: item.quantity,
-          adjustable_quantity: {
-            enabled: false,
-          },
-          price_data: {
-            currency: 'eur',
-            unit_amount: item.product.realPrice * 100,
-            product_data: {
-              name: item.product.name,
-              description: `${item.product.description} ${
-                item.inventory.size ? `(${item.inventory.size})` : ''
-              }`,
-              images: [`${Env.get('APP_URL', '')}/products/${item.product.id}/images/0`],
-              metadata: {
-                productId: item.product.id,
-              },
-            },
-          },
-        })
-      }
-    })
-
-    try {
-      // Adding customer
-      const customersListResponse = await stripeAPI.customers.list({
-        email: user.email,
-      })
-      let customer
-      if (customersListResponse.data && customersListResponse.data.length > 0) {
-        customer = customersListResponse.data[0]
-      } else {
-        customer = await stripeAPI.customers.create({
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-        })
-      }
-      if (!customer) {
-        throw new InternalServerException('Cannot get customer to create a new checkout session')
-      }
-
-      // Creating checkout session
-      const session = await stripeAPI.checkout.sessions.create({
-        mode: 'payment',
-        line_items: lineItems,
-        customer: customer.id,
-        success_url: Env.get('STRIPE_SUCCESS_ENDPOINT', ''),
-        cancel_url: Env.get('STRIPE_CANCEL_ENDPOINT', ''),
-        shipping_address_collection: {
-          allowed_countries: ['ES'],
-        },
-        phone_number_collection: {
-          enabled: true,
-        },
-      })
-
-      const successMsg = `Successfully created checkout session with id ${session.id}`
-      logRouteSuccess(request, successMsg)
-      return response.created({
-        code: 201,
-        message: successMsg,
-        sessionId: session.id,
-      } as StripeResponse)
-    } catch (error) {
-      logRouteSuccess(request, error.getMessage())
-      throw new InternalServerException(error.getMessage())
-    }
-  }
-
-  public async webhooks({ request, response }: HttpContextContract) {
-    const payload = request.raw()
-    const sig = request.header('stripe-signature')
-    let event
-    try {
-      event = stripeAPI.webhooks.constructEvent(payload, sig, Env.get('STRIPE_WEBHOOKS_SECRET', ''))
-    } catch (err) {
-      return response.status(400).send(`Webhook Error: ${err.message}`)
-    }
-
-    const session = event.data.object
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        // Save an order in your database, marked as 'awaiting payment'
-        const order = await this.createOrder(session)
-
-        // Check if the order is paid (for example, from a card payment)
-        //
-        // A delayed notification payment will have an `unpaid` status, as
-        // you're still waiting for funds to be transferred from the customer's
-        // account.
-        if (session.payment_status === OrderStatus.PAID) {
-          await this.fulfillOrder(session, order)
-        }
-        break
-      }
-
-      case 'checkout.session.async_payment_succeeded': {
-        // Fulfill the purchase...
-        await this.fulfillOrder(session)
-        break
-      }
-
-      case 'checkout.session.async_payment_failed': {
-        // Send an email to the customer asking them to retry their order
-        await this.failedOrder(session)
-        break
-      }
-    }
-    const successMsg = `Successfully webhook ${event.type} from stripe`
-    logRouteSuccess(request, successMsg)
-    return response.created({
-      code: 201,
-      message: successMsg,
-    } as BasicResponse)
-  }
-
-  private async createOrder(session: any) {
+  /*private async createOrder(session: any) {
     const paymentIntent = await stripeAPI.paymentIntents.retrieve(session.payment_intent, {
       expand: ['payment_method'],
     })
@@ -447,28 +383,5 @@ export default class PaypalController {
     } catch (e) {
       throw new InternalServerException(e.message)
     }
-  }
-
-  private async fulfillOrder(session: any, order?: Order) {
-    let fulfilledOrder = order
-    if (!fulfilledOrder) {
-      fulfilledOrder = (await Order.query().where('sessionId', session.id).first()) || undefined
-    }
-    if (!fulfilledOrder) {
-      throw new ModelNotFoundException(`Cannot find fulfilled order with session id ${session.id}`)
-    }
-
-    fulfilledOrder.status = OrderStatus.PAID
-    fulfilledOrder.save()
-  }
-
-  private async failedOrder(session: any) {
-    const failedOrder = (await Order.query().where('sessionId', session.id).first()) || undefined
-    if (!failedOrder) {
-      throw new ModelNotFoundException(`Cannot find failed order with session id ${session.id}`)
-    }
-
-    failedOrder.status = OrderStatus.FAILED
-    failedOrder.save()
   }*/
 }

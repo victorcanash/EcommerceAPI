@@ -3,9 +3,9 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import CartItem from 'App/Models/CartItem'
 import User from 'App/Models/User'
 import ProductInventory from 'App/Models/ProductInventory'
-import { CItemsResponse, CItemResponse, BasicResponse } from 'App/Controllers/Http/types'
-import PaginationValidator from 'App/Validators/List/PaginationValidator'
-import SortValidator from 'App/Validators/List/SortValidator'
+import { /*CItemsResponse,*/ CItemResponse, BasicResponse } from 'App/Controllers/Http/types'
+// import PaginationValidator from 'App/Validators/List/PaginationValidator'
+// import SortValidator from 'App/Validators/List/SortValidator'
 import CreateCItemValidator from 'App/Validators/Cart/CreateCItemValidator'
 import UpdateCItemValidator from 'App/Validators/Cart/UpdateCItemValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
@@ -14,7 +14,7 @@ import BadRequestException from 'App/Exceptions/BadRequestException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class CItemsController {
-  public async index({ request, response }: HttpContextContract) {
+  /*public async index({ request, response }: HttpContextContract) {
     const validatedPaginationData = await request.validate(PaginationValidator)
     const page = validatedPaginationData.page || 1
     const limit = validatedPaginationData.limit || 10
@@ -52,7 +52,7 @@ export default class CItemsController {
       message: successMsg,
       cartItem: cartItem,
     } as CItemResponse)
-  }
+  }*/
 
   public async store({ request, response, auth }: HttpContextContract) {
     const user = await User.query().where('id', auth.user?.id).preload('cart').first()

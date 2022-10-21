@@ -48,31 +48,26 @@ Route.group(() => {
     })
     .apiOnly()
 
-  Route.resource('uaddresses', 'UAddressesController')
+  /*
+  Route.resource('user-addresses', 'UAddressesController')
     .middleware({
       '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
-  Route.resource('upayments', 'UPaymentsController')
+  Route.resource('user-payments', 'UPaymentsController')
     .middleware({
       '*': ['auth:api', 'admin'],
     })
     .apiOnly()
+  */
 
   // Cart routes
 
-  Route.resource('carts', 'CartsController')
-    .middleware({
-      '*': ['auth:api', 'admin'],
-    })
-    .apiOnly()
-
-  Route.resource('citems', 'CItemsController')
+  Route.resource('cart-items', 'CItemsController')
+    .except(['index', 'show'])
     .middleware({
       '*': ['auth:api'],
-      'index': ['admin'],
-      'show': ['admin'],
     })
     .apiOnly()
 
@@ -97,22 +92,24 @@ Route.group(() => {
     })
     .apiOnly()
 
-  Route.resource('pcategories', 'PCategoriesController')
+  Route.resource('product-categories', 'PCategoriesController')
+    .except(['show'])
     .middleware({
-      show: ['auth:api', 'admin'],
       store: ['auth:api', 'admin'],
       update: ['auth:api', 'admin'],
       destroy: ['auth:api', 'admin'],
     })
     .apiOnly()
 
-  Route.resource('pdiscounts', 'PDiscountsController')
+  Route.resource('product-discounts', 'PDiscountsController')
+    .except(['index', 'show'])
     .middleware({
       '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
-  Route.resource('pinventories', 'PInventoriesController')
+  Route.resource('product-inventories', 'PInventoriesController')
+    .except(['index', 'show'])
     .middleware({
       '*': ['auth:api', 'admin'],
     })
@@ -122,6 +119,7 @@ Route.group(() => {
 
   Route.post('paypal/checkout-order', 'PaypalController.checkoutOrder').middleware('auth:api')
   Route.post('paypal/capture-order', 'PaypalController.captureOrder').middleware('auth:api')
+  Route.post('paypal/refund-order', 'PaypalController.refundOrder').middleware('auth:api')
 
   // Stripe routes
 

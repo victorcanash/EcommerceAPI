@@ -1,17 +1,20 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import ProductDiscount from 'App/Models/ProductDiscount'
-import { PDiscountsResponse, PDiscountResponse, BasicResponse } from 'App/Controllers/Http/types'
-import PaginationValidator from 'App/Validators/List/PaginationValidator'
-import SortValidator from 'App/Validators/List/SortValidator'
-import FilterPDiscountValidator from 'App/Validators/Product/FilterPDiscountValidator'
+import {
+  /*PDiscountsResponse,*/ PDiscountResponse,
+  BasicResponse,
+} from 'App/Controllers/Http/types'
+// import PaginationValidator from 'App/Validators/List/PaginationValidator'
+// import SortValidator from 'App/Validators/List/SortValidator'
+// import FilterPDiscountValidator from 'App/Validators/Product/FilterPDiscountValidator'
 import CreatePDiscountValidator from 'App/Validators/Product/CreatePDiscountValidator'
 import UpdatePDiscountValidator from 'App/Validators/Product/UpdatePDiscountValidator'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PDiscountsController {
-  public async index({ request, response }: HttpContextContract) {
+  /*public async index({ request, response }: HttpContextContract) {
     const validatedPaginationData = await request.validate(PaginationValidator)
     const page = validatedPaginationData.page || 1
     const limit = validatedPaginationData.limit || 10
@@ -57,7 +60,7 @@ export default class PDiscountsController {
       message: successMsg,
       productDiscount: productDiscount,
     } as PDiscountResponse)
-  }
+  }*/
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePDiscountValidator)

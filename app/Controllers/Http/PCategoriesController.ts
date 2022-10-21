@@ -35,7 +35,7 @@ export default class PCategoriesController {
     } as PCategoriesResponse)
   }
 
-  public async show({ params: { id }, request, response }: HttpContextContract) {
+  /*public async show({ params: { id }, request, response }: HttpContextContract) {
     const productCategory = await ProductCategory.find(id)
     if (!productCategory) {
       throw new ModelNotFoundException(`Invalid id ${id} getting product category`)
@@ -48,7 +48,7 @@ export default class PCategoriesController {
       message: successMsg,
       productCategory: productCategory,
     } as PCategoryResponse)
-  }
+  }*/
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePCategoryValidator)
