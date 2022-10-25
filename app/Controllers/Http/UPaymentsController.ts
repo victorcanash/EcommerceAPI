@@ -1,4 +1,4 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+/*import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import UserPayment from 'App/Models/UserPayment'
 import { UPaymentsResponse, UPaymentResponse, BasicResponse } from 'App/Controllers/Http/types'
@@ -104,4 +104,4 @@ export default class UPaymentsController {
       message: successMsg,
     } as BasicResponse)
   }
-}
+}*/

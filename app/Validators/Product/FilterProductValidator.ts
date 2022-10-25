@@ -14,6 +14,7 @@ export default class FilterProductValidator {
       rules.exists({ table: 'product_categories', column: 'name' }),
     ]),
     ordersRemain: schema.boolean.optional(),
+    adminData: schema.boolean.optional(),
   })
 
   public messages: CustomMessages = {}

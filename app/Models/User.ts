@@ -1,5 +1,14 @@
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, hasMany, HasMany, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
+import {
+  column,
+  beforeSave,
+  hasMany,
+  HasMany,
+  hasOne,
+  HasOne,
+  ModelQueryBuilderContract,
+  scope,
+} from '@ioc:Adonis/Lucid/Orm'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Env from '@ioc:Adonis/Core/Env'
 import { DateTime } from 'luxon'
@@ -56,6 +65,20 @@ export default class User extends AppBaseModel {
       user.password = await Hash.make(user.password)
     }
   }
+
+  public static getAllData = scope((query: ModelQueryBuilderContract<typeof User, User>) => {
+    query
+      .preload('addresses')
+      .preload('payments')
+      .preload('cart', (query) => {
+        query.preload('items', (query) => {
+          query.preload('product', (query) => {
+            query.preload('activeDiscount')
+          })
+          query.preload('inventory')
+        })
+      })
+  })
 
   public async sendActivationEmail(appName: string, appDomain: string, url: string) {
     const currentYear = new Date().getFullYear()

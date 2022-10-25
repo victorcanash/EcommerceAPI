@@ -20,15 +20,11 @@ import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import ConflictException from 'App/Exceptions/ConflictException'
 import { logRouteSuccess } from 'App/Utils/logger'
-import { Roles } from 'App/Models/Enums/Roles'
 
 export default class AuthController {
   public async activate({ response, request, auth }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth, 'activation')
     const user = await UsersService.getUserByEmail(email, false)
-    if (!user) {
-      throw new ModelNotFoundException('Invalid auth email to activate user')
-    }
     if (user.isActivated) {
       throw new ConflictException(`User with email ${email} was already activated`)
     }
@@ -54,14 +50,11 @@ export default class AuthController {
     const validatedData = await request.validate(LoginValidator)
 
     const user = await UsersService.getUserByEmail(validatedData.email, true)
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid email to login user`)
-    }
     if (!user.isActivated) {
-      throw new PermissionException('You have to activate your account')
+      throw new ConflictException(`User with email ${validatedData.email} was already activated`)
     }
     if (user.lockedOut) {
-      throw new PermissionException('You are locked out')
+      throw new PermissionException(`User with email ${validatedData.email} is locked out`)
     }
 
     try {
@@ -98,9 +91,6 @@ export default class AuthController {
   public async getLogged({ request, response, auth }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth, 'api')
     const user = await UsersService.getUserByEmail(email, true)
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid auth email ${email} to get logged user`)
-    }
 
     const successMsg = `Successfully got logged user`
     logRouteSuccess(request, successMsg)
@@ -112,10 +102,8 @@ export default class AuthController {
   }
 
   public async isAdmin({ request, response, auth }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth, 'api')
-    const user = await UsersService.getUserByEmail(email, false)
+    const isAdmin = await UsersService.isAuthAdmin(auth)
 
-    let isAdmin = user && user.role === Roles.ADMIN ? true : false
     const successMsg = 'Successfully checked if user is admin'
     logRouteSuccess(request, successMsg)
     return response.ok({
@@ -127,10 +115,9 @@ export default class AuthController {
 
   public async update({ params: { id }, request, response, auth }: HttpContextContract) {
     let isAdmin = false
-    const validAdminToken = await auth.use('api').check()
     const validToken = await auth.use('update').check()
     if (!validToken) {
-      if (!validAdminToken || (validAdminToken && auth.use('api').user?.role !== Roles.ADMIN)) {
+      if (!UsersService.isAuthAdmin(auth)) {
         throw new PermissionException(
           'Token is missing or has expirated to update email and/or password'
         )
@@ -143,15 +130,6 @@ export default class AuthController {
     const user = isAdmin
       ? await UsersService.getUserById(id, false)
       : await UsersService.getUserByEmail(email, false)
-    if (!user) {
-      if (isAdmin) {
-        throw new ModelNotFoundException(`Invalid id ${id} updating user email and/or password`)
-      } else {
-        throw new ModelNotFoundException(
-          `Invalid auth email ${email} updating user email and/or password`
-        )
-      }
-    }
 
     const validatedData = await request.validate(UpdateAuthValidator)
     const newEmail = isAdmin ? validatedData.newEmail : auth.use('update').token?.meta?.new_email
@@ -186,11 +164,6 @@ export default class AuthController {
     const validatedData = await request.validate(SendActivationEmailValidator)
 
     const user = await UsersService.getUserByEmail(validatedData.email, false)
-    if (!user) {
-      throw new ModelNotFoundException(
-        `Invalid email ${validatedData.email} to send activation email`
-      )
-    }
 
     const tokenData = await auth.use('activation').generate(user, {
       expiresIn: Env.get('ACTIVATION_TOKEN_EXPIRY', '3h'),
@@ -214,11 +187,6 @@ export default class AuthController {
     const validatedData = await request.validate(SendResetPswEmailValidator)
 
     const user = await UsersService.getUserByEmail(validatedData.email, false)
-    if (!user) {
-      throw new ModelNotFoundException(
-        `Invalid email ${validatedData.email} to send reset psw email`
-      )
-    }
 
     const tokenData = await auth.use('update').generate(user, {
       expiresIn: Env.get('UPDATE_TOKEN_EXPIRY', '3h'),
@@ -241,9 +209,6 @@ export default class AuthController {
   public async sendUpdateEmail({ response, request, auth }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth, 'api')
     const user = await UsersService.getUserByEmail(email, false)
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid auth email ${email} to send update email`)
-    }
 
     const validatedData = await request.validate(SendUpdateEmailValidator)
 

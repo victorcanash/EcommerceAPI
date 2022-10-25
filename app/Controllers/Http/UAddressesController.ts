@@ -1,4 +1,4 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+/*import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import UserAddress from 'App/Models/UserAddress'
 import { UAddressesResponse, UAddressResponse, BasicResponse } from 'App/Controllers/Http/types'
@@ -104,4 +104,4 @@ export default class UAddressesController {
       message: successMsg,
     } as BasicResponse)
   }
-}
+}*/

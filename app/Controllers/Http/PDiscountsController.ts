@@ -1,67 +1,13 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import ProductDiscount from 'App/Models/ProductDiscount'
-import {
-  /*PDiscountsResponse,*/ PDiscountResponse,
-  BasicResponse,
-} from 'App/Controllers/Http/types'
-// import PaginationValidator from 'App/Validators/List/PaginationValidator'
-// import SortValidator from 'App/Validators/List/SortValidator'
-// import FilterPDiscountValidator from 'App/Validators/Product/FilterPDiscountValidator'
+import ProductsService from 'App/Services/ProductsService'
+import { PDiscountResponse, BasicResponse } from 'App/Controllers/Http/types'
 import CreatePDiscountValidator from 'App/Validators/Product/CreatePDiscountValidator'
 import UpdatePDiscountValidator from 'App/Validators/Product/UpdatePDiscountValidator'
-import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PDiscountsController {
-  /*public async index({ request, response }: HttpContextContract) {
-    const validatedPaginationData = await request.validate(PaginationValidator)
-    const page = validatedPaginationData.page || 1
-    const limit = validatedPaginationData.limit || 10
-
-    const validatedSortData = await request.validate(SortValidator)
-    const sortBy = validatedSortData.sortBy || 'id'
-    const order = validatedSortData.order || 'asc'
-
-    const validatedFilterData = await request.validate(FilterPDiscountValidator)
-    const productId = validatedFilterData.productId || -1
-
-    const productDiscounts = await ProductDiscount.query()
-      .whereHas('product', (query) => {
-        if (productId !== -1) {
-          query.where('id', productId)
-        }
-      })
-      .orderBy(sortBy, order)
-      .paginate(page, limit)
-    const result = productDiscounts.toJSON()
-
-    const successMsg = 'Successfully got product discounts'
-    logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
-      message: successMsg,
-      productDiscounts: result.data,
-      totalPages: Math.ceil(result.meta.total / limit),
-      currentPage: result.meta.current_page as number,
-    } as PDiscountsResponse)
-  }
-
-  public async show({ params: { id }, request, response }: HttpContextContract) {
-    const productDiscount = await ProductDiscount.find(id)
-    if (!productDiscount) {
-      throw new ModelNotFoundException(`Invalid id ${id} getting product discount`)
-    }
-
-    const successMsg = `Successfully got product discount by id ${id}`
-    logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
-      message: successMsg,
-      productDiscount: productDiscount,
-    } as PDiscountResponse)
-  }*/
-
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePDiscountValidator)
 
@@ -77,10 +23,7 @@ export default class PDiscountsController {
   }
 
   public async update({ params: { id }, request, response }: HttpContextContract) {
-    const productDiscount = await ProductDiscount.find(id)
-    if (!productDiscount) {
-      throw new ModelNotFoundException(`Invalid id ${id} updating product discount`)
-    }
+    const productDiscount = await ProductsService.getDiscountById(id)
 
     const validatedData = await request.validate(UpdatePDiscountValidator)
 
@@ -97,10 +40,7 @@ export default class PDiscountsController {
   }
 
   public async destroy({ params: { id }, request, response }: HttpContextContract) {
-    const productDiscount = await ProductDiscount.find(id)
-    if (!productDiscount) {
-      throw new ModelNotFoundException(`Invalid id ${id} deleting product discount`)
-    }
+    const productDiscount = await ProductsService.getDiscountById(id)
 
     await productDiscount.delete()
 

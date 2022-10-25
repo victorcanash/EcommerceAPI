@@ -1,78 +1,39 @@
 import { AuthContract, GuardsList } from '@ioc:Adonis/Addons/Auth'
-import { DateTime } from 'luxon'
 
+import { Roles } from 'App/Models/Enums/Roles'
 import User from 'App/Models/User'
-import Cart from 'App/Models/Cart'
+import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 class UsersService {
+  public static async getUserById(id: number, allData: boolean) {
+    return this.getUserByField('id', id, allData)
+  }
+
+  public static async getUserByEmail(email: string, allData: boolean) {
+    return this.getUserByField('email', email, allData)
+  }
+
   public static async getAuthEmail(auth: AuthContract, guard: keyof GuardsList): Promise<string> {
     return auth.use(guard).user?.email || ''
   }
 
-  public static async getUserByEmail(email: string, allData: boolean) {
+  public static async isAuthAdmin(auth: AuthContract) {
+    return auth.use('api').user?.role === Roles.ADMIN
+  }
+
+  private static async getUserByField(field: string, value: string | number, allData: boolean) {
     let user: User | null = null
-    if (allData) {
-      user = await User.query()
-        .where('email', email)
-        .preload('addresses')
-        .preload('payments')
-        .preload('cart', (query) => {
-          query.preload('items', (query) => {
-            query.preload('product', (query) => {
-              query.preload('activeDiscount')
-            })
-            query.preload('inventory')
-          })
-        })
-        .first()
-    } else {
-      user = await User.query().where('email', email).first()
+    user = await User.query()
+      .where(field, value)
+      .apply((scopes) => {
+        if (allData) {
+          scopes.getAllData()
+        }
+      })
+      .first()
+    if (!user) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting user`)
     }
-    return user
-  }
-
-  public static async getUserById(id: number, allData: boolean) {
-    let user: User | null = null
-    if (allData) {
-      user = await User.query()
-        .where('id', id)
-        .preload('addresses')
-        .preload('payments')
-        .preload('cart', (query) => {
-          query.preload('items', (query) => {
-            query.preload('product', (query) => {
-              query.preload('activeDiscount')
-            })
-            query.preload('inventory')
-          })
-        })
-        .first()
-    } else {
-      user = await User.query().where('id', id).first()
-    }
-    return user
-  }
-
-  public static async getUsers(
-    sortBy: 'firstName' | 'lastName' | 'id' | 'createdAt' | 'updatedAt',
-    order: 'asc' | 'desc',
-    page: number,
-    limit: number
-  ) {
-    const users = await User.query().orderBy(sortBy, order).paginate(page, limit)
-    return users.toJSON()
-  }
-
-  public static async createUser(data: {
-    email: string
-    password: string
-    firstName: string
-    lastName: string
-    birthday: DateTime
-  }) {
-    const user = await User.create(data)
-    await Cart.create({ userId: user.id, total: 0 })
-
     return user
   }
 }

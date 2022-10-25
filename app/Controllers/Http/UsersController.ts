@@ -1,25 +1,38 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
+import {
+  defaultPage,
+  defaultLimit,
+  defaultOrder,
+  defaultSortBy,
+} from 'App/Models/Constants/Validators'
+import User from 'App/Models/User'
+import Cart from 'App/Models/Cart'
 import UsersService from 'App/Services/UsersService'
 import { UsersResponse, UserResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
-import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
     const validatedPaginationData = await request.validate(PaginationValidator)
-    const page = validatedPaginationData.page || 1
-    const limit = validatedPaginationData.limit || 10
+    const page = validatedPaginationData.page || defaultPage
+    const limit = validatedPaginationData.limit || defaultLimit
 
     const validatedSortData = await request.validate(SortValidator)
-    const sortBy = validatedSortData.sortBy || 'id'
-    const order = validatedSortData.order || 'asc'
+    const sortBy = validatedSortData.sortBy || defaultSortBy
+    const order = validatedSortData.order || defaultOrder
 
-    const result = await UsersService.getUsers(sortBy, order, page, limit)
+    const users = await User.query()
+      .apply((scopes) => {
+        scopes.getAllData()
+      })
+      .orderBy(sortBy, order)
+      .paginate(page, limit)
+    const result = users.toJSON()
 
     const successMsg = 'Successfully got users'
     logRouteSuccess(request, successMsg)
@@ -33,10 +46,7 @@ export default class UsersController {
   }
 
   public async show({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const user = await UsersService.getUserById(id, false)
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid id ${id} getting user`)
-    }
+    const user = await UsersService.getUserById(id, true)
 
     await bouncer.with('UserPolicy').authorize('view', user)
 
@@ -52,7 +62,8 @@ export default class UsersController {
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateUserValidator)
 
-    const user = await UsersService.createUser(validatedData)
+    const user = await User.create(validatedData)
+    await Cart.create({ userId: user.id, total: 0 })
 
     const successMsg = 'Successfully created user'
     logRouteSuccess(request, successMsg)
@@ -65,9 +76,6 @@ export default class UsersController {
 
   public async update({ params: { id }, request, response, bouncer }: HttpContextContract) {
     const user = await UsersService.getUserById(id, false)
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid id ${id} updating user`)
-    }
 
     await bouncer.with('UserPolicy').authorize('update', user)
 
@@ -87,9 +95,6 @@ export default class UsersController {
 
   public async destroy({ params: { id }, request, response, bouncer }: HttpContextContract) {
     const user = await UsersService.getUserById(id, false)
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid id ${id} deleting user`)
-    }
 
     await bouncer.with('UserPolicy').authorize('delete', user)
 

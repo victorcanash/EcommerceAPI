@@ -2,6 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
+import { SortByOptions, OrderOptions } from 'App/Models/Enums/Validators'
 
 export default class SortValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -9,14 +10,8 @@ export default class SortValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    sortBy: schema.enum.optional([
-      'id',
-      'firstName',
-      'lastName',
-      'createdAt',
-      'updatedAt',
-    ] as const),
-    order: schema.enum.optional(['asc', 'desc'] as const),
+    sortBy: schema.enum.optional(Object.values(SortByOptions)),
+    order: schema.enum.optional(Object.values(OrderOptions)),
   })
 
   public messages: CustomMessages = {}

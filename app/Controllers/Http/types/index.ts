@@ -1,7 +1,4 @@
 import User from 'App/Models/User'
-import UserAddress from 'App/Models/UserAddress'
-import UserPayment from 'App/Models/UserPayment'
-import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
@@ -58,62 +55,42 @@ export type UsersResponse = {
 /**
  * User address JSON response for Controllers
  */
-export type UAddressResponse = {
+/*export type UAddressResponse = {
   code: number
   message: string
   userAddress: UserAddress
-}
+}*/
 
 /**
  * User addresses JSON response for Controllers
  */
-export type UAddressesResponse = {
+/*export type UAddressesResponse = {
   code: number
   message: string
   userAddresses: UserAddress[]
   totalPages: number
   currentPage: number
-}
+}*/
 
 /**
  * User payment JSON response for Controllers
  */
-export type UPaymentResponse = {
+/*export type UPaymentResponse = {
   code: number
   message: string
   userPayment: UserPayment
-}
+}*/
 
 /**
  * User payments JSON response for Controllers
  */
-export type UPaymentsResponse = {
+/*export type UPaymentsResponse = {
   code: number
   message: string
   userPayments: UserPayment[]
   totalPages: number
   currentPage: number
-}
-
-/**
- * Cart JSON response for Controllers
- */
-export type CartResponse = {
-  code: number
-  message: string
-  cart: Cart
-}
-
-/**
- * Carts JSON response for Controllers
- */
-export type CartsResponse = {
-  code: number
-  message: string
-  carts: Cart[]
-  totalPages: number
-  currentPage: number
-}
+}*/
 
 /**
  * Cart item JSON response for Controllers
@@ -123,17 +100,6 @@ export type CItemResponse = {
   message: string
   cartItem: CartItem
 }
-
-/**
- * Cart items JSON response for Controllers
- */
-/*export type CItemsResponse = {
-  code: number
-  message: string
-  cartItems: CartItem[]
-  totalPages: number
-  currentPage: number
-}*/
 
 /**
  * Product JSON response for Controllers
@@ -195,34 +161,12 @@ export type PDiscountResponse = {
 }
 
 /**
- * Product discounts JSON response for Controllers
- */
-export type PDiscountsResponse = {
-  code: number
-  message: string
-  productDiscounts: ProductDiscount[]
-  totalPages: number
-  currentPage: number
-}
-
-/**
  * Product inventory JSON response for Controllers
  */
 export type PInventoryResponse = {
   code: number
   message: string
   productInventory: ProductInventory
-}
-
-/**
- * Product inventories JSON response for Controllers
- */
-export type PInventoriesResponse = {
-  code: number
-  message: string
-  productInventories: ProductInventory[]
-  totalPages: number
-  currentPage: number
 }
 
 /**

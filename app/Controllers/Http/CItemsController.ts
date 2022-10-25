@@ -1,77 +1,39 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import CartItem from 'App/Models/CartItem'
-import User from 'App/Models/User'
 import ProductInventory from 'App/Models/ProductInventory'
-import { /*CItemsResponse,*/ CItemResponse, BasicResponse } from 'App/Controllers/Http/types'
-// import PaginationValidator from 'App/Validators/List/PaginationValidator'
-// import SortValidator from 'App/Validators/List/SortValidator'
+import UsersService from 'App/Services/UsersService'
+import CartsService from 'App/Services/CartsService'
+import { CItemResponse, BasicResponse } from 'App/Controllers/Http/types'
 import CreateCItemValidator from 'App/Validators/Cart/CreateCItemValidator'
 import UpdateCItemValidator from 'App/Validators/Cart/UpdateCItemValidator'
-import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import { logRouteSuccess } from 'App/Utils/logger'
 import PermissionException from 'App/Exceptions/PermissionException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
-import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class CItemsController {
-  /*public async index({ request, response }: HttpContextContract) {
-    const validatedPaginationData = await request.validate(PaginationValidator)
-    const page = validatedPaginationData.page || 1
-    const limit = validatedPaginationData.limit || 10
-
-    const validatedSortData = await request.validate(SortValidator)
-    const sortBy = validatedSortData.sortBy || 'id'
-    const order = validatedSortData.order || 'asc'
-
-    const cartItems = await CartItem.query().orderBy(sortBy, order).paginate(page, limit)
-    const result = cartItems.toJSON()
-
-    const successMsg = 'Successfully got cart items'
-    logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
-      message: successMsg,
-      cartItems: result.data,
-      totalPages: Math.ceil(result.meta.total / limit),
-      currentPage: result.meta.current_page as number,
-    } as CItemsResponse)
-  }
-
-  public async show({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const cartItem = await CartItem.find(id)
-    if (!cartItem) {
-      throw new ModelNotFoundException(`Invalid id ${id} getting cart item`)
-    }
-
-    await bouncer.with('CItemPolicy').authorize('view', cartItem)
-
-    const successMsg = `Successfully got cart item by id ${id}`
-    logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
-      message: successMsg,
-      cartItem: cartItem,
-    } as CItemResponse)
-  }*/
-
   public async store({ request, response, auth }: HttpContextContract) {
-    const user = await User.query().where('id', auth.user?.id).preload('cart').first()
-    if (!user) {
-      throw new ModelNotFoundException(`Invalid auth id ${auth.user?.id} creating cart item`)
-    }
-    if (!user.cart) {
-      throw new PermissionException(`You don't have an existing cart to create a new cart item`)
-    }
+    const email = await UsersService.getAuthEmail(auth, 'api')
+    const user = await UsersService.getUserByEmail(email, false)
 
     const validatedData = await request.validate(CreateCItemValidator)
-    validatedData.cartId = user.cart.id
+
+    await user.load('cart')
+    if (!user.cart) {
+      throw new PermissionException(`You don't have an existing cart`)
+    }
 
     const productInventory = await ProductInventory.find(validatedData.inventoryId)
     if (productInventory?.productId !== validatedData.productId) {
       throw new BadRequestException('Inventory id must belong to the same product id')
     }
 
-    const cartItem = await CartItem.create(validatedData)
+    const cartItem = await CartItem.create({
+      cartId: user.cart.id,
+      productId: validatedData.productId,
+      inventoryId: validatedData.inventoryId,
+      quantity: validatedData.quantity,
+    })
 
     const successMsg = 'Successfully created cart item'
     logRouteSuccess(request, successMsg)
@@ -83,10 +45,7 @@ export default class CItemsController {
   }
 
   public async update({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const cartItem = await CartItem.find(id)
-    if (!cartItem) {
-      throw new ModelNotFoundException(`Invalid id ${id} updating cart item`)
-    }
+    const cartItem = await CartsService.getCartItemById(id)
 
     await bouncer.with('CItemPolicy').authorize('update', cartItem)
 
@@ -105,10 +64,7 @@ export default class CItemsController {
   }
 
   public async destroy({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const cartItem = await CartItem.find(id)
-    if (!cartItem) {
-      throw new ModelNotFoundException(`Invalid id ${id} deleting cart item`)
-    }
+    const cartItem = await CartsService.getCartItemById(id)
 
     await bouncer.with('CItemPolicy').authorize('delete', cartItem)
 

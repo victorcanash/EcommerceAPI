@@ -7,6 +7,8 @@ import {
   hasOne,
   HasOne,
   computed,
+  ModelQueryBuilderContract,
+  scope,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
@@ -73,4 +75,45 @@ export default class Product extends AppBaseModel {
     }
     return this.price
   }
+
+  public static filter = scope(
+    (
+      query: ModelQueryBuilderContract<typeof Product, Product>,
+      keywords: string,
+      categoryName: string | null,
+      ordersRemain: boolean
+    ) => {
+      query
+        .where((query) => {
+          query
+            .where('name', 'ILIKE', `%${keywords}%`)
+            .orWhere('description', 'ILIKE', `%${keywords}%`)
+            .orWhereHas('category', (query) => {
+              query
+                .where('name', 'ILIKE', `%${keywords}%`)
+                .orWhere('description', 'ILIKE', `%${keywords}%`)
+            })
+        })
+        .whereHas('inventories', (query) => {
+          if (ordersRemain) {
+            query.where('quantity', '>', 0)
+          }
+        })
+        .whereHas('category', (query) => {
+          if (categoryName) {
+            query.where('name', categoryName)
+          }
+        })
+    }
+  )
+
+  public static getAllData = scope((query: ModelQueryBuilderContract<typeof Product, Product>) => {
+    query.preload('inventories').preload('activeDiscount')
+  })
+
+  public static getAdminData = scope(
+    (query: ModelQueryBuilderContract<typeof Product, Product>) => {
+      query.preload('discounts')
+    }
+  )
 }
