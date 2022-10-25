@@ -15,14 +15,12 @@ export default class CItemsController {
   public async store({ request, response, auth }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth, 'api')
     const user = await UsersService.getUserByEmail(email, false)
-
-    const validatedData = await request.validate(CreateCItemValidator)
-
     await user.load('cart')
     if (!user.cart) {
       throw new PermissionException(`You don't have an existing cart`)
     }
 
+    const validatedData = await request.validate(CreateCItemValidator)
     const productInventory = await ProductInventory.find(validatedData.inventoryId)
     if (productInventory?.productId !== validatedData.productId) {
       throw new BadRequestException('Inventory id must belong to the same product id')

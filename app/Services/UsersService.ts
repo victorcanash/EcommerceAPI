@@ -4,7 +4,7 @@ import { Roles } from 'App/Models/Enums/Roles'
 import User from 'App/Models/User'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
-class UsersService {
+export default class UsersService {
   public static async getUserById(id: number, allData: boolean) {
     return this.getUserByField('id', id, allData)
   }
@@ -37,5 +37,3 @@ class UsersService {
     return user
   }
 }
-
-export default UsersService

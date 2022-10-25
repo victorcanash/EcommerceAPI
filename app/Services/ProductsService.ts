@@ -7,7 +7,7 @@ import ProductDiscount from 'App/Models/ProductDiscount'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 
-class ProductsService {
+export default class ProductsService {
   public static async getProductById(id: number, allData: boolean, adminData = false) {
     return this.getProductByField('id', id, allData, adminData)
   }
@@ -94,5 +94,3 @@ class ProductsService {
     return discount
   }
 }
-
-export default ProductsService

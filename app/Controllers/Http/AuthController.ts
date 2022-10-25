@@ -77,10 +77,10 @@ export default class AuthController {
 
   public async logout({ request, response, auth }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth, 'api')
-    const successMsg = `Successfully logged out user with email ${email}`
 
     await auth.use('api').revoke()
 
+    const successMsg = `Successfully logged out user with email ${email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,

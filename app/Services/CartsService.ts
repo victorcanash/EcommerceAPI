@@ -1,7 +1,7 @@
 import CartItem from 'App/Models/CartItem'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
-class CartsService {
+export default class CartsService {
   public static async getCartItemById(id: number) {
     return this.getCartItemByField('id', id)
   }
@@ -15,5 +15,3 @@ class CartsService {
     return cartItem
   }
 }
-
-export default CartsService
