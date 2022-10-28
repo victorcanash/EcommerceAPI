@@ -114,6 +114,7 @@ Route.group(() => {
 
   // Paypal routes
 
+  Route.get('paypal/client-token', 'PaypalController.getClientToken')
   Route.post('paypal/checkout-order', 'PaypalController.checkoutOrder').middleware('auth:api')
   Route.post('paypal/capture-order', 'PaypalController.captureOrder').middleware('auth:api')
   Route.post('paypal/refund-order', 'PaypalController.refundOrder').middleware('auth:api')

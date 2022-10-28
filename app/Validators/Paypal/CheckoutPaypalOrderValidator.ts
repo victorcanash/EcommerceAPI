@@ -10,8 +10,8 @@ export default class CheckoutPaypalOrderValidator {
 
   public schema = schema.create({
     currencyCode: schema.string.optional(),
-    returnUrl: schema.string(),
-    cancelUrl: schema.string(),
+    // returnUrl: schema.string(),
+    // cancelUrl: schema.string(),
   })
 
   public messages: CustomMessages = {}

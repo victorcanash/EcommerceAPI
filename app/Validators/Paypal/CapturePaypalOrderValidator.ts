@@ -9,7 +9,7 @@ export default class CapturePaypalOrderValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    orderToken: schema.string(),
+    orderId: schema.string(),
   })
 
   public messages: CustomMessages = {}

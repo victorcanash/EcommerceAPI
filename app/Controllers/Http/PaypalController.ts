@@ -3,89 +3,81 @@ import Env from '@ioc:Adonis/Core/Env'
 
 import axios, { AxiosResponse } from 'axios'
 
-import User from 'App/Models/User'
-import { PaypalCheckoutOrderResponse, PaypalCaptureOrderResponse } from 'App/Controllers/Http/types'
+import { defaultCurrencyCode } from 'App/Models/Constants/Validators'
+import UsersService from 'App/Services/UsersService'
+import PaypalService from 'App/Services/PaypalService'
+import {
+  PaypalClientTokenResponse,
+  PaypalCheckoutOrderResponse,
+  PaypalCaptureOrderResponse,
+} from 'App/Controllers/Http/types'
 import CheckoutPaypalOrderValidator from 'App/Validators/Paypal/CheckoutPaypalOrderValidator'
 import CapturePaypalOrderValidator from 'App/Validators/Paypal/CapturePaypalOrderValidator'
 import RefundPaypalOrderValidator from 'App/Validators/Paypal/RefundPaypalOrderValidator'
-import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
+import CartsService from 'App/Services/CartsService'
 
 export default class PaypalController {
-  private readonly defaultCurrencyCode = 'EUR'
+  // Get client token
+  public async getClientToken({ request, response }: HttpContextContract) {
+    const paypalAccessToken = await PaypalService.getAccessToken()
+
+    const paypalClientToken = await PaypalService.getClientToken(paypalAccessToken)
+
+    const successMsg = 'Successfully got paypal client token'
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      id: Env.get('PAYPAL_CLIENT_ID', ''),
+      token: paypalClientToken,
+    } as PaypalClientTokenResponse)
+  }
 
   // Create checkout order
   public async checkoutOrder({ request, response, auth }: HttpContextContract) {
-    // Load user
-    const user = await User.query()
-      .where('email', auth.user?.email)
-      .preload('cart', (query) => {
-        query.preload('items', (query) => {
-          query.preload('product', (query) => {
-            query.preload('activeDiscount')
-          })
-          query.preload('inventory')
-        })
+    const email = await UsersService.getAuthEmail(auth, 'api')
+
+    const validatedData = await request.validate(CheckoutPaypalOrderValidator)
+    const currencyCode = validatedData.currencyCode || defaultCurrencyCode
+
+    // Create paypal items
+    const paypalItems: any[] = []
+    let totalItemsAmount = 0
+    let totalItemsTax = 0
+    const changedCartItems = await CartsService.checkItemsQuantity(email, (item) => {
+      const product = item.product.serialize()
+      paypalItems.push({
+        name: product.name,
+        description: `${product.description} ${
+          item.inventory.size ? `(${item.inventory.size})` : ''
+        }`,
+        sku: product.sku,
+        quantity: item.quantity,
+        unit_amount: {
+          currency_code: currencyCode,
+          value: product.realPrice,
+        },
+        tax: {
+          currency_code: currencyCode,
+          value: 0,
+        },
       })
-      .first()
-    if (!user) {
-      throw new ModelNotFoundException(
-        `Invalid auth email ${auth.user?.email} to checkout a paypal order`
-      )
-    }
-    if (!user.cart || user.cart.items.length < 1) {
+      totalItemsAmount += product.realPrice * item.quantity
+      totalItemsTax += 0 * item.quantity
+    })
+    if (paypalItems.length < 1) {
       throw new PermissionException('No items to checkout a paypal order')
     }
 
-    // Validate
-    const validatedData = await request.validate(CheckoutPaypalOrderValidator)
-    const currencyCode = validatedData.currencyCode || this.defaultCurrencyCode
-
-    // Check cart items and create paypal order
-    const items: any[] = []
-    let totalItemsAmount = 0
-    let totalItemsTax = 0
-    user.cart.items.forEach(async (item) => {
-      // Check if there are the quantity desired by user and if there are items with 0 quantity
-      if (item.quantity > item.inventory.quantity) {
-        item.quantity = item.inventory.quantity
-        if (item.quantity > 0) {
-          await item.save()
-        }
-      }
-      if (item.quantity < 1) {
-        await item.delete()
-      } else {
-        // Create items for the order
-        const product = item.product.serialize()
-        items.push({
-          name: product.name,
-          description: `${product.description} ${
-            item.inventory.size ? `(${item.inventory.size})` : ''
-          }`,
-          sku: product.sku,
-          quantity: item.quantity,
-          unit_amount: {
-            currency_code: currencyCode,
-            value: product.realPrice,
-          },
-          tax: {
-            currency_code: currencyCode,
-            value: 0,
-          },
-        })
-        totalItemsAmount += product.realPrice * item.quantity
-        totalItemsTax += 0 * item.quantity
-      }
-    })
     // Create paypal order
     const paypalOrder = {
       intent: 'CAPTURE',
       purchase_units: [
         {
-          items: items,
+          items: paypalItems,
           amount: {
             currency_code: currencyCode,
             value: totalItemsAmount,
@@ -132,112 +124,52 @@ export default class PaypalController {
       application_context: {
         brand_name: 'EcommerceVC',
         user_action: 'PAY_NOW',
-        return_url: validatedData.returnUrl,
-        cancel_url: validatedData.cancelUrl,
-        locale: 'es-ES',
+        // return_url: validatedData.returnUrl,
+        // cancel_url: validatedData.cancelUrl,
+        // locale: 'es-ES',
         payment_method: {
           payee_preferred: 'IMMEDIATE_PAYMENT_REQUIRED',
         },
       },
     }
 
-    // Get auth token of paypal API
-    let paypalToken = ''
-    try {
-      paypalToken = await this.generatePaypalToken()
-    } catch (error) {
-      throw new InternalServerException(error.message)
-    }
+    const paypalAccessToken = await PaypalService.getAccessToken()
 
-    // Call create order endpoint of paypal API
-    let checkoutUrl = ''
-    await axios
-      .post(`${Env.get('PAYPAL_API')}/v2/checkout/orders`, paypalOrder, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${paypalToken}`,
-        },
-      })
-      .then((response: AxiosResponse) => {
-        if (response.status === 201) {
-          response.data.links.forEach((link) => {
-            if (link.rel === 'approve') {
-              checkoutUrl = link.href
-              return
-            }
-          })
-        }
-      })
-      .catch((error: Error) => {
-        throw new InternalServerException(error.message)
-      })
+    const orderId = await PaypalService.checkoutOrder(paypalAccessToken, paypalOrder)
 
-    const successMsg = `Successfully checked out paypal order for user with email ${auth.user?.email}`
+    const successMsg = `Successfully checked out paypal order for user with email ${email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
-      checkoutUrl: checkoutUrl,
+      orderId: orderId,
+      changedCartItems: changedCartItems,
     } as PaypalCheckoutOrderResponse)
   }
 
   // When order is paid
   public async captureOrder({ request, response, auth }: HttpContextContract) {
-    // Validate
     const validatedData = await request.validate(CapturePaypalOrderValidator)
 
-    // Get auth token of paypal API
-    let paypalToken = ''
-    try {
-      paypalToken = await this.generatePaypalToken()
-    } catch (error) {
-      throw new InternalServerException(error.message)
-    }
+    const paypalAccessToken = await PaypalService.getAccessToken()
 
-    // Call capture order endpoint of paypal API
-    let paypalOrder
-    await axios
-      .post(
-        `${Env.get('PAYPAL_API')}/v2/checkout/orders/${validatedData.orderToken}/capture`,
-        {},
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${paypalToken}`,
-            'Prefer': 'return=representation',
-          },
-        }
-      )
-      .then((response: AxiosResponse) => {
-        if (response.status === 201) {
-          paypalOrder = response.data
-        }
-      })
-      .catch((error: Error) => {
-        throw new InternalServerException(error.message)
-      })
+    const data = await PaypalService.captureOrder(paypalAccessToken, validatedData.orderId)
 
     const successMsg = `Successfully captured paypal order for user with email ${auth.user?.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
-      paypalOrder: paypalOrder,
+      data: data,
     } as PaypalCaptureOrderResponse)
   }
 
+  // Refund all or partial order
   public async refundOrder({ request, response, auth }: HttpContextContract) {
-    // Validate
     const validatedData = await request.validate(RefundPaypalOrderValidator)
-    const currencyCode = validatedData.currencyCode || this.defaultCurrencyCode
+    const currencyCode = validatedData.currencyCode || defaultCurrencyCode
 
-    // Get auth token of paypal API
-    let paypalToken = ''
-    try {
-      paypalToken = await this.generatePaypalToken()
-    } catch (error) {
-      throw new InternalServerException(error.message)
-    }
+    const paypalAccessToken = await PaypalService.getAccessToken()
 
     // Call get order details endpoint of paypal API
     let captureId
@@ -248,7 +180,7 @@ export default class PaypalController {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${paypalToken}`,
+            'Authorization': `Bearer ${paypalAccessToken}`,
             'Prefer': 'return=representation',
           },
         }
@@ -278,18 +210,18 @@ export default class PaypalController {
       // invoice_id: '',
       note_to_payer: validatedData.noteToPlayer,
     }
-    let paypalOrder
+    let data
     await axios
       .post(`${Env.get('PAYPAL_API')}/v2/payments/captures/${captureId}/refund`, payload, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${paypalToken}`,
+          'Authorization': `Bearer ${paypalAccessToken}`,
           'Prefer': 'return=representation',
         },
       })
       .then((response: AxiosResponse) => {
         if (response.status === 201) {
-          paypalOrder = response.data
+          data = response.data
         }
       })
       .catch((error: Error) => {
@@ -301,32 +233,8 @@ export default class PaypalController {
     return response.created({
       code: 201,
       message: successMsg,
-      paypalOrder: paypalOrder,
+      data: data,
     } as PaypalCaptureOrderResponse)
-  }
-
-  private async generatePaypalToken() {
-    const params = new URLSearchParams()
-    params.append('grant_type', 'client_credentials')
-    let paypalToken = ''
-    await axios
-      .post(`${Env.get('PAYPAL_API')}/v1/oauth2/token`, params, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        auth: {
-          username: Env.get('PAYPAL_CLIENT_ID', ''),
-          password: Env.get('PAYPAL_CLIENT_SECRET', ''),
-        },
-      })
-      .then((response: AxiosResponse) => {
-        paypalToken = response.data.access_token
-      })
-      .catch((error: Error) => {
-        throw error
-      })
-
-    return paypalToken
   }
 
   /*private async createOrder(session: any) {

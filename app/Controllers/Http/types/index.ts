@@ -170,12 +170,23 @@ export type PInventoryResponse = {
 }
 
 /**
+ * Paypal client token JSON response for Controllers
+ */
+export type PaypalClientTokenResponse = {
+  code: number
+  message: string
+  id: string
+  token: string
+}
+
+/**
  * Paypal checkout order JSON response for Controllers
  */
 export type PaypalCheckoutOrderResponse = {
   code: number
   message: string
-  checkoutUrl: string
+  orderId: string
+  changedCartItems: CartItem[]
 }
 
 /**
@@ -184,7 +195,7 @@ export type PaypalCheckoutOrderResponse = {
 export type PaypalCaptureOrderResponse = {
   code: number
   message: string
-  paypalOrder: any
+  data: any
 }
 
 /**
