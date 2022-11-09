@@ -1,7 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import PermissionException from 'App/Exceptions/PermissionException'
-import { Roles } from 'App/Models/Enums/Auth'
+import { Roles } from 'App/Constants/Auth'
 
 export default class AdminMiddleware {
   public async handle({ auth }: HttpContextContract, next: () => Promise<void>) {

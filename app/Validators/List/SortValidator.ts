@@ -2,7 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
-import { SortByOptions, OrderOptions } from 'App/Models/Enums/Validators'
+import { SortByOptions, OrderOptions } from 'App/Constants/Lists'
 
 export default class SortValidator {
   constructor(protected ctx: HttpContextContract) {}

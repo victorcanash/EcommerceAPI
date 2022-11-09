@@ -112,14 +112,9 @@ Route.group(() => {
     })
     .apiOnly()
 
-  // Paypal routes
+  // Payment routes
 
-  Route.get('paypal/client-token', 'PaypalController.getClientToken')
-  Route.post('paypal/checkout-order', 'PaypalController.checkoutOrder').middleware('auth:api')
-  Route.post('paypal/capture-order', 'PaypalController.captureOrder').middleware('auth:api')
-  Route.post('paypal/refund-order', 'PaypalController.refundOrder').middleware('auth:api')
-
-  // Stripe routes
+  Route.post('payment/transaction', 'PaymentController.createTransaction').middleware('auth:api')
 
   /*Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
     'auth:api'

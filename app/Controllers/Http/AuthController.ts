@@ -4,6 +4,7 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
 
 import UsersService from 'App/Services/UsersService'
+import BraintreeService from 'App/Services/BraintreeService'
 import {
   BasicResponse,
   AuthResponse,
@@ -57,26 +58,31 @@ export default class AuthController {
       throw new PermissionException(`User with email ${validatedData.email} is locked out`)
     }
 
-    try {
-      const tokenData = await auth.use('api').attempt(validatedData.email, validatedData.password, {
+    const tokenData = await auth
+      .use('api')
+      .attempt(validatedData.email, validatedData.password, {
         expiresIn: Env.get('API_TOKEN_EXPIRY', '7days'),
       })
+      .catch((_error) => {
+        throw new ModelNotFoundException(`Invalid password to login user`)
+      })
 
-      const successMsg = `Successfully logged in user with email ${user.email}`
-      logRouteSuccess(request, successMsg)
-      return response.created({
-        code: 201,
-        message: successMsg,
-        token: tokenData.token,
-        user: user,
-      } as AuthResponse)
-    } catch (error) {
-      throw new ModelNotFoundException(`Invalid password to login user`)
-    }
+    const braintreeService = new BraintreeService()
+    let braintreeToken = await braintreeService.generateClientToken(user.braintreeId)
+
+    const successMsg = `Successfully logged in user with email ${user.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      token: tokenData.token,
+      user: user,
+      braintreeToken: braintreeToken,
+    } as AuthResponse)
   }
 
   public async logout({ request, response, auth }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth, 'api')
+    const email = await UsersService.getAuthEmail(auth)
 
     await auth.use('api').revoke()
 
@@ -89,8 +95,11 @@ export default class AuthController {
   }
 
   public async getLogged({ request, response, auth }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth, 'api')
+    const email = await UsersService.getAuthEmail(auth)
     const user = await UsersService.getUserByEmail(email, true)
+
+    const braintreeService = new BraintreeService()
+    let braintreeToken = await braintreeService.generateClientToken(user.braintreeId)
 
     const successMsg = `Successfully got logged user`
     logRouteSuccess(request, successMsg)
@@ -98,6 +107,7 @@ export default class AuthController {
       code: 200,
       message: successMsg,
       user: user,
+      braintreeToken: braintreeToken,
     } as UserResponse)
   }
 
@@ -207,7 +217,7 @@ export default class AuthController {
   }
 
   public async sendUpdateEmail({ response, request, auth }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth, 'api')
+    const email = await UsersService.getAuthEmail(auth)
     const user = await UsersService.getUserByEmail(email, false)
 
     const validatedData = await request.validate(SendUpdateEmailValidator)

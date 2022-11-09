@@ -21,6 +21,7 @@ export type AuthResponse = {
   message: string
   token: string
   user: User
+  braintreeToken: string
 }
 
 /**
@@ -39,6 +40,7 @@ export type UserResponse = {
   code: number
   message: string
   user: User
+  braintreeToken: string
 }
 
 /**
@@ -169,33 +171,10 @@ export type PInventoryResponse = {
   productInventory: ProductInventory
 }
 
-/**
- * Paypal client token JSON response for Controllers
- */
-export type PaypalClientTokenResponse = {
+export type PaymentTransactionResponse = {
   code: number
   message: string
-  id: string
-  token: string
-}
-
-/**
- * Paypal checkout order JSON response for Controllers
- */
-export type PaypalCheckoutOrderResponse = {
-  code: number
-  message: string
-  orderId: string
-  changedCartItems: CartItem[]
-}
-
-/**
- * Paypal capture order JSON response for Controllers
- */
-export type PaypalCaptureOrderResponse = {
-  code: number
-  message: string
-  data: any
+  transaction: any
 }
 
 /**

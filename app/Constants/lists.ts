@@ -8,3 +8,8 @@ export enum OrderOptions {
   ASC = 'asc',
   DESC = 'desc',
 }
+
+export const defaultPage = 1
+export const defaultLimit = 10
+export const defaultSortBy = SortByOptions.ID
+export const defaultOrder = OrderOptions.ASC

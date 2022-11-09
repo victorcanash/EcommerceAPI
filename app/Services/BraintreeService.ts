@@ -4,7 +4,7 @@ import braintree, { BraintreeGateway, KeyGatewayConfig, TransactionRequest } fro
 
 import InternalServerException from 'App/Exceptions/InternalServerException'
 
-export default class BraintreeWrapper {
+export default class BraintreeService {
   private gateway: BraintreeGateway
 
   constructor() {
