@@ -1,6 +1,6 @@
 import { AuthContract, GuardsList } from '@ioc:Adonis/Addons/Auth'
 
-import { Roles } from 'App/Models/Enums/Roles'
+import { Roles } from 'App/Models/Enums/Auth'
 import User from 'App/Models/User'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
@@ -13,7 +13,10 @@ export default class UsersService {
     return this.getUserByField('email', email, allData)
   }
 
-  public static async getAuthEmail(auth: AuthContract, guard: keyof GuardsList): Promise<string> {
+  public static async getAuthEmail(
+    auth: AuthContract,
+    guard: keyof GuardsList = 'api'
+  ): Promise<string> {
     return auth.use(guard).user?.email || ''
   }
 

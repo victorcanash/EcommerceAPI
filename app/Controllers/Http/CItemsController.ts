@@ -13,7 +13,7 @@ import BadRequestException from 'App/Exceptions/BadRequestException'
 
 export default class CItemsController {
   public async store({ request, response, auth }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth, 'api')
+    const email = await UsersService.getAuthEmail(auth)
     const user = await UsersService.getUserByEmail(email, false)
     await user.load('cart')
     if (!user.cart) {

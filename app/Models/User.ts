@@ -14,7 +14,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import { DateTime } from 'luxon'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
-import { Roles } from 'App/Models/Enums/Roles'
+import { Roles } from 'App/Models/Enums/Auth'
 import UserAddress from 'App/Models/UserAddress'
 import UserPayment from 'App/Models/UserPayment'
 import Cart from 'App/Models/Cart'
@@ -49,6 +49,9 @@ export default class User extends AppBaseModel {
 
   @column()
   public lockedOut: boolean
+
+  @column()
+  public braintreeId: string
 
   @hasMany(() => UserAddress)
   public addresses: HasMany<typeof UserAddress>
