@@ -1,6 +1,6 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-import { Roles } from 'App/Models/Enums/Auth'
+import { Roles } from 'App/Constants/Auth'
 
 export default class UsersSchema extends BaseSchema {
   protected tableName = 'users'
@@ -18,6 +18,7 @@ export default class UsersSchema extends BaseSchema {
       table.string('last_name', 255).notNullable()
       table.date('birthday').notNullable()
       table.boolean('locked_out').defaultTo(false).notNullable()
+      table.string('braintree_id', 64).defaultTo('')
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

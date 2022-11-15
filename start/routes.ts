@@ -47,15 +47,10 @@ Route.group(() => {
       'show': ['admin'],
     })
     .apiOnly()
+  Route.put('users/:id/addresses', 'UsersController.updateAddresses').middleware('auth:api')
 
   /*
   Route.resource('user-addresses', 'UAddressesController')
-    .middleware({
-      '*': ['auth:api', 'admin'],
-    })
-    .apiOnly()
-
-  Route.resource('user-payments', 'UPaymentsController')
     .middleware({
       '*': ['auth:api', 'admin'],
     })
@@ -114,7 +109,7 @@ Route.group(() => {
 
   // Payment routes
 
-  Route.post('payment/transaction', 'PaymentController.createTransaction').middleware('auth:api')
+  Route.post('payments/transaction', 'PaymentsController.createTransaction').middleware('auth:api')
 
   /*Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
     'auth:api'

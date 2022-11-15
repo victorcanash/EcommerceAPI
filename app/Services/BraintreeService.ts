@@ -2,6 +2,7 @@ import Env from '@ioc:Adonis/Core/Env'
 
 import braintree, { BraintreeGateway, KeyGatewayConfig, TransactionRequest } from 'braintree'
 
+import User from 'App/Models/User'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 
 export default class BraintreeService {
@@ -34,9 +35,26 @@ export default class BraintreeService {
     return customer
   }
 
+  public async updateCustomer(braintreeId: string, user: User) {
+    let response: braintree.ValidatedResponse<braintree.Customer> | undefined
+    await this.gateway.customer
+      .update(braintreeId, {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      })
+      .then((result) => {
+        response = result
+      })
+      .catch((_error) => {
+        response = undefined
+      })
+    return response
+  }
+
   public async generateClientToken(braintreeId: string) {
     const customer = await this.getCustomer(braintreeId)
-    let customerId = customer?.id || ''
+    let customerId = customer?.id || undefined
     let clientToken = ''
     await this.gateway.clientToken
       .generate({
