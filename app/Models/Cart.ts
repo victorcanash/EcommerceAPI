@@ -8,9 +8,6 @@ export default class Cart extends AppBaseModel {
   @column()
   public userId: number
 
-  @column()
-  public total: number
-
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
 
@@ -20,4 +17,13 @@ export default class Cart extends AppBaseModel {
     },
   })
   public items: HasMany<typeof CartItem>
+
+  public get amount() {
+    let amount = 0
+    this.items.forEach((item) => {
+      const product = item.product.serialize()
+      amount += product.realPrice * item.quantity
+    })
+    return amount
+  }
 }
