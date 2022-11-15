@@ -48,6 +48,7 @@ Route.group(() => {
     })
     .apiOnly()
   Route.put('users/:id/addresses', 'UsersController.updateAddresses').middleware('auth:api')
+  Route.put('users/:id/check-cart', 'UsersController.checkCart').middleware('auth:api')
 
   /*
   Route.resource('user-addresses', 'UAddressesController')

@@ -1,5 +1,6 @@
 import User from 'App/Models/User'
 import UserAddress from 'App/Models/UserAddress'
+import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
@@ -63,6 +64,17 @@ export type UAddressesResponse = {
   message: string
   shipping: UserAddress
   billing: UserAddress
+}
+
+/**
+ * User addresses JSON response for Controllers
+ */
+export type CheckCartResponse = {
+  code: number
+  message: string
+  cart: Cart
+  changedItems: CartItem[]
+  deletedItems: CartItem[]
 }
 
 /**
