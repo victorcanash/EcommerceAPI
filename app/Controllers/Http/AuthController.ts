@@ -138,8 +138,8 @@ export default class AuthController {
 
     const email = await UsersService.getAuthEmail(auth, 'update')
     const user = isAdmin
-      ? await UsersService.getUserById(id, false)
-      : await UsersService.getUserByEmail(email, false)
+      ? await UsersService.getUserById(id, true)
+      : await UsersService.getUserByEmail(email, true)
 
     const validatedData = await request.validate(UpdateAuthValidator)
     const newEmail = isAdmin ? validatedData.newEmail : auth.use('update').token?.meta?.new_email

@@ -1,14 +1,22 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/Lists'
+import { AddressTypes } from 'App/Constants/Addresses'
 import User from 'App/Models/User'
+import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
 import UsersService from 'App/Services/UsersService'
-import { UsersResponse, UserResponse, BasicResponse } from 'App/Controllers/Http/types'
+import {
+  UsersResponse,
+  UserResponse,
+  UAddressesResponse,
+  BasicResponse,
+} from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
+import UpdateUAddressesValidator from 'App/Validators/User/UpdateUAddressesValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class UsersController {
@@ -58,7 +66,7 @@ export default class UsersController {
     const validatedData = await request.validate(CreateUserValidator)
 
     const user = await User.create(validatedData)
-    await Cart.create({ userId: user.id, total: 0 })
+    await Cart.create({ userId: user.id })
 
     const successMsg = 'Successfully created user'
     logRouteSuccess(request, successMsg)
@@ -70,7 +78,7 @@ export default class UsersController {
   }
 
   public async update({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const user = await UsersService.getUserById(id, false)
+    const user = await UsersService.getUserById(id, true)
 
     await bouncer.with('UserPolicy').authorize('update', user)
 
@@ -86,6 +94,53 @@ export default class UsersController {
       message: successMsg,
       user: user,
     } as UserResponse)
+  }
+
+  public async updateAddresses({
+    params: { id },
+    request,
+    response,
+    bouncer,
+  }: HttpContextContract) {
+    const user = await UsersService.getUserById(id, false)
+
+    await bouncer.with('UserPolicy').authorize('update', user)
+
+    const validatedData = await request.validate(UpdateUAddressesValidator)
+
+    await user.load('shipping')
+    await user.load('billing')
+    let shipping: UserAddress
+    if (user.shipping) {
+      user.shipping.merge(validatedData.shipping)
+      shipping = await user.shipping.save()
+    } else {
+      shipping = await UserAddress.create({
+        ...validatedData.shipping,
+        userId: user.id,
+        type: AddressTypes.SHIPPING,
+      })
+    }
+    let billing: UserAddress
+    if (user.billing) {
+      user.billing.merge(validatedData.billing)
+      billing = await user.billing.save()
+    } else {
+      billing = await UserAddress.create({
+        ...validatedData.billing,
+        userId: user.id,
+        type: AddressTypes.BILLING,
+      })
+    }
+
+    const successMsg = `Successfully updated user addresses by id ${id}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      shipping: shipping,
+      billing: billing,
+    } as UAddressesResponse)
   }
 
   public async destroy({ params: { id }, request, response, bouncer }: HttpContextContract) {

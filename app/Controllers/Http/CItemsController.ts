@@ -27,10 +27,8 @@ export default class CItemsController {
     }
 
     const cartItem = await CartItem.create({
+      ...validatedData,
       cartId: user.cart.id,
-      productId: validatedData.productId,
-      inventoryId: validatedData.inventoryId,
-      quantity: validatedData.quantity,
     })
 
     const successMsg = 'Successfully created cart item'

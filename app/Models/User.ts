@@ -2,8 +2,6 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import {
   column,
   beforeSave,
-  hasMany,
-  HasMany,
   hasOne,
   HasOne,
   ModelQueryBuilderContract,
@@ -16,8 +14,8 @@ import { DateTime } from 'luxon'
 import { Roles } from 'App/Constants/Auth'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import UserAddress from 'App/Models/UserAddress'
-import UserPayment from 'App/Models/UserPayment'
 import Cart from 'App/Models/Cart'
+import { AddressTypes } from 'App/Constants/Addresses'
 
 export default class User extends AppBaseModel {
   @column()
@@ -53,14 +51,22 @@ export default class User extends AppBaseModel {
   @column()
   public braintreeId: string
 
-  @hasMany(() => UserAddress)
-  public addresses: HasMany<typeof UserAddress>
-
-  @hasMany(() => UserPayment)
-  public payments: HasMany<typeof UserPayment>
-
   @hasOne(() => Cart)
   public cart: HasOne<typeof Cart>
+
+  @hasOne(() => UserAddress, {
+    onQuery: (query) => {
+      query.where('type', AddressTypes.SHIPPING).orderBy('id', 'desc')
+    },
+  })
+  public shipping: HasOne<typeof UserAddress>
+
+  @hasOne(() => UserAddress, {
+    onQuery: (query) => {
+      query.where('type', AddressTypes.BILLING).orderBy('id', 'desc')
+    },
+  })
+  public billing: HasOne<typeof UserAddress>
 
   @beforeSave()
   public static async hashPassword(user: User) {
@@ -71,8 +77,6 @@ export default class User extends AppBaseModel {
 
   public static getAllData = scope((query: ModelQueryBuilderContract<typeof User, User>) => {
     query
-      .preload('addresses')
-      .preload('payments')
       .preload('cart', (query) => {
         query.preload('items', (query) => {
           query.preload('product', (query) => {
@@ -81,6 +85,8 @@ export default class User extends AppBaseModel {
           query.preload('inventory')
         })
       })
+      .preload('shipping')
+      .preload('billing')
   })
 
   public async sendActivationEmail(appName: string, appDomain: string, url: string) {

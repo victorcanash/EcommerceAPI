@@ -1,4 +1,5 @@
 import User from 'App/Models/User'
+import UserAddress from 'App/Models/UserAddress'
 import CartItem from 'App/Models/CartItem'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
@@ -55,44 +56,14 @@ export type UsersResponse = {
 }
 
 /**
- * User address JSON response for Controllers
- */
-/*export type UAddressResponse = {
-  code: number
-  message: string
-  userAddress: UserAddress
-}*/
-
-/**
  * User addresses JSON response for Controllers
  */
-/*export type UAddressesResponse = {
+export type UAddressesResponse = {
   code: number
   message: string
-  userAddresses: UserAddress[]
-  totalPages: number
-  currentPage: number
-}*/
-
-/**
- * User payment JSON response for Controllers
- */
-/*export type UPaymentResponse = {
-  code: number
-  message: string
-  userPayment: UserPayment
-}*/
-
-/**
- * User payments JSON response for Controllers
- */
-/*export type UPaymentsResponse = {
-  code: number
-  message: string
-  userPayments: UserPayment[]
-  totalPages: number
-  currentPage: number
-}*/
+  shipping: UserAddress
+  billing: UserAddress
+}
 
 /**
  * Cart item JSON response for Controllers
@@ -171,10 +142,11 @@ export type PInventoryResponse = {
   productInventory: ProductInventory
 }
 
-export type PaymentTransactionResponse = {
+export type PaymentResponse = {
   code: number
   message: string
   transaction: any
+  braintreeToken: string
 }
 
 /**

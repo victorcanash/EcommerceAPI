@@ -1,5 +1,6 @@
 import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 
+import { AddressTypes, CountryOptions } from 'App/Constants/Addresses'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import User from 'App/Models/User'
 
@@ -8,10 +9,19 @@ export default class UserAddress extends AppBaseModel {
   public userId: number
 
   @column()
-  public addressLine: string
+  public type: AddressTypes
 
   @column()
-  public additionalInfo: string
+  public firstName: string
+
+  @column()
+  public lastName: string
+
+  @column()
+  public addressLine1: string
+
+  @column()
+  public addressLine2?: string
 
   @column()
   public postalCode: string
@@ -20,13 +30,7 @@ export default class UserAddress extends AppBaseModel {
   public locality: string
 
   @column()
-  public administrativeArea: string
-
-  @column()
-  public country: string
-
-  @column()
-  public type?: string
+  public country: CountryOptions
 
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
