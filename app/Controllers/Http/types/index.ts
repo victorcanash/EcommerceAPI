@@ -74,7 +74,6 @@ export type CheckCartResponse = {
   message: string
   cart: Cart
   changedItems: CartItem[]
-  deletedItems: CartItem[]
 }
 
 /**
