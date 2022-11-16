@@ -13,10 +13,12 @@ export default class CartsService {
 
   // Check if there are the quantity desired by user and if there are items with 0 quantity
   public static async checkCartItemsQuantity(cart: Cart) {
+    await cart.load('items')
     const changedItems: CartItem[] = []
     const deletedItems: CartItem[] = []
     for (let i = 0; i < cart.items.length; i++) {
       let item = cart.items[i]
+      await item.load('inventory')
       if (item.quantity < 1) {
         await item.delete()
       } else if (item.quantity > item.inventory.quantity) {
