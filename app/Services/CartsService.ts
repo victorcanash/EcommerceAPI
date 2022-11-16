@@ -1,22 +1,22 @@
+import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
-import User from 'App/Models/User'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class CartsService {
+  public static async getCartById(id: number) {
+    return this.getCartByField('id', id)
+  }
+
   public static async getCartItemById(id: number) {
     return this.getCartItemByField('id', id)
   }
 
   // Check if there are the quantity desired by user and if there are items with 0 quantity
-  public static async checkItemsQuantity(user: User) {
-    if (!user.cart) {
-      throw new PermissionException(`You don't have an existing cart`)
-    }
+  public static async checkCartItemsQuantity(cart: Cart) {
     const changedItems: CartItem[] = []
     const deletedItems: CartItem[] = []
-    for (let i = 0; i < user.cart.items.length; i++) {
-      let item = user.cart.items[i]
+    for (let i = 0; i < cart.items.length; i++) {
+      let item = cart.items[i]
       if (item.quantity < 1) {
         await item.delete()
       } else if (item.quantity > item.inventory.quantity) {
@@ -34,6 +34,15 @@ export default class CartsService {
       changedItems,
       deletedItems,
     }
+  }
+
+  private static async getCartByField(field: string, value: string | number) {
+    let cart: Cart | null = null
+    cart = await Cart.findBy(field, value)
+    if (!cart) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting cart`)
+    }
+    return cart
   }
 
   private static async getCartItemByField(field: string, value: string | number) {

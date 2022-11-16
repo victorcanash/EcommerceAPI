@@ -48,7 +48,6 @@ Route.group(() => {
     })
     .apiOnly()
   Route.put('users/:id/addresses', 'UsersController.updateAddresses').middleware('auth:api')
-  Route.put('users/:id/check-cart', 'UsersController.checkCart').middleware('auth:api')
 
   /*
   Route.resource('user-addresses', 'UAddressesController')
@@ -59,6 +58,8 @@ Route.group(() => {
   */
 
   // Cart routes
+
+  Route.put('carts/:id/check', 'CartsController.check').middleware('auth:api')
 
   Route.resource('cart-items', 'CItemsController')
     .except(['index', 'show'])

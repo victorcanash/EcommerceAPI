@@ -6,12 +6,10 @@ import User from 'App/Models/User'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
 import UsersService from 'App/Services/UsersService'
-import CartsService from 'App/Services/CartsService'
 import {
   UsersResponse,
   UserResponse,
   UAddressesResponse,
-  CheckCartResponse,
   BasicResponse,
 } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
@@ -143,24 +141,6 @@ export default class UsersController {
       shipping: shipping,
       billing: billing,
     } as UAddressesResponse)
-  }
-
-  public async checkCart({ params: { id }, request, response, bouncer }: HttpContextContract) {
-    const user = await UsersService.getUserById(id, true)
-
-    await bouncer.with('UserPolicy').authorize('update', user)
-
-    const { changedItems, deletedItems } = await CartsService.checkItemsQuantity(user)
-
-    const successMsg = `Successfully checked user cart by id ${id}`
-    logRouteSuccess(request, successMsg)
-    return response.created({
-      code: 201,
-      message: successMsg,
-      cart: user.cart,
-      changedItems: changedItems,
-      deletedItems: deletedItems,
-    } as CheckCartResponse)
   }
 
   public async destroy({ params: { id }, request, response, bouncer }: HttpContextContract) {
