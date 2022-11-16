@@ -11,7 +11,7 @@ export default class CartsController {
 
     await bouncer.with('CartPolicy').authorize('check', cart)
 
-    const changedItems = await CartsService.checkCartItemsQuantity(cart)
+    const changedItemsByInventory = await CartsService.checkCartItemsQuantity(cart)
 
     const user = await UsersService.getUserById(cart.userId, true)
 
@@ -21,7 +21,7 @@ export default class CartsController {
       code: 201,
       message: successMsg,
       cart: user.cart,
-      changedItems: changedItems,
+      changedItemsByInventory: changedItemsByInventory,
     } as CheckCartResponse)
   }
 }

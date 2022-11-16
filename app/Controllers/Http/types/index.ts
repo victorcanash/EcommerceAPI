@@ -73,7 +73,7 @@ export type CheckCartResponse = {
   code: number
   message: string
   cart: Cart
-  changedItems: CartItem[]
+  changedItemsByInventory: CartItem[]
 }
 
 /**
