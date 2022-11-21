@@ -5,12 +5,12 @@ import User from 'App/Models/User'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class UsersService {
-  public static async getUserById(id: number, allData: boolean) {
-    return this.getUserByField('id', id, allData)
+  public static async getUserById(id: number, allData: boolean, bigbuyData = false) {
+    return this.getUserByField('id', id, allData, bigbuyData)
   }
 
-  public static async getUserByEmail(email: string, allData: boolean) {
-    return this.getUserByField('email', email, allData)
+  public static async getUserByEmail(email: string, allData: boolean, bigbuyData = false) {
+    return this.getUserByField('email', email, allData, bigbuyData)
   }
 
   public static async getAuthEmail(
@@ -24,7 +24,12 @@ export default class UsersService {
     return auth.use('api').user?.role === Roles.ADMIN
   }
 
-  private static async getUserByField(field: string, value: string | number, allData: boolean) {
+  private static async getUserByField(
+    field: string,
+    value: string | number,
+    allData: boolean,
+    bigbuyData = false
+  ) {
     let user: User | null = null
     user = await User.query()
       .where(field, value)
@@ -36,6 +41,13 @@ export default class UsersService {
       .first()
     if (!user) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting user`)
+    }
+    if (bigbuyData && user.cart?.items && user.cart.items.length > 0) {
+      for (let i = 0; i < user.cart.items.length; i++) {
+        if (user.cart.items[i].inventory) {
+          await user.cart.items[i].inventory.loadBigbuyData()
+        }
+      }
     }
     return user
   }

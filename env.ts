@@ -52,4 +52,6 @@ export default Env.rules({
   BRAINTREE_MERCHANT_ID: Env.schema.string(),
   BRAINTREE_PUBLIC_KEY: Env.schema.string(),
   BRAINTREE_PRIVATE_KEY: Env.schema.string(),
+  BIGBUY_API_KEY: Env.schema.string(),
+  BIGBUY_API_URL: Env.schema.string(),
 })

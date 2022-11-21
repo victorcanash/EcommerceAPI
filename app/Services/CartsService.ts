@@ -13,15 +13,11 @@ export default class CartsService {
 
   // Check if there are the quantity desired by user and if there are items with 0 quantity
   public static async checkCartItemsQuantity(cart: Cart) {
-    await cart.load('items')
     const changedItems: CartItem[] = []
     for (let i = 0; i < cart.items.length; i++) {
       let item = cart.items[i]
-      await item.load('inventory')
-      await item.load('product')
-      await item.product.load('activeDiscount')
-      if (item.quantity > item.inventory.quantity) {
-        item.merge({ quantity: item.inventory.quantity })
+      if (item.quantity > item.inventory.bigbuy.quantity) {
+        item.merge({ quantity: item.inventory.bigbuy.quantity })
         await item.save()
         changedItems.push(item)
       }

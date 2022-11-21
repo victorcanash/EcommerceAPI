@@ -15,7 +15,6 @@ import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
-import { roundTwoDecimals } from 'App/Utils/numbers'
 
 export default class Product extends AppBaseModel {
   @column()
@@ -26,12 +25,6 @@ export default class Product extends AppBaseModel {
 
   @column()
   public description: string
-
-  @column()
-  public sku: string
-
-  @column()
-  public price: number
 
   @column({ serializeAs: null })
   public images: string
@@ -68,20 +61,36 @@ export default class Product extends AppBaseModel {
   public activeDiscount: HasOne<typeof ProductDiscount>
 
   @computed()
-  public get realPrice() {
-    if (this.activeDiscount) {
-      const discount = (this.activeDiscount.discountPercent / 100) * this.price
-      return roundTwoDecimals(this.price - discount)
+  public get lowestPrice() {
+    let price = 0
+    if (this.inventories) {
+      this.inventories.forEach((item, index) => {
+        if (item.price < price || index === 0) {
+          price = item.price
+        }
+      })
     }
-    return this.price
+    return price
+  }
+
+  @computed()
+  public get lowestRealPrice() {
+    let price = 0
+    if (this.inventories) {
+      this.inventories.forEach((item, index) => {
+        if (item.realPrice < price || index === 0) {
+          price = item.realPrice
+        }
+      })
+    }
+    return price
   }
 
   public static filter = scope(
     (
       query: ModelQueryBuilderContract<typeof Product, Product>,
       keywords: string,
-      categoryName: string | null,
-      ordersRemain: boolean
+      categoryName: string | null
     ) => {
       query
         .where((query) => {
@@ -93,11 +102,6 @@ export default class Product extends AppBaseModel {
                 .where('name', 'ILIKE', `%${keywords}%`)
                 .orWhere('description', 'ILIKE', `%${keywords}%`)
             })
-        })
-        .whereHas('inventories', (query) => {
-          if (ordersRemain) {
-            query.where('quantity', '>', 0)
-          }
         })
         .whereHas('category', (query) => {
           if (categoryName) {

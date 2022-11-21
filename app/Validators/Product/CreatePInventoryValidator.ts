@@ -10,8 +10,10 @@ export default class CreatePInventoryValidator {
 
   public schema = schema.create({
     productId: schema.number([rules.exists({ table: 'products', column: 'id' })]),
-    quantity: schema.number(),
-    size: schema.string.optional(),
+    sku: schema.string({}, [rules.unique({ table: 'product_inventories', column: 'sku' })]),
+    name: schema.string(),
+    description: schema.string(),
+    price: schema.number(),
   })
 
   public messages: CustomMessages = {}

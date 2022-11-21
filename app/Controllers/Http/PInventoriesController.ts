@@ -28,9 +28,6 @@ export default class PInventoriesController {
     const validatedData = await request.validate(UpdatePInventoryValidator)
 
     productInventory.merge(validatedData)
-    if (!validatedData.size) {
-      productInventory.merge({ size: undefined })
-    }
     await productInventory.save()
 
     const successMsg = `Successfully updated product inventory by id ${id}`

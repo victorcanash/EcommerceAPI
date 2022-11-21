@@ -8,8 +8,13 @@ import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 
 export default class ProductsService {
-  public static async getProductById(id: number, allData: boolean, adminData = false) {
-    return this.getProductByField('id', id, allData, adminData)
+  public static async getProductById(
+    id: number,
+    allData: boolean,
+    adminData = false,
+    bigbuyData = false
+  ) {
+    return this.getProductByField('id', id, allData, adminData, bigbuyData)
   }
 
   public static async getCategoryById(id: number) {
@@ -20,8 +25,8 @@ export default class ProductsService {
     return this.getCategoryByField('name', name)
   }
 
-  public static async getInventoryById(id: number) {
-    return this.getInventoryByField('id', id)
+  public static async getInventoryById(id: number, bigbuyData = false) {
+    return this.getInventoryByField('id', id, bigbuyData)
   }
 
   public static async getDiscountById(id: number) {
@@ -47,7 +52,8 @@ export default class ProductsService {
     field: string,
     value: string | number,
     allData: boolean,
-    adminData: boolean
+    adminData: boolean,
+    bigbuyData = false
   ) {
     let product: Product | null = null
     product = await Product.query()
@@ -64,6 +70,11 @@ export default class ProductsService {
     if (!product) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product`)
     }
+    if (bigbuyData && product.inventories && product.inventories.length > 0) {
+      for (let i = 0; i < product.inventories.length; i++) {
+        await product.inventories[i].loadBigbuyData()
+      }
+    }
     return product
   }
 
@@ -76,11 +87,18 @@ export default class ProductsService {
     return category
   }
 
-  private static async getInventoryByField(field: string, value: string | number) {
+  private static async getInventoryByField(
+    field: string,
+    value: string | number,
+    bigbuyData = false
+  ) {
     let inventory: ProductInventory | null = null
     inventory = await ProductInventory.findBy(field, value)
     if (!inventory) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product inventory`)
+    }
+    if (bigbuyData) {
+      inventory.loadBigbuyData()
     }
     return inventory
   }

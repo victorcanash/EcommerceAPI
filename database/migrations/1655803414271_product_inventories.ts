@@ -12,8 +12,10 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('products')
         .onDelete('CASCADE')
-      table.integer('quantity', 255).notNullable()
-      table.string('size', 255).nullable()
+      table.string('sku', 255).notNullable()
+      table.string('name', 255).notNullable()
+      table.string('description', 255).notNullable()
+      table.float('price', 255).notNullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

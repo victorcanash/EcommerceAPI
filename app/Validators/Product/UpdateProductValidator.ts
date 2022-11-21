@@ -20,10 +20,6 @@ export default class UpdateProductValidator {
       rules.unique({ table: 'products', column: 'name', whereNot: { id: this.refs.id } }),
     ]),
     description: schema.string.optional(),
-    sku: schema.string.optional({}, [
-      rules.unique({ table: 'products', column: 'sku', whereNot: { id: this.refs.id } }),
-    ]),
-    price: schema.number.optional(),
   })
 
   public messages: CustomMessages = {}

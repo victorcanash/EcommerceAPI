@@ -14,8 +14,6 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
       table.string('name', 255).notNullable()
       table.string('description', 255).notNullable()
-      table.string('sku', 255).notNullable()
-      table.float('price', 255).notNullable()
       table.text('images', 'longtext').nullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()

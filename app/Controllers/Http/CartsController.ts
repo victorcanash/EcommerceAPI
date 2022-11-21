@@ -11,9 +11,9 @@ export default class CartsController {
 
     await bouncer.with('CartPolicy').authorize('check', cart)
 
-    const changedItemsByInventory = await CartsService.checkCartItemsQuantity(cart)
+    const user = await UsersService.getUserById(cart.userId, true, true)
 
-    const user = await UsersService.getUserById(cart.userId, true)
+    const changedItemsByInventory = await CartsService.checkCartItemsQuantity(user.cart)
 
     const successMsg = `Successfully checked cart by id ${id}`
     logRouteSuccess(request, successMsg)

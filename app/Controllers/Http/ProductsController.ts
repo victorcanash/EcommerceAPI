@@ -27,7 +27,6 @@ export default class ProductsController {
     const validatedFilterData = await request.validate(FilterProductValidator)
     const keywords = validatedFilterData.keywords || ''
     const categoryName = validatedFilterData.categoryName || null
-    const ordersRemain = validatedFilterData.ordersRemain || false
     const adminData = validatedFilterData.adminData || false
 
     if (adminData && !UsersService.isAuthAdmin(auth)) {
@@ -36,7 +35,7 @@ export default class ProductsController {
 
     const products = await Product.query()
       .apply((scopes) => {
-        scopes.filter(keywords, categoryName, ordersRemain)
+        scopes.filter(keywords, categoryName)
         scopes.getAllData()
         if (adminData) {
           scopes.getAdminData()
@@ -71,7 +70,7 @@ export default class ProductsController {
       throw new PermissionException('You need to be an admin to get admin data')
     }
 
-    const product = await ProductsService.getProductById(id, true, adminData)
+    const product = await ProductsService.getProductById(id, true, adminData, true)
 
     const successMsg = `Successfully got product by id ${id}`
     logRouteSuccess(request, successMsg)

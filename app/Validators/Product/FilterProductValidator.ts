@@ -13,7 +13,6 @@ export default class FilterProductValidator {
     categoryName: schema.string.optional([
       rules.exists({ table: 'product_categories', column: 'name' }),
     ]),
-    ordersRemain: schema.boolean.optional(),
     adminData: schema.boolean.optional(),
   })
 
