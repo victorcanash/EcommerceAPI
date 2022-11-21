@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
 
       table.string('user_id', 255).notNullable()
-      table.string('paypal_order_id', 255).notNullable()
+      table.string('braintree_transaction_id', 255).notNullable()
       table.string('bigbuy_order_id', 255).notNullable()
 
       table.timestamp('created_at', { useTz: true })

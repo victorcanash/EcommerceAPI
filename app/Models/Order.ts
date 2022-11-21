@@ -7,8 +7,8 @@ export default class Order extends AppBaseModel {
   public userId: number
 
   @column()
-  public paypalOrderId: string
+  public bigbuyOrderId: string
 
   @column()
-  public bigbuyOrderId: string
+  public braintreeTransactionId: string
 }
