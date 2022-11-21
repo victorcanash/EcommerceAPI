@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import CartItem from 'App/Models/CartItem'
-import ProductInventory from 'App/Models/ProductInventory'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import { CItemResponse, BasicResponse } from 'App/Controllers/Http/types'
@@ -9,7 +8,6 @@ import CreateCItemValidator from 'App/Validators/Cart/CreateCItemValidator'
 import UpdateCItemValidator from 'App/Validators/Cart/UpdateCItemValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 import PermissionException from 'App/Exceptions/PermissionException'
-import BadRequestException from 'App/Exceptions/BadRequestException'
 
 export default class CItemsController {
   public async store({ request, response, auth }: HttpContextContract) {
@@ -21,10 +19,6 @@ export default class CItemsController {
     }
 
     const validatedData = await request.validate(CreateCItemValidator)
-    const productInventory = await ProductInventory.find(validatedData.inventoryId)
-    if (productInventory?.productId !== validatedData.productId) {
-      throw new BadRequestException('Inventory id must belong to the same product id')
-    }
 
     const cartItem = await CartItem.create({
       ...validatedData,

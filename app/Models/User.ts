@@ -79,9 +79,6 @@ export default class User extends AppBaseModel {
     query
       .preload('cart', (query) => {
         query.preload('items', (query) => {
-          query.preload('product', (query) => {
-            query.preload('activeDiscount')
-          })
           query.preload('inventory')
         })
       })
