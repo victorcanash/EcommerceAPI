@@ -4,6 +4,7 @@ import braintree, { BraintreeGateway, KeyGatewayConfig, TransactionRequest } fro
 
 import User from 'App/Models/User'
 import InternalServerException from 'App/Exceptions/InternalServerException'
+import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class BraintreeService {
   private gateway: BraintreeGateway
@@ -73,12 +74,85 @@ export default class BraintreeService {
     return clientToken
   }
 
-  public async createTransaction(request: TransactionRequest) {
+  public async createTransaction(
+    user: User,
+    braintreeCustomer: braintree.Customer | undefined,
+    paymentMethodNonce: string
+  ) {
+    if (!user.shipping) {
+      throw new PermissionException(`You don't have an existing shipping address`)
+    }
+    if (!user.billing) {
+      throw new PermissionException(`You don't have an existing billing address`)
+    }
+    if (!user.cart) {
+      throw new PermissionException(`You don't have an existing cart`)
+    }
+    if (user.cart.items && user.cart.items.length <= 0) {
+      throw new PermissionException(`You don't have selected items in your cart`)
+    }
+
+    const amount = user.cart.amount
+    if (amount <= 0) {
+      throw new PermissionException(`Your don't have cart amount`)
+    }
+
+    const customer = braintreeCustomer
+      ? undefined
+      : {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          // company: "Braintree",
+          // phone: "312-555-1234",
+          // fax: "312-555-12346",
+          // website: "http://www.example.com",
+          email: user.email,
+        }
+    const customerId = braintreeCustomer ? braintreeCustomer.id : undefined
+
+    const transactionRequest: TransactionRequest = {
+      amount: amount.toString(),
+      paymentMethodNonce: paymentMethodNonce,
+      // deviceData: deviceDataFromTheClient,
+      customerId,
+      customer,
+      billing: {
+        firstName: user.billing.firstName,
+        lastName: user.billing.lastName,
+        // company: "Braintree",
+        streetAddress: user.billing.addressLine1,
+        extendedAddress: user.billing.addressLine2,
+        locality: user.billing.locality,
+        // region: "IL",
+        postalCode: user.billing.postalCode,
+        countryName: user.billing.country,
+      },
+      shipping: {
+        firstName: user.shipping.firstName,
+        lastName: user.shipping.lastName,
+        // company: "Braintree",
+        streetAddress: user.shipping.addressLine1,
+        extendedAddress: user.shipping.addressLine2,
+        locality: user.shipping.locality,
+        // region: "IL",
+        postalCode: user.shipping.postalCode,
+        countryName: user.shipping.country,
+      },
+      options: {
+        submitForSettlement: true,
+        storeInVaultOnSuccess: true,
+      },
+    }
+
+    let transactionResponse: braintree.ValidatedResponse<braintree.Transaction>
     try {
-      const transactionResponse = await this.gateway.transaction.sale(request)
-      return transactionResponse
+      transactionResponse = await this.gateway.transaction.sale(transactionRequest)
     } catch (error) {
       throw new InternalServerException(error.message)
     }
+    if (!transactionResponse.success) {
+      throw new PermissionException(transactionResponse.message)
+    }
+    return transactionResponse
   }
 }

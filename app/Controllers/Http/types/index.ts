@@ -6,6 +6,7 @@ import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
+import Order from 'App/Models/Order'
 
 /**
  * Basic JSON response for Controllers
@@ -156,8 +157,14 @@ export type PInventoryResponse = {
 export type PaymentResponse = {
   code: number
   message: string
-  transaction: any
+  transactionId: string
   braintreeToken: string
+}
+
+export type OrderResponse = {
+  code: number
+  message: string
+  order: Order
 }
 
 /**

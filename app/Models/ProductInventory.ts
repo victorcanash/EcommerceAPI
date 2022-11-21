@@ -11,7 +11,6 @@ import AppBaseModel from 'App/Models/AppBaseModel'
 import Product from 'App/Models/Product'
 import BigbuyService from 'App/Services/BigbuyService'
 import { roundTwoDecimals } from 'App/Utils/numbers'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class ProductInventory extends AppBaseModel {
   @column()
@@ -66,7 +65,6 @@ export default class ProductInventory extends AppBaseModel {
         quantity: quantity,
       }
     }
-    Logger.error(JSON.stringify(this.bigbuyData))
   }
 
   @beforeFetch()
