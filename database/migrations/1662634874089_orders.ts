@@ -6,10 +6,8 @@ export default class extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-
-      table.string('user_id', 255).notNullable()
+      table.integer('user_id', 255).notNullable()
       table.string('braintree_transaction_id', 255).notNullable()
-      table.string('bigbuy_order_id', 255).notNullable()
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })

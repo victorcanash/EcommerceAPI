@@ -1,10 +1,11 @@
 import Env from '@ioc:Adonis/Core/Env'
 
-import braintree, { BraintreeGateway, KeyGatewayConfig, TransactionRequest } from 'braintree'
+import braintree, { BraintreeGateway, KeyGatewayConfig } from 'braintree'
 
 import User from 'App/Models/User'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
+import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class BraintreeService {
   private gateway: BraintreeGateway
@@ -74,6 +75,19 @@ export default class BraintreeService {
     return clientToken
   }
 
+  public async getTransactionInfo(transactionId: string) {
+    let result: braintree.Transaction | undefined
+    await this.gateway.transaction
+      .find(transactionId)
+      .then((response) => {
+        result = response
+      })
+      .catch((error) => {
+        throw new ModelNotFoundException(error.message)
+      })
+    return result
+  }
+
   public async createTransaction(
     user: User,
     braintreeCustomer: braintree.Customer | undefined,
@@ -110,43 +124,41 @@ export default class BraintreeService {
         }
     const customerId = braintreeCustomer ? braintreeCustomer.id : undefined
 
-    const transactionRequest: TransactionRequest = {
-      amount: amount.toString(),
-      paymentMethodNonce: paymentMethodNonce,
-      // deviceData: deviceDataFromTheClient,
-      customerId,
-      customer,
-      billing: {
-        firstName: user.billing.firstName,
-        lastName: user.billing.lastName,
-        // company: "Braintree",
-        streetAddress: user.billing.addressLine1,
-        extendedAddress: user.billing.addressLine2,
-        locality: user.billing.locality,
-        // region: "IL",
-        postalCode: user.billing.postalCode,
-        countryName: user.billing.country,
-      },
-      shipping: {
-        firstName: user.shipping.firstName,
-        lastName: user.shipping.lastName,
-        // company: "Braintree",
-        streetAddress: user.shipping.addressLine1,
-        extendedAddress: user.shipping.addressLine2,
-        locality: user.shipping.locality,
-        // region: "IL",
-        postalCode: user.shipping.postalCode,
-        countryName: user.shipping.country,
-      },
-      options: {
-        submitForSettlement: true,
-        storeInVaultOnSuccess: true,
-      },
-    }
-
     let transactionResponse: braintree.ValidatedResponse<braintree.Transaction>
     try {
-      transactionResponse = await this.gateway.transaction.sale(transactionRequest)
+      transactionResponse = await this.gateway.transaction.sale({
+        amount: amount.toString(),
+        paymentMethodNonce: paymentMethodNonce,
+        // deviceData: deviceDataFromTheClient,
+        customerId,
+        customer,
+        billing: {
+          firstName: user.billing.firstName,
+          lastName: user.billing.lastName,
+          // company: "Braintree",
+          streetAddress: user.billing.addressLine1,
+          extendedAddress: user.billing.addressLine2,
+          locality: user.billing.locality,
+          // region: "IL",
+          postalCode: user.billing.postalCode,
+          countryName: user.billing.country,
+        },
+        shipping: {
+          firstName: user.shipping.firstName,
+          lastName: user.shipping.lastName,
+          // company: "Braintree",
+          streetAddress: user.shipping.addressLine1,
+          extendedAddress: user.shipping.addressLine2,
+          locality: user.shipping.locality,
+          // region: "IL",
+          postalCode: user.shipping.postalCode,
+          countryName: user.shipping.country,
+        },
+        options: {
+          submitForSettlement: true,
+          storeInVaultOnSuccess: true,
+        },
+      })
     } catch (error) {
       throw new InternalServerException(error.message)
     }

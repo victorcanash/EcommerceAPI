@@ -168,6 +168,17 @@ export type OrderResponse = {
 }
 
 /**
+ * Users JSON response for Controllers
+ */
+export type OrdersResponse = {
+  code: number
+  message: string
+  orders: Order[]
+  totalPages: number
+  currentPage: number
+}
+
+/**
  * Stripe JSON response for Controllers
  */
 /*export type StripeResponse = {

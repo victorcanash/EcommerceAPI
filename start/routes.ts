@@ -117,4 +117,12 @@ Route.group(() => {
     'auth:api'
   )
   Route.post('stripe/webhooks', 'StripeController.webhooks')*/
+
+  // Order routes
+  Route.resource('orders', 'OrdersController')
+    .except(['show', 'update', 'destroy'])
+    .middleware({
+      '*': ['auth:api'],
+    })
+    .apiOnly()
 }).prefix('api')
