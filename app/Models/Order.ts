@@ -1,6 +1,7 @@
 import { column, computed } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
+import ProductInventory from 'App/Models/ProductInventory'
 import BigbuyService from 'App/Services/BigbuyService'
 import BraintreeService from 'App/Services/BraintreeService'
 
@@ -39,6 +40,7 @@ export default class Order extends AppBaseModel {
       reference: string
       quantity: number
       name: string
+      inventory: ProductInventory | null
     }[],
   }
 
@@ -65,6 +67,26 @@ export default class Order extends AppBaseModel {
   public async loadBigbuyData() {
     if (this.bigbuyData.id <= 0) {
       const orderInfo = await BigbuyService.getOrderInfo(this.id.toString())
+      const products = [] as {
+        id: string
+        reference: string
+        quantity: number
+        name: string
+        inventory: ProductInventory | null
+      }[]
+      for (let i = 0; i < orderInfo.products.length; i++) {
+        const item = orderInfo.products[i]
+        const inventory = await ProductInventory.findBy('sku', item.reference)
+        await inventory?.load('product')
+        await inventory?.product?.load('activeDiscount')
+        products.push({
+          id: item.id,
+          reference: item.reference,
+          quantity: item.quantity,
+          name: item.name,
+          inventory: inventory,
+        })
+      }
       this.bigbuyData = {
         id: orderInfo.id,
         status: orderInfo.status,
@@ -78,14 +100,7 @@ export default class Order extends AppBaseModel {
           addressLine2: '',
           phone: orderInfo.shippingAddress.phone,
         },
-        products: orderInfo.products.map((item) => {
-          return {
-            id: item.id,
-            reference: item.reference,
-            quantity: item.quantity,
-            name: item.name,
-          }
-        }),
+        products: products,
       }
     }
   }
