@@ -157,8 +157,8 @@ export type PInventoryResponse = {
 export type PaymentResponse = {
   code: number
   message: string
-  transactionId: string
   braintreeToken: string
+  order: Order
 }
 
 export type OrderResponse = {

@@ -3,8 +3,8 @@ import User from 'App/Models/User'
 import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class UserPolicy extends BasePolicy {
-  public async view(user: User, userUpdate: User) {
-    if (user.id === userUpdate.id) {
+  public async view(user: User, userView: User) {
+    if (user.id === userView.id) {
       return true
     }
 

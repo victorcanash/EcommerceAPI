@@ -120,7 +120,7 @@ Route.group(() => {
 
   // Order routes
   Route.resource('orders', 'OrdersController')
-    .except(['update', 'destroy'])
+    .except(['store', 'update', 'destroy'])
     .middleware({
       '*': ['auth:api'],
     })

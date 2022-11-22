@@ -1,9 +1,12 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
+import Order from 'App/Models/Order'
 import UsersService from 'App/Services/UsersService'
 import BraintreeService from 'App/Services/BraintreeService'
+import BigbuyService from 'App/Services/BigbuyService'
 import { PaymentResponse } from 'App/Controllers/Http/types'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
+import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PaymentsController {
@@ -12,6 +15,8 @@ export default class PaymentsController {
     const user = await UsersService.getUserByEmail(email, true)
 
     const validatedData = await request.validate(CreateTransactionValidator)
+
+    // Braintree Transaction
 
     const braintreeService = new BraintreeService()
 
@@ -38,13 +43,28 @@ export default class PaymentsController {
 
     const braintreeToken = await braintreeService.generateClientToken(user.braintreeId)
 
-    const successMsg = `Successfully created transaction with user email ${email}`
+    // Bigbuy Order
+
+    const order = await Order.create({
+      userId: user.id,
+      braintreeTransactionId: result.transaction.id,
+    })
+    try {
+      await BigbuyService.createOrder(user, order.id.toString())
+    } catch (error) {
+      await order.delete()
+      throw new InternalServerException('Create bigbuy order error')
+    }
+
+    // Response
+
+    const successMsg = `Successfully created transaction and order with user email ${email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
-      transactionId: result.transaction.id,
       braintreeToken: braintreeToken,
+      order,
     } as PaymentResponse)
   }
 }

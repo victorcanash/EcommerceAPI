@@ -4,18 +4,15 @@ import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Cons
 import Order from 'App/Models/Order'
 import OrdersService from 'App/Services/OrdersService'
 import UsersService from 'App/Services/UsersService'
-import BigbuyService from 'App/Services/BigbuyService'
 import { OrderResponse, OrdersResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
-import CreateOrderValidator from 'App/Validators/Order/CreateOrderValidator'
+import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
+import PermissionException from 'App/Exceptions/PermissionException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class OrdersController {
-  public async index({ request, response, auth }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth)
-    const user = await UsersService.getUserByEmail(email, true)
-
+  public async index({ request, response, auth, bouncer }: HttpContextContract) {
     const validatedPaginationData = await request.validate(PaginationValidator)
     const page = validatedPaginationData.page || defaultPage
     const limit = validatedPaginationData.limit || defaultLimit
@@ -24,13 +21,30 @@ export default class OrdersController {
     const sortBy = validatedSortData.sortBy || defaultSortBy
     const order = validatedSortData.order || defaultOrder
 
+    const validatedFilterData = await request.validate(FilterOrderValidator)
+    const userId = validatedFilterData.userId || -1
+
+    if (userId !== -1) {
+      const user = await UsersService.getUserById(userId, false)
+      await bouncer.with('UserPolicy').authorize('view', user)
+    } else {
+      const isAuth = await UsersService.isAuthAdmin(auth)
+      if (!isAuth) {
+        throw new PermissionException(`You have to be an admin to get all orders`)
+      }
+    }
+
     const orders = await Order.query()
-      .where('userId', user.id)
+      .where((query) => {
+        if (userId !== -1) {
+          query.where('userId', userId)
+        }
+      })
       .orderBy(sortBy, order)
       .paginate(page, limit)
     const result = orders.toJSON()
 
-    const successMsg = `Successfully got orders by user ${user.email}`
+    const successMsg = 'Successfully got orders'
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
@@ -50,33 +64,6 @@ export default class OrdersController {
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
-      message: successMsg,
-      order: order,
-    } as OrderResponse)
-  }
-
-  public async store({ request, response, auth }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth)
-    const user = await UsersService.getUserByEmail(email, true)
-
-    const validatedData = await request.validate(CreateOrderValidator)
-
-    const order = await Order.create({
-      userId: user.id,
-      braintreeTransactionId: validatedData.braintreeTransactionId,
-    })
-
-    await BigbuyService.createOrder(user, order.id.toString())
-      .then(async (_orderId: string) => {})
-      .catch(async (error) => {
-        await order.delete()
-        throw error
-      })
-
-    const successMsg = `Successfully created order with braintree transaction id ${validatedData.braintreeTransactionId}`
-    logRouteSuccess(request, successMsg)
-    return response.created({
-      code: 201,
       message: successMsg,
       order: order,
     } as OrderResponse)
