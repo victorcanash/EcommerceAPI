@@ -18,7 +18,7 @@ export default class Order extends AppBaseModel {
 
   @computed()
   public get braintree() {
-    return this.braintreeTransactionData
+    return this.braintreeData
   }
 
   public bigbuyData = {
@@ -42,7 +42,7 @@ export default class Order extends AppBaseModel {
     }[],
   }
 
-  public braintreeTransactionData = {
+  public braintreeData = {
     amount: '',
     billing: {
       firstName: '',
@@ -90,11 +90,11 @@ export default class Order extends AppBaseModel {
     }
   }
 
-  public async loadBraintreeTransactionData() {
-    if (this.braintreeTransactionData.amount === '') {
+  public async loadBraintreeData() {
+    if (this.braintreeData.amount === '') {
       const braintreeService = new BraintreeService()
       const transactionInfo = await braintreeService.getTransactionInfo(this.braintreeTransactionId)
-      this.braintreeTransactionData = {
+      this.braintreeData = {
         amount: transactionInfo?.amount || '',
         billing: {
           firstName: transactionInfo?.billing?.firstName || '',

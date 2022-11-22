@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/Lists'
 import Order from 'App/Models/Order'
+import OrdersService from 'App/Services/OrdersService'
 import UsersService from 'App/Services/UsersService'
 import BigbuyService from 'App/Services/BigbuyService'
 import { OrderResponse, OrdersResponse } from 'App/Controllers/Http/types'
@@ -29,11 +30,6 @@ export default class OrdersController {
       .paginate(page, limit)
     const result = orders.toJSON()
 
-    for (let i = 0; i < orders.length; i++) {
-      await orders[i].loadBigbuyData()
-      await orders[i].loadBraintreeTransactionData()
-    }
-
     const successMsg = `Successfully got orders by user ${user.email}`
     logRouteSuccess(request, successMsg)
     return response.ok({
@@ -43,6 +39,20 @@ export default class OrdersController {
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
     } as OrdersResponse)
+  }
+
+  public async show({ params: { id }, request, response, bouncer }: HttpContextContract) {
+    const order = await OrdersService.getOrderById(id, true, true)
+
+    await bouncer.with('OrderPolicy').authorize('view', order)
+
+    const successMsg = `Successfully got order by id ${id}`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      order: order,
+    } as OrderResponse)
   }
 
   public async store({ request, response, auth }: HttpContextContract) {
@@ -62,9 +72,6 @@ export default class OrdersController {
         await order.delete()
         throw error
       })
-
-    await order.loadBigbuyData()
-    await order.loadBraintreeTransactionData()
 
     const successMsg = `Successfully created order with braintree transaction id ${validatedData.braintreeTransactionId}`
     logRouteSuccess(request, successMsg)
