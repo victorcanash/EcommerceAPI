@@ -15,6 +15,7 @@ import { Roles } from 'App/Constants/Auth'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
+import Order from 'App/Models/Order'
 import { AddressTypes } from 'App/Constants/Addresses'
 
 export default class User extends AppBaseModel {
@@ -86,30 +87,40 @@ export default class User extends AppBaseModel {
       .preload('billing')
   })
 
-  public async sendActivationEmail(appName: string, appDomain: string, url: string) {
+  public async sendActivationEmail(appName: string, appDomain: string, btnUrl: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
         .from(Env.get('DEFAULT_FROM_EMAIL'))
         .to(this.email)
         .subject('Please verify your email')
-        .htmlView('emails/auth/activate', { user: this, appName, appDomain, url, currentYear })
+        .htmlView('emails/auth', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          description: 'Click below to activate your account.',
+          btnTxt: 'Verify Account',
+          btnUrl,
+        })
     })
   }
 
-  public async sendResetPswEmail(appName: string, appDomain: string, url: string) {
+  public async sendResetPswEmail(appName: string, appDomain: string, btnUrl: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
         .from(Env.get('DEFAULT_FROM_EMAIL'))
         .to(this.email)
         .subject('Please add your new password')
-        .htmlView('emails/auth/update-password', {
-          user: this,
+        .htmlView('emails/auth', {
           appName,
           appDomain,
-          url,
           currentYear,
+          user: this,
+          description: 'Click below to add your new password.',
+          btnTxt: 'Update Password',
+          btnUrl,
         })
     })
   }
@@ -117,19 +128,99 @@ export default class User extends AppBaseModel {
   public async sendUpdateEmail(
     appName: string,
     appDomain: string,
-    url: string,
+    btnUrl: string,
     email: string,
     revert = false
   ) {
     const currentYear = new Date().getFullYear()
-    const template = revert ? 'emails/auth/revert-update-email' : 'emails/auth/update-email'
     const subject = revert ? 'Revert your new email' : 'Please verify your new email'
+    const description = revert
+      ? 'Click below to revert your new email.'
+      : 'Click below to confirm your new email.'
+    const btnTxt = revert ? 'Revert New Email' : 'Update Email'
     Mail.send((message) => {
       message
         .from(Env.get('DEFAULT_FROM_EMAIL'))
         .to(email)
         .subject(subject)
-        .htmlView(template, { user: this, appName, appDomain, url, currentYear })
+        .htmlView('emails/auth', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          description,
+          btnTxt,
+          btnUrl,
+        })
+    })
+  }
+
+  public async sendCheckOrderEmail(appName: string, appDomain: string, order: Order) {
+    const currentYear = new Date().getFullYear()
+    Mail.send((message) => {
+      message
+        .from(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(this.email)
+        .subject('Please check your order')
+        .htmlView('emails/orders/check-order', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          order,
+        })
+    })
+  }
+
+  public async sendErrorGetOrderEmail(appName: string, appDomain: string, order: Order) {
+    const currentYear = new Date().getFullYear()
+    Mail.send((message) => {
+      message
+        .from(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(Env.get('DEFAULT_FROM_EMAIL'))
+        .subject('Error getting an order')
+        .htmlView('emails/orders/error-get-order', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          order,
+        })
+    })
+  }
+
+  public async sendErrorCreateOrderEmail(
+    appName: string,
+    appDomain: string,
+    errorMsg: string,
+    braintreeTransactionId: string,
+    products: (
+      | {
+          reference: string
+          quantity: number
+          internalReference: string
+        }
+      | undefined
+    )[]
+  ) {
+    const currentYear = new Date().getFullYear()
+    const currentDate = new Date().toLocaleDateString()
+    Mail.send((message) => {
+      message
+        .from(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(Env.get('DEFAULT_FROM_EMAIL'))
+        .subject('Error creating an order')
+        .htmlView('emails/orders/error-create-order', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          currentDate,
+          errorMsg,
+          braintreeTransactionId,
+          shipping: this.shipping,
+          products,
+        })
     })
   }
 }

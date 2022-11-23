@@ -154,13 +154,9 @@ export type PInventoryResponse = {
   productInventory: ProductInventory
 }
 
-export type PaymentResponse = {
-  code: number
-  message: string
-  braintreeToken: string
-  order: Order
-}
-
+/**
+ * Order JSON response for Controllers
+ */
 export type OrderResponse = {
   code: number
   message: string
@@ -168,7 +164,7 @@ export type OrderResponse = {
 }
 
 /**
- * Users JSON response for Controllers
+ * Orders JSON response for Controllers
  */
 export type OrdersResponse = {
   code: number

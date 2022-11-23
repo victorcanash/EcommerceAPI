@@ -2,10 +2,9 @@ import Env from '@ioc:Adonis/Core/Env'
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 
-import User from 'App/Models/User'
+import UserAddress from 'App/Models/UserAddress'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
-import PermissionException from 'App/Exceptions/PermissionException'
 import { getCountryCode } from 'App/Utils/addresses'
 
 export default class BigbuyService {
@@ -113,20 +112,19 @@ export default class BigbuyService {
     return result
   }
 
-  public static async createOrder(user: User, internalReference: string) {
-    if (!user.shipping) {
-      throw new PermissionException(`You don't have an existing shipping address`)
-    }
-    if (!user.billing) {
-      throw new PermissionException(`You don't have an existing billing address`)
-    }
-    if (!user.cart) {
-      throw new PermissionException(`You don't have an existing cart`)
-    }
-    if (user.cart.items && user.cart.items.length <= 0) {
-      throw new PermissionException(`You don't have selected items in your cart`)
-    }
-
+  public static async createOrder(
+    internalReference: string,
+    email: string,
+    shipping: UserAddress,
+    products: (
+      | {
+          reference: string
+          quantity: number
+          internalReference: string
+        }
+      | undefined
+    )[]
+  ) {
     let orderId = ''
     const options: AxiosRequestConfig = {
       headers: this.getAuthHeaders(),
@@ -166,25 +164,17 @@ export default class BigbuyService {
               },
             ],
             shippingAddress: {
-              firstName: user.shipping.firstName,
-              lastName: user.shipping.lastName,
-              country: getCountryCode(user.shipping.country),
-              postcode: user.shipping.postalCode,
-              town: user.shipping.locality,
-              address: `${user.shipping.addressLine1} ${user.shipping.addressLine2}`,
+              firstName: shipping.firstName,
+              lastName: shipping.lastName,
+              country: getCountryCode(shipping.country),
+              postcode: shipping.postalCode,
+              town: shipping.locality,
+              address: `${shipping.addressLine1} ${shipping.addressLine2}`,
               phone: '644348466',
-              email: user.email,
+              email: email,
               comment: '',
             },
-            products: user.cart.items.map((item) => {
-              if (item.quantity > 0) {
-                return {
-                  reference: item.inventory.sku,
-                  quantity: item.quantity,
-                  internalReference: item.inventory.id.toString(),
-                }
-              }
-            }),
+            products: products,
           },
         },
         options

@@ -2,9 +2,10 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Order from 'App/Models/Order'
 import UsersService from 'App/Services/UsersService'
+import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import BigbuyService from 'App/Services/BigbuyService'
-import { PaymentResponse } from 'App/Controllers/Http/types'
+import { OrderResponse } from 'App/Controllers/Http/types'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
@@ -30,31 +31,60 @@ export default class PaymentsController {
       await braintreeService.updateCustomer(braintreeCustomer.id, user)
     }
 
-    const result = await braintreeService.createTransaction(
+    const braintreeResult = await braintreeService.createTransaction(
       user,
       braintreeCustomer,
       validatedData.paymentMethodNonce
     )
 
     user.merge({
-      braintreeId: result.transaction.customer.id,
+      braintreeId: braintreeResult.transaction.customer.id,
     })
     await user.save()
 
-    const braintreeToken = await braintreeService.generateClientToken(user.braintreeId)
+    const braintreeTransactionId = braintreeResult.transaction.id
 
     // Bigbuy Order
 
     const order = await Order.create({
       userId: user.id,
-      braintreeTransactionId: result.transaction.id,
+      braintreeTransactionId: braintreeTransactionId,
     })
+    const orderProducts = user.cart.items.map((item) => {
+      if (item.quantity > 0) {
+        return {
+          reference: item.inventory.sku,
+          quantity: item.quantity,
+          internalReference: item.inventory.id.toString(),
+        }
+      }
+    })
+
+    await CartsService.deleteCartItems(user.cart)
+
     try {
-      await BigbuyService.createOrder(user, order.id.toString())
+      await BigbuyService.createOrder(order.id.toString(), user.email, user.shipping, orderProducts)
     } catch (error) {
       await order.delete()
+      await user.sendErrorCreateOrderEmail(
+        validatedData.appName,
+        validatedData.appDomain,
+        error.message,
+        braintreeTransactionId,
+        orderProducts
+      )
       throw new InternalServerException('Create bigbuy order error')
     }
+
+    try {
+      await order.loadBigbuyData()
+      await order.loadBraintreeData()
+    } catch (error) {
+      await user.sendErrorGetOrderEmail(validatedData.appName, validatedData.appDomain, order)
+      throw new InternalServerException('Get order info error')
+    }
+
+    await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
 
     // Response
 
@@ -63,8 +93,7 @@ export default class PaymentsController {
     return response.created({
       code: 201,
       message: successMsg,
-      braintreeToken: braintreeToken,
       order,
-    } as PaymentResponse)
+    } as OrderResponse)
   }
 }

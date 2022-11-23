@@ -25,6 +25,17 @@ export default class CartsService {
     return changedItems
   }
 
+  public static async deleteCartItems(cart: Cart, onlyWithQuantity = true) {
+    await CartItem.query()
+      .where((query) => {
+        query.where('cartId', cart.id)
+        if (onlyWithQuantity) {
+          query.where('quantity', '>', 0)
+        }
+      })
+      .delete()
+  }
+
   private static async getCartByField(field: string, value: string | number) {
     let cart: Cart | null = null
     cart = await Cart.findBy(field, value)

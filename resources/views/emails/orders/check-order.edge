@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  </head>
+  <body style="padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; margin: 0; -ms-text-size-adjust: 100%;" marginheight="0" marginwidth="0">
+    <table cellpadding="8" cellspacing="0" style="padding: 0; width: 100% !important; margin: 0;" border="0">
+      <tr>
+        <td valign="top">
+
+          @!component('emails/header', {
+            appName,
+            appDomain,
+            user,
+          })
+
+                      You have realized a new order:
+                      -Order number: {{order.id}}
+                      -Status: {{order.bigbuy.status}}
+                      -Order date: {{new Date(order.createdAt).toLocaleDateString()}}
+                      @if(order.braintree.creditCard.cardType !== '')
+                        -Paid with {{order.braintree.creditCard.cardType}} ....{{order.braintree.creditCard.last4}}
+                      @elseif(order.braintree.paypalAccount.payerEmail != '')
+                        -Paid with Paypal {{order.braintree.paypalAccount.payerEmail}}
+                      @end
+                      -Shipping:
+                        {{order.bigbuy.shipping.firstName}} {{order.bigbuy.shipping.lastName}}
+                        {{order.bigbuy.shipping.addressLine1}}
+                        {{order.bigbuy.shipping.addressLine2}}
+                        {{order.bigbuy.shipping.postalCode}} {{order.bigbuy.shipping.locality}}
+                        {{order.bigbuy.shipping.country}}
+                      -Billing:
+                        {{order.braintree.billing.firstName}} {{order.braintree.billing.lastName}}
+                        {{order.braintree.billing.addressLine1}}
+                        {{order.braintree.billing.addressLine2}}
+                        {{order.braintree.billing.postalCode}} {{order.braintree.billing.locality}}
+                        {{order.braintree.billing.country}}
+                      -Products:
+                      @each(product in order.bigbuy.products)
+                        @if(product.inventory)
+                          {{product.inventory.product.name}}
+                          {{product.inventory.name}}
+                        @else
+                          The product reference no longer exists
+                          {{product.name}}
+                        @end
+                        {{product.quantity.toString()}}
+                        SKU: {{product.reference}}
+                        @if(product.inventory)
+                          {{(product.inventory.realPrice * product.quantity).toFixed(2)}} €
+                        @end
+                      @end
+                      -Total: {{Number(order.braintree.amount).toFixed(2)}} €
+
+          @!component('emails/footer', {
+            appName,
+            currentYear,
+          })
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
