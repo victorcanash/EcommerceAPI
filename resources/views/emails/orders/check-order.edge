@@ -6,7 +6,7 @@
   <body style="padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; margin: 0; -ms-text-size-adjust: 100%;" marginheight="0" marginwidth="0">
     <table cellpadding="8" cellspacing="0" style="padding: 0; width: 100% !important; margin: 0;" border="0">
       <tr>
-        <td valign="top">
+        <td valign="top" style="color: #525C66; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; -webkit-text-size-adjust: none;">
 
           @!component('emails/header', {
             appName,
@@ -14,43 +14,114 @@
             user,
           })
 
-                      You have realized a new order:
-                      -Order number: {{order.id}}
-                      -Status: {{order.bigbuy.status}}
-                      -Order date: {{new Date(order.createdAt).toLocaleDateString()}}
-                      @if(order.braintree.creditCard.cardType !== '')
-                        -Paid with {{order.braintree.creditCard.cardType}} ....{{order.braintree.creditCard.last4}}
-                      @elseif(order.braintree.paypalAccount.payerEmail != '')
-                        -Paid with Paypal {{order.braintree.paypalAccount.payerEmail}}
-                      @end
-                      -Shipping:
-                        {{order.bigbuy.shipping.firstName}} {{order.bigbuy.shipping.lastName}}
-                        {{order.bigbuy.shipping.addressLine1}}
-                        {{order.bigbuy.shipping.addressLine2}}
-                        {{order.bigbuy.shipping.postalCode}} {{order.bigbuy.shipping.locality}}
-                        {{order.bigbuy.shipping.country}}
-                      -Billing:
-                        {{order.braintree.billing.firstName}} {{order.braintree.billing.lastName}}
-                        {{order.braintree.billing.addressLine1}}
+          <div style="text-align: center;">
+            <p style="font-size: 18px;">
+              You have realized a new order:
+            </p>
+            <ul style="list-style-type: disc; line-height: 24px; display: inline-block; text-align: left;">
+              <li>
+                Order number: {{order.id}}
+              </li>
+              <li>
+                Status: {{order.bigbuy.status}}
+              </li>
+              <li>
+                Order date: {{new Date(order.createdAt).toLocaleDateString()}}
+              </li>
+              <li>
+                @if(order.braintree.creditCard.cardType !== '')
+                  Paid with {{order.braintree.creditCard.cardType}} ....{{order.braintree.creditCard.last4}}
+                @elseif(order.braintree.paypalAccount.payerEmail != '')
+                  Paid with Paypal {{order.braintree.paypalAccount.payerEmail}}
+                @end
+              </li>
+              @if(order.braintree.billing.addressLine1 && order.braintree.billing.addressLine1 !== '')
+                <li>
+                  Billing:
+                  <ul style="list-style-type: disc;">
+                    <li>
+                      {{order.braintree.billing.firstName}} {{order.braintree.billing.lastName}}
+                    </li>
+                    <li>
+                      {{order.braintree.billing.addressLine1}}
+                    </li>
+                    @if(order.braintree.billing.addressLine2 && order.braintree.billing.addressLine2 !== '')
+                      <li>
                         {{order.braintree.billing.addressLine2}}
-                        {{order.braintree.billing.postalCode}} {{order.braintree.billing.locality}}
-                        {{order.braintree.billing.country}}
-                      -Products:
-                      @each(product in order.bigbuy.products)
-                        @if(product.inventory)
-                          {{product.inventory.product.name}}
-                          {{product.inventory.name}}
-                        @else
-                          The product reference no longer exists
-                          {{product.name}}
-                        @end
-                        {{product.quantity.toString()}}
-                        SKU: {{product.reference}}
-                        @if(product.inventory)
-                          {{(product.inventory.realPrice * product.quantity).toFixed(2)}} €
-                        @end
+                      </li>
+                    @end
+                    <li>
+                      {{order.braintree.billing.postalCode}} {{order.braintree.billing.locality}}
+                    </li>
+                    <li>
+                      {{order.braintree.billing.country}}
+                    </li>
+                  </ul>
+                </li>
+              @end
+              <li>
+                Shipping:
+                <ul style="list-style-type: disc;">
+                  <li>
+                    {{order.bigbuy.shipping.firstName}} {{order.bigbuy.shipping.lastName}}
+                  </li>
+                  <li>
+                    {{order.bigbuy.shipping.addressLine1}}
+                  </li>
+                  @if(order.bigbuy.shipping.addressLine2 && order.bigbuy.shipping.addressLine2 !== '')
+                    <li>
+                      {{order.bigbuy.shipping.addressLine2}}
+                    </li>
+                  @end
+                  <li>
+                    {{order.bigbuy.shipping.postalCode}} {{order.bigbuy.shipping.locality}}
+                  </li>
+                  <li>
+                    {{order.bigbuy.shipping.country}}
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Products:
+                <ul style="list-style-type: disc;">
+                  @each(product in order.bigbuy.products)
+                    <li>
+                      @if(product.inventory)
+                        {{product.inventory.product.name}}
+                      @else
+                        {{product.name}}
                       @end
-                      -Total: {{Number(order.braintree.amount).toFixed(2)}} €
+                      <ul style="list-style-type: disc;">
+                        @if(product.inventory)
+                          <li>
+                            {{product.inventory.name}}
+                          </li>
+                        @else
+                          <li>
+                            The product reference no longer exists
+                          </li>
+                        @end
+                          <li>
+                            Quantity: {{product.quantity.toString()}}
+                          </li>
+                          <li>
+                            SKU: {{product.reference}}
+                          </li>
+                        @if(product.inventory)
+                          <li>
+                            {{(product.inventory.realPrice * product.quantity).toFixed(2)}} €
+                          </li>
+                        @end
+                      </ul>
+                    </li>
+                  @end
+                </ul>
+              </li>
+              <li>
+                Total: {{Number(order.braintree.amount).toFixed(2)}} €
+              </li>
+            </ul>
+          </div>
 
           @!component('emails/footer', {
             appName,
