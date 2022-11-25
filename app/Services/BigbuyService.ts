@@ -169,7 +169,9 @@ export default class BigbuyService {
               country: getCountryCode(shipping.country),
               postcode: shipping.postalCode,
               town: shipping.locality,
-              address: `${shipping.addressLine1} ${shipping.addressLine2}`,
+              address: `${shipping.addressLine1}${
+                shipping.addressLine2 ? ` ${shipping.addressLine2}` : ''
+              }`,
               phone: '644348466',
               email: email,
               comment: '',
