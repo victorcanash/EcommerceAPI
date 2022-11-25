@@ -4,6 +4,7 @@ import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
 import BigbuyService from 'App/Services/BigbuyService'
 import BraintreeService from 'App/Services/BraintreeService'
+import { getCountryName } from 'App/Utils/addresses'
 
 export default class Order extends AppBaseModel {
   @column()
@@ -93,7 +94,7 @@ export default class Order extends AppBaseModel {
         shipping: {
           firstName: orderInfo.shippingAddress.firstName,
           lastName: orderInfo.shippingAddress.lastName,
-          country: orderInfo.shippingAddress.country,
+          country: getCountryName(orderInfo.shippingAddress.country),
           postalCode: orderInfo.shippingAddress.postcode,
           locality: orderInfo.shippingAddress.town,
           addressLine1: orderInfo.shippingAddress.address,
