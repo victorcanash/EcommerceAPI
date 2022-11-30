@@ -90,38 +90,30 @@ export default class User extends AppBaseModel {
   public async sendActivationEmail(appName: string, appDomain: string, btnUrl: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
-      message
-        .from(Env.get('DEFAULT_FROM_EMAIL'))
-        .to(this.email)
-        .subject('Please verify your email')
-        .htmlView('emails/auth', {
-          appName,
-          appDomain,
-          currentYear,
-          user: this,
-          description: 'Click below to activate your account.',
-          btnTxt: 'Verify Account',
-          btnUrl,
-        })
+      message.to(this.email).subject('Please verify your email').htmlView('emails/auth', {
+        appName,
+        appDomain,
+        currentYear,
+        user: this,
+        description: 'Click below to activate your account.',
+        btnTxt: 'Verify Account',
+        btnUrl,
+      })
     })
   }
 
   public async sendResetPswEmail(appName: string, appDomain: string, btnUrl: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
-      message
-        .from(Env.get('DEFAULT_FROM_EMAIL'))
-        .to(this.email)
-        .subject('Please add your new password')
-        .htmlView('emails/auth', {
-          appName,
-          appDomain,
-          currentYear,
-          user: this,
-          description: 'Click below to add your new password.',
-          btnTxt: 'Update Password',
-          btnUrl,
-        })
+      message.to(this.email).subject('Please add your new password').htmlView('emails/auth', {
+        appName,
+        appDomain,
+        currentYear,
+        user: this,
+        description: 'Click below to add your new password.',
+        btnTxt: 'Update Password',
+        btnUrl,
+      })
     })
   }
 
@@ -139,19 +131,15 @@ export default class User extends AppBaseModel {
       : 'Click below to confirm your new email.'
     const btnTxt = revert ? 'Revert New Email' : 'Update Email'
     Mail.send((message) => {
-      message
-        .from(Env.get('DEFAULT_FROM_EMAIL'))
-        .to(email)
-        .subject(subject)
-        .htmlView('emails/auth', {
-          appName,
-          appDomain,
-          currentYear,
-          user: this,
-          description,
-          btnTxt,
-          btnUrl,
-        })
+      message.to(email).subject(subject).htmlView('emails/auth', {
+        appName,
+        appDomain,
+        currentYear,
+        user: this,
+        description,
+        btnTxt,
+        btnUrl,
+      })
     })
   }
 
@@ -159,7 +147,6 @@ export default class User extends AppBaseModel {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
-        .from(Env.get('DEFAULT_FROM_EMAIL'))
         .to(this.email)
         .subject('Please check your order')
         .htmlView('emails/orders/check-order', {
@@ -190,8 +177,7 @@ export default class User extends AppBaseModel {
     const currentDate = new Date().toLocaleDateString()
     Mail.send((message) => {
       message
-        .from(Env.get('DEFAULT_FROM_EMAIL'))
-        .to(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(Env.get('SMTP_USERNAME'))
         .subject('Error creating new order')
         .htmlView('emails/orders/error-create-order', {
           appName,
@@ -217,8 +203,7 @@ export default class User extends AppBaseModel {
     const currentDate = new Date().toLocaleDateString()
     Mail.send((message) => {
       message
-        .from(Env.get('DEFAULT_FROM_EMAIL'))
-        .to(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(Env.get('SMTP_USERNAME'))
         .subject('Error sending new order email')
         .htmlView('emails/orders/error-get-order-email', {
           appName,
