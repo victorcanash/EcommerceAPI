@@ -12,11 +12,11 @@ import Env from '@ioc:Adonis/Core/Env'
 import { DateTime } from 'luxon'
 
 import { Roles } from 'App/Constants/Auth'
+import { AddressTypes } from 'App/Constants/Addresses'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
 import Order from 'App/Models/Order'
-import { AddressTypes } from 'App/Constants/Addresses'
 
 export default class User extends AppBaseModel {
   @column()
@@ -172,23 +172,6 @@ export default class User extends AppBaseModel {
     })
   }
 
-  public async sendErrorGetOrderEmail(appName: string, appDomain: string, order: Order) {
-    const currentYear = new Date().getFullYear()
-    Mail.send((message) => {
-      message
-        .from(Env.get('DEFAULT_FROM_EMAIL'))
-        .to(Env.get('DEFAULT_FROM_EMAIL'))
-        .subject('Error getting an order')
-        .htmlView('emails/orders/error-get-order', {
-          appName,
-          appDomain,
-          currentYear,
-          user: this,
-          order,
-        })
-    })
-  }
-
   public async sendErrorCreateOrderEmail(
     appName: string,
     appDomain: string,
@@ -209,7 +192,7 @@ export default class User extends AppBaseModel {
       message
         .from(Env.get('DEFAULT_FROM_EMAIL'))
         .to(Env.get('DEFAULT_FROM_EMAIL'))
-        .subject('Error creating an order')
+        .subject('Error creating new order')
         .htmlView('emails/orders/error-create-order', {
           appName,
           appDomain,
@@ -220,6 +203,31 @@ export default class User extends AppBaseModel {
           braintreeTransactionId,
           shipping: this.shipping,
           products,
+        })
+    })
+  }
+
+  public async sendErrorGetOrderEmail(
+    appName: string,
+    appDomain: string,
+    errorMsg: string,
+    order: Order
+  ) {
+    const currentYear = new Date().getFullYear()
+    const currentDate = new Date().toLocaleDateString()
+    Mail.send((message) => {
+      message
+        .from(Env.get('DEFAULT_FROM_EMAIL'))
+        .to(Env.get('DEFAULT_FROM_EMAIL'))
+        .subject('Error sending new order email')
+        .htmlView('emails/orders/error-get-order-email', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          currentDate,
+          errorMsg,
+          order,
         })
     })
   }

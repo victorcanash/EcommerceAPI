@@ -25,13 +25,10 @@ export default class CartsService {
     return changedItems
   }
 
-  public static async deleteCartItems(cart: Cart, onlyWithQuantity = true) {
+  public static async deleteCartItems(cart: Cart) {
     await CartItem.query()
       .where((query) => {
         query.where('cartId', cart.id)
-        if (onlyWithQuantity) {
-          query.where('quantity', '>', 0)
-        }
       })
       .delete()
   }

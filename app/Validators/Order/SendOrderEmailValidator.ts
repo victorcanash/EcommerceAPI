@@ -3,7 +3,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
 
-export default class CreateTransactionValidator {
+export default class SendOrderEmailValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter
@@ -11,7 +11,6 @@ export default class CreateTransactionValidator {
   public schema = schema.create({
     appName: schema.string(),
     appDomain: schema.string(),
-    paymentMethodNonce: schema.string(),
   })
 
   public messages: CustomMessages = {}

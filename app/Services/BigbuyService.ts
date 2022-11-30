@@ -2,7 +2,7 @@ import Env from '@ioc:Adonis/Core/Env'
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 
-import UserAddress from 'App/Models/UserAddress'
+import { CountryOptions } from 'App/Constants/Addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { getCountryCode } from 'App/Utils/addresses'
@@ -115,7 +115,15 @@ export default class BigbuyService {
   public static async createOrder(
     internalReference: string,
     email: string,
-    shipping: UserAddress,
+    shipping: {
+      firstName: string
+      lastName: string
+      addressLine1: string
+      addressLine2?: string
+      postalCode: string
+      locality: string
+      country: CountryOptions
+    },
     products: (
       | {
           reference: string

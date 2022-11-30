@@ -1,8 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Order from 'App/Models/Order'
+import CartItem from 'App/Models/CartItem'
 import UsersService from 'App/Services/UsersService'
-import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import BigbuyService from 'App/Services/BigbuyService'
 import { OrderResponse } from 'App/Controllers/Http/types'
@@ -50,8 +50,10 @@ export default class PaymentsController {
       userId: user.id,
       braintreeTransactionId: braintreeTransactionId,
     })
+    const cartItemsId = [] as number[]
     const orderProducts = user.cart.items.map((item) => {
       if (item.quantity > 0) {
+        cartItemsId.push(item.id)
         return {
           reference: item.inventory.sku,
           quantity: item.quantity,
@@ -60,7 +62,7 @@ export default class PaymentsController {
       }
     })
 
-    await CartsService.deleteCartItems(user.cart)
+    await CartItem.query().whereIn('id', cartItemsId).delete()
 
     try {
       await BigbuyService.createOrder(order.id.toString(), user.email, user.shipping, orderProducts)
@@ -79,12 +81,16 @@ export default class PaymentsController {
     try {
       await order.loadBigbuyData()
       await order.loadBraintreeData()
+      await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
     } catch (error) {
-      await user.sendErrorGetOrderEmail(validatedData.appName, validatedData.appDomain, order)
+      await user.sendErrorGetOrderEmail(
+        validatedData.appName,
+        validatedData.appDomain,
+        error.message,
+        order
+      )
       throw new InternalServerException('Get order info error')
     }
-
-    await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
 
     // Response
 

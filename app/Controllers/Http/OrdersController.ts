@@ -4,11 +4,16 @@ import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Cons
 import Order from 'App/Models/Order'
 import OrdersService from 'App/Services/OrdersService'
 import UsersService from 'App/Services/UsersService'
+import BigbuyService from 'App/Services/BigbuyService'
+import ProductsService from 'App/Services/ProductsService'
 import { OrderResponse, OrdersResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
+import CreateOrderValidator from 'App/Validators/Order/CreateOrderValidator'
+import SendCheckOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
+import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class OrdersController {
@@ -64,6 +69,85 @@ export default class OrdersController {
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
+      message: successMsg,
+      order: order,
+    } as OrderResponse)
+  }
+
+  public async store({ request, response }: HttpContextContract) {
+    const validatedData = await request.validate(CreateOrderValidator)
+
+    const user = await UsersService.getUserById(validatedData.userId, false)
+
+    const order = await Order.create({
+      userId: user.id,
+      braintreeTransactionId: validatedData.braintreeTransactionId,
+    })
+    const orderProducts = [] as { reference: string; quantity: number; internalReference: string }[]
+    for (const item of validatedData.products) {
+      const inventory = await ProductsService.getInventoryById(item.inventoryId)
+      if (item.quantity > 0) {
+        orderProducts.push({
+          reference: inventory.sku,
+          quantity: item.quantity,
+          internalReference: inventory.id.toString(),
+        })
+      }
+    }
+
+    try {
+      await order.loadBraintreeData()
+    } catch (error) {
+      await order.delete()
+      throw new InternalServerException('Braintree error')
+    }
+
+    try {
+      await BigbuyService.createOrder(
+        order.id.toString(),
+        user.email,
+        validatedData.shipping,
+        orderProducts
+      )
+    } catch (error) {
+      await order.delete()
+      throw new InternalServerException(error.message)
+    }
+
+    try {
+      await order.loadBigbuyData()
+      await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
+    } catch (error) {
+      await user.sendErrorGetOrderEmail(
+        validatedData.appName,
+        validatedData.appDomain,
+        error.message,
+        order
+      )
+      throw new InternalServerException('Get order info error')
+    }
+
+    const successMsg = 'Successfully created order'
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      order: order,
+    } as OrderResponse)
+  }
+
+  public async sendCheckEmail({ params: { id }, request, response }: HttpContextContract) {
+    const order = await OrdersService.getOrderById(id, true, true)
+    const user = await UsersService.getUserById(order.userId, false)
+
+    const validatedData = await request.validate(SendCheckOrderEmailValidator)
+
+    await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
+
+    const successMsg = 'Successfully sent check order email'
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
       message: successMsg,
       order: order,
     } as OrderResponse)
