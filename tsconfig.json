@@ -36,7 +36,8 @@
       "@adonisjs/drive-s3",
       "@types/url-parse",
       "@adonisjs/mail",
-      "@adonisjs/view"
+      "@adonisjs/view",
+      "@adonisjs/i18n"
     ]
   }
 }
