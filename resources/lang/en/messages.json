@@ -1,0 +1,46 @@
+{
+  "emails": {
+    "header": {
+      "title": "Welcome to ",
+      "subtitle": "Happy to have you { username }."
+    },
+    "auth": {
+      "activation": {
+        "subject": "Please verify your email",
+        "description": "Click below to active your account.",
+        "button": "Verify Account"
+      },
+      "resetPsw": {
+        "subject": "Please add your new password",
+        "description": "Click below to add your new password.",
+        "button": "Update Password"
+      },
+      "updateEmail": {
+        "subject": "Please verify your new email",
+        "description": "Click below to confirm your new email.",
+        "button": "Update Email"
+      },
+      "revertEmail": {
+        "subject": "Revert your new email",
+        "description": "Click below to revert your new email.",
+        "button": "Revert Email"
+      }
+    },
+    "checkOrder": {
+      "subject": "Please check your order",
+      "description": "You have realized a new order:",
+      "numberField": "Order number: { id }",
+      "statusField": "Status: { status }",
+      "dateField": "Order date: {orderDate, date, medium}",
+      "paidCard": "Paid with { cardType } ....{ last4 }",
+      "paidPaypal": "Paid with Paypal { payerEmail }",
+      "billing": "Billing:",
+      "shipping": "Shipping:",
+      "products": "Products:",
+      "productReference": "The product reference no longer exists",
+      "quantityField": "Quantity: { quantity }",
+      "skuField": "SKU: { sku }",
+      "totalField": "Total: { amount }"
+    }
+  }
+}

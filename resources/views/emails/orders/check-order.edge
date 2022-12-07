@@ -16,28 +16,28 @@
 
           <div style="text-align: center;">
             <p style="font-size: 18px;">
-              You have realized a new order:
+              {{ t('messages.emails.checkOrder.description') }}
             </p>
             <ul style="list-style-type: disc; line-height: 24px; display: inline-block; text-align: left;">
               <li>
-                Order number: {{order.id}}
+                {{ t('messages.emails.checkOrder.numberField', { id: order.id }) }}
               </li>
               <li>
-                Status: {{order.bigbuy.status}}
+                {{ t('messages.emails.checkOrder.statusField', { status: order.bigbuy.status }) }}
               </li>
               <li>
-                Order date: {{new Date(order.createdAt).toLocaleDateString()}}
+                {{ t('messages.emails.checkOrder.dateField', { orderDate: new Date(order.createdAt) }) }}
               </li>
               <li>
                 @if(order.braintree.creditCard.cardType !== '')
-                  Paid with {{order.braintree.creditCard.cardType}} ....{{order.braintree.creditCard.last4}}
+                  {{ t('messages.emails.checkOrder.paidCard', { cardType: order.braintree.creditCard.cardType, last4: order.braintree.creditCard.last4 }) }}
                 @elseif(order.braintree.paypalAccount.payerEmail != '')
-                  Paid with Paypal {{order.braintree.paypalAccount.payerEmail}}
+                  {{ t('messages.emails.checkOrder.paidPaypal', { payerEmail: order.braintree.paypalAccount.payerEmail }) }}
                 @end
               </li>
               @if(order.braintree.billing.addressLine1 && order.braintree.billing.addressLine1 !== '')
                 <li>
-                  Billing:
+                  {{ t('messages.emails.checkOrder.billing') }}
                   <ul style="list-style-type: disc;">
                     <li>
                       {{order.braintree.billing.firstName}} {{order.braintree.billing.lastName}}
@@ -60,7 +60,7 @@
                 </li>
               @end
               <li>
-                Shipping:
+                {{ t('messages.emails.checkOrder.shipping') }}
                 <ul style="list-style-type: disc;">
                   <li>
                     {{order.bigbuy.shipping.firstName}} {{order.bigbuy.shipping.lastName}}
@@ -82,7 +82,7 @@
                 </ul>
               </li>
               <li>
-                Products:
+                {{ t('messages.emails.checkOrder.products') }}
                 <ul style="list-style-type: disc;">
                   @each(product in order.bigbuy.products)
                     <li>
@@ -98,14 +98,14 @@
                           </li>
                         @else
                           <li>
-                            The product reference no longer exists
+                            {{ t('messages.emails.checkOrder.productReference') }}
                           </li>
                         @end
                           <li>
-                            Quantity: {{product.quantity.toString()}}
+                            {{ t('messages.emails.checkOrder.quantityField', { quantity: product.quantity.toString() }) }}
                           </li>
                           <li>
-                            SKU: {{product.reference}}
+                            {{ t('messages.emails.checkOrder.skuField', { sku: product.reference }) }}
                           </li>
                         @if(product.inventory)
                           <li>
@@ -118,7 +118,7 @@
                 </ul>
               </li>
               <li>
-                Total: {{Number(order.braintree.amount).toFixed(2)}} €
+                {{ t('messages.emails.checkOrder.totalField', { amount: Number(order.braintree.amount).toFixed(2) }) }} €
               </li>
             </ul>
           </div>

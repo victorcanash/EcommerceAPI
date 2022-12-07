@@ -9,6 +9,7 @@ import {
 } from '@ioc:Adonis/Lucid/Orm'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Env from '@ioc:Adonis/Core/Env'
+import I18n from '@ioc:Adonis/Addons/I18n'
 import { DateTime } from 'luxon'
 
 import { Roles } from 'App/Constants/Auth'
@@ -90,30 +91,48 @@ export default class User extends AppBaseModel {
   public async sendActivationEmail(appName: string, appDomain: string, btnUrl: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
-      message.to(this.email).subject('Please verify your email').htmlView('emails/auth', {
-        appName,
-        appDomain,
-        currentYear,
-        user: this,
-        description: 'Click below to activate your account.',
-        btnTxt: 'Verify Account',
-        btnUrl,
-      })
+      message
+        .to(this.email)
+        .subject(
+          I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.activation.subject')
+        )
+        .htmlView('emails/auth', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          description: I18n.locale(I18n.defaultLocale).formatMessage(
+            'messages.emails.auth.activation.description'
+          ),
+          btnTxt: I18n.locale(I18n.defaultLocale).formatMessage(
+            'messages.emails.auth.activation.button'
+          ),
+          btnUrl,
+        })
     })
   }
 
   public async sendResetPswEmail(appName: string, appDomain: string, btnUrl: string) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
-      message.to(this.email).subject('Please add your new password').htmlView('emails/auth', {
-        appName,
-        appDomain,
-        currentYear,
-        user: this,
-        description: 'Click below to add your new password.',
-        btnTxt: 'Update Password',
-        btnUrl,
-      })
+      message
+        .to(this.email)
+        .subject(
+          I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.resetPsw.subject')
+        )
+        .htmlView('emails/auth', {
+          appName,
+          appDomain,
+          currentYear,
+          user: this,
+          description: I18n.locale(I18n.defaultLocale).formatMessage(
+            'messages.emails.auth.resetPsw.description'
+          ),
+          btnTxt: I18n.locale(I18n.defaultLocale).formatMessage(
+            'messages.emails.auth.resetPsw.button'
+          ),
+          btnUrl,
+        })
     })
   }
 
@@ -125,11 +144,19 @@ export default class User extends AppBaseModel {
     revert = false
   ) {
     const currentYear = new Date().getFullYear()
-    const subject = revert ? 'Revert your new email' : 'Please verify your new email'
+    const subject = revert
+      ? I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.revertEmail.subject')
+      : I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.updateEmail.subject')
     const description = revert
-      ? 'Click below to revert your new email.'
-      : 'Click below to confirm your new email.'
-    const btnTxt = revert ? 'Revert New Email' : 'Update Email'
+      ? I18n.locale(I18n.defaultLocale).formatMessage(
+          'messages.emails.auth.revertEmail.description'
+        )
+      : I18n.locale(I18n.defaultLocale).formatMessage(
+          'messages.emails.auth.updateEmail.description'
+        )
+    const btnTxt = revert
+      ? I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.revertEmail.button')
+      : I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.updateEmail.button')
     Mail.send((message) => {
       message.to(email).subject(subject).htmlView('emails/auth', {
         appName,
@@ -148,7 +175,9 @@ export default class User extends AppBaseModel {
     Mail.send((message) => {
       message
         .to(this.email)
-        .subject('Please check your order')
+        .subject(
+          I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.checkOrder.subject')
+        )
         .htmlView('emails/orders/check-order', {
           appName,
           appDomain,

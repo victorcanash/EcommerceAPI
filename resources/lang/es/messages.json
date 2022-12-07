@@ -1,0 +1,46 @@
+{
+  "emails": {
+    "header": {
+      "title": "Bienvenido a ",
+      "subtitle": "Encantado de tenerte { username }."
+    },
+    "auth": {
+      "activation": {
+        "subject": "Porfavor verifica tu correo",
+        "description": "Pulsa abajo para activar tu cuenta.",
+        "button": "Verificar Cuenta"
+      },
+      "resetPsw": {
+        "subject": "Porfavor añade tu nueva contraseña",
+        "description": "Pulsa abajo para añadir tu nueva contraseña.",
+        "button": "Actualizar Contraseña"
+      },
+      "updateEmail": {
+        "subject": "Porfavor verifica tu nuevo correo",
+        "description": "Pulsa abajo para confirmar tu nuevo correo.",
+        "button": "Actualizar Correo"
+      },
+      "revertEmail": {
+        "subject": "Revertir tu nuevo correo",
+        "description": "Pulsa abajo para revertir tu nuevo correo.",
+        "button": "Revertir Correo"
+      }
+    },
+    "checkOrder": {
+      "subject": "Porfavor mira tu pedido",
+      "description": "Has realizado un nuevo pedido:",
+      "numberField": "Número de pedido: { id }",
+      "statusField": "Estado: { status }",
+      "dateField": "Fecha del pedido: {orderDate, date, medium}",
+      "paidCard": "Pagado con { cardType } ....{ last4 }",
+      "paidPaypal": "Pagado con Paypal { payerEmail }",
+      "billing": "Facturación:",
+      "shipping": "Envío:",
+      "products": "Productos:",
+      "productReference": "La referencia del producto ya no existe",
+      "quantityField": "Cantidad: { quantity }",
+      "skuField": "SKU: { sku }",
+      "totalField": "Total: { amount }"
+    }
+  }
+}
