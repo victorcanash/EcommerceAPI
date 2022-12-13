@@ -11,7 +11,7 @@ import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PaymentsController {
-  public async createTransaction({ request, response, auth }: HttpContextContract) {
+  public async createTransaction({ request, response, auth, i18n }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth)
     const user = await UsersService.getUserByEmail(email, true)
 
@@ -69,6 +69,7 @@ export default class PaymentsController {
     } catch (error) {
       await order.delete()
       await user.sendErrorCreateOrderEmail(
+        i18n,
         validatedData.appName,
         validatedData.appDomain,
         error.message,
@@ -81,9 +82,10 @@ export default class PaymentsController {
     try {
       await order.loadBigbuyData()
       await order.loadBraintreeData()
-      await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
+      await user.sendCheckOrderEmail(i18n, validatedData.appName, validatedData.appDomain, order)
     } catch (error) {
       await user.sendErrorGetOrderEmail(
+        i18n,
         validatedData.appName,
         validatedData.appDomain,
         error.message,

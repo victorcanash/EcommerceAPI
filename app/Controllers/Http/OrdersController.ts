@@ -1,4 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import I18n from '@ioc:Adonis/Addons/I18n'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/Lists'
 import Order from 'App/Models/Order'
@@ -13,6 +14,7 @@ import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
 import CreateOrderValidator from 'App/Validators/Order/CreateOrderValidator'
 import SendCheckOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
+import BadRequestException from 'App/Exceptions/BadRequestException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
@@ -77,6 +79,11 @@ export default class OrdersController {
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateOrderValidator)
 
+    const locale = I18n.getSupportedLocale(validatedData.locale)
+    if (!locale) {
+      throw new BadRequestException(`Unsupported locale: ${validatedData.locale}`)
+    }
+
     const user = await UsersService.getUserById(validatedData.userId, false)
 
     const order = await Order.create({
@@ -116,9 +123,15 @@ export default class OrdersController {
 
     try {
       await order.loadBigbuyData()
-      await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
+      await user.sendCheckOrderEmail(
+        I18n.locale(locale),
+        validatedData.appName,
+        validatedData.appDomain,
+        order
+      )
     } catch (error) {
       await user.sendErrorGetOrderEmail(
+        I18n.locale(locale),
         validatedData.appName,
         validatedData.appDomain,
         error.message,
@@ -142,7 +155,17 @@ export default class OrdersController {
 
     const validatedData = await request.validate(SendCheckOrderEmailValidator)
 
-    await user.sendCheckOrderEmail(validatedData.appName, validatedData.appDomain, order)
+    const locale = I18n.getSupportedLocale(validatedData.locale)
+    if (!locale) {
+      throw new BadRequestException(`Unsupported locale: ${validatedData.locale}`)
+    }
+
+    await user.sendCheckOrderEmail(
+      I18n.locale(locale),
+      validatedData.appName,
+      validatedData.appDomain,
+      order
+    )
 
     const successMsg = 'Successfully sent check order email'
     logRouteSuccess(request, successMsg)

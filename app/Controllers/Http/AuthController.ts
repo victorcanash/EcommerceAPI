@@ -170,7 +170,7 @@ export default class AuthController {
     } as AuthResponse)
   }
 
-  public async sendActivationEmail({ response, request, auth }: HttpContextContract) {
+  public async sendActivationEmail({ response, request, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(SendActivationEmailValidator)
 
     const user = await UsersService.getUserByEmail(validatedData.email, false)
@@ -180,6 +180,7 @@ export default class AuthController {
     })
 
     await user.sendActivationEmail(
+      i18n,
       validatedData.appName,
       validatedData.appDomain,
       validatedData.url + `?token=${tokenData.token}`
@@ -193,7 +194,7 @@ export default class AuthController {
     } as BasicResponse)
   }
 
-  public async sendResetPswEmail({ response, request, auth }: HttpContextContract) {
+  public async sendResetPswEmail({ response, request, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(SendResetPswEmailValidator)
 
     const user = await UsersService.getUserByEmail(validatedData.email, false)
@@ -203,6 +204,7 @@ export default class AuthController {
     })
 
     await user.sendResetPswEmail(
+      i18n,
       validatedData.appName,
       validatedData.appDomain,
       validatedData.url + `?token=${tokenData.token}`
@@ -216,7 +218,7 @@ export default class AuthController {
     } as BasicResponse)
   }
 
-  public async sendUpdateEmail({ response, request, auth }: HttpContextContract) {
+  public async sendUpdateEmail({ response, request, auth, i18n }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth)
     const user = await UsersService.getUserByEmail(email, false)
 
@@ -234,6 +236,7 @@ export default class AuthController {
 
     if (validatedData.newEmail && validatedData.newEmail !== user.email) {
       await user.sendUpdateEmail(
+        i18n,
         validatedData.appName,
         validatedData.appDomain,
         validatedData.url + `?token=${tokenData.token}`,

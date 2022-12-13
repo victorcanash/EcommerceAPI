@@ -9,7 +9,7 @@ import {
 } from '@ioc:Adonis/Lucid/Orm'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Env from '@ioc:Adonis/Core/Env'
-import I18n from '@ioc:Adonis/Addons/I18n'
+import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 import { DateTime } from 'luxon'
 
 import { Roles } from 'App/Constants/Auth'
@@ -88,55 +88,56 @@ export default class User extends AppBaseModel {
       .preload('billing')
   })
 
-  public async sendActivationEmail(appName: string, appDomain: string, btnUrl: string) {
+  public async sendActivationEmail(
+    i18n: I18nContract,
+    appName: string,
+    appDomain: string,
+    btnUrl: string
+  ) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
         .to(this.email)
-        .subject(
-          I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.activation.subject')
-        )
+        .subject(i18n.formatMessage('messages.emails.auth.activation.subject'))
         .htmlView('emails/auth', {
+          i18n,
           appName,
           appDomain,
           currentYear,
           user: this,
-          description: I18n.locale(I18n.defaultLocale).formatMessage(
-            'messages.emails.auth.activation.description'
-          ),
-          btnTxt: I18n.locale(I18n.defaultLocale).formatMessage(
-            'messages.emails.auth.activation.button'
-          ),
+          description: i18n.formatMessage('messages.emails.auth.activation.description'),
+          btnTxt: i18n.formatMessage('messages.emails.auth.activation.button'),
           btnUrl,
         })
     })
   }
 
-  public async sendResetPswEmail(appName: string, appDomain: string, btnUrl: string) {
+  public async sendResetPswEmail(
+    i18n: I18nContract,
+    appName: string,
+    appDomain: string,
+    btnUrl: string
+  ) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
         .to(this.email)
-        .subject(
-          I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.resetPsw.subject')
-        )
+        .subject(i18n.formatMessage('messages.emails.auth.resetPsw.subject'))
         .htmlView('emails/auth', {
+          i18n,
           appName,
           appDomain,
           currentYear,
           user: this,
-          description: I18n.locale(I18n.defaultLocale).formatMessage(
-            'messages.emails.auth.resetPsw.description'
-          ),
-          btnTxt: I18n.locale(I18n.defaultLocale).formatMessage(
-            'messages.emails.auth.resetPsw.button'
-          ),
+          description: i18n.formatMessage('messages.emails.auth.resetPsw.description'),
+          btnTxt: i18n.formatMessage('messages.emails.auth.resetPsw.button'),
           btnUrl,
         })
     })
   }
 
   public async sendUpdateEmail(
+    i18n: I18nContract,
     appName: string,
     appDomain: string,
     btnUrl: string,
@@ -145,20 +146,17 @@ export default class User extends AppBaseModel {
   ) {
     const currentYear = new Date().getFullYear()
     const subject = revert
-      ? I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.revertEmail.subject')
-      : I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.updateEmail.subject')
+      ? i18n.formatMessage('messages.emails.auth.revertEmail.subject')
+      : i18n.formatMessage('messages.emails.auth.updateEmail.subject')
     const description = revert
-      ? I18n.locale(I18n.defaultLocale).formatMessage(
-          'messages.emails.auth.revertEmail.description'
-        )
-      : I18n.locale(I18n.defaultLocale).formatMessage(
-          'messages.emails.auth.updateEmail.description'
-        )
+      ? i18n.formatMessage('messages.emails.auth.revertEmail.description')
+      : i18n.formatMessage('messages.emails.auth.updateEmail.description')
     const btnTxt = revert
-      ? I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.revertEmail.button')
-      : I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.auth.updateEmail.button')
+      ? i18n.formatMessage('messages.emails.auth.revertEmail.button')
+      : i18n.formatMessage('messages.emails.auth.updateEmail.button')
     Mail.send((message) => {
       message.to(email).subject(subject).htmlView('emails/auth', {
+        i18n,
         appName,
         appDomain,
         currentYear,
@@ -170,15 +168,19 @@ export default class User extends AppBaseModel {
     })
   }
 
-  public async sendCheckOrderEmail(appName: string, appDomain: string, order: Order) {
+  public async sendCheckOrderEmail(
+    i18n: I18nContract,
+    appName: string,
+    appDomain: string,
+    order: Order
+  ) {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
         .to(this.email)
-        .subject(
-          I18n.locale(I18n.defaultLocale).formatMessage('messages.emails.checkOrder.subject')
-        )
+        .subject(i18n.formatMessage('messages.emails.checkOrder.subject'))
         .htmlView('emails/orders/check-order', {
+          i18n,
           appName,
           appDomain,
           currentYear,
@@ -189,6 +191,7 @@ export default class User extends AppBaseModel {
   }
 
   public async sendErrorCreateOrderEmail(
+    i18n: I18nContract,
     appName: string,
     appDomain: string,
     errorMsg: string,
@@ -209,6 +212,7 @@ export default class User extends AppBaseModel {
         .to(Env.get('SMTP_USERNAME'))
         .subject('Error creating new order')
         .htmlView('emails/orders/error-create-order', {
+          locale: i18n.locale,
           appName,
           appDomain,
           currentYear,
@@ -223,6 +227,7 @@ export default class User extends AppBaseModel {
   }
 
   public async sendErrorGetOrderEmail(
+    i18n: I18nContract,
     appName: string,
     appDomain: string,
     errorMsg: string,
@@ -235,6 +240,7 @@ export default class User extends AppBaseModel {
         .to(Env.get('SMTP_USERNAME'))
         .subject('Error sending new order email')
         .htmlView('emails/orders/error-get-order-email', {
+          locale: i18n.locale,
           appName,
           appDomain,
           currentYear,

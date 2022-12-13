@@ -9,6 +9,7 @@
         <td valign="top">
 
           @!component('emails/header', {
+            i18n,
             appName,
             appDomain,
             user,
@@ -46,6 +47,7 @@
           </table>
 
           @!component('emails/footer', {
+            i18n,
             appName,
             currentYear,
           })

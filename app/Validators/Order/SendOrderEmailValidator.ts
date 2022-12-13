@@ -9,6 +9,7 @@ export default class SendOrderEmailValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    locale: schema.string(),
     appName: schema.string(),
     appDomain: schema.string(),
   })

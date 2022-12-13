@@ -10,6 +10,7 @@ export default class CreateOrderValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    locale: schema.string(),
     appName: schema.string(),
     appDomain: schema.string(),
     userId: schema.number([rules.exists({ table: 'users', column: 'id' })]),

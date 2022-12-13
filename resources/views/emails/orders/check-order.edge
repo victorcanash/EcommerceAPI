@@ -9,6 +9,7 @@
         <td valign="top" style="color: #525C66; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; -webkit-text-size-adjust: none;">
 
           @!component('emails/header', {
+            i18n,
             appName,
             appDomain,
             user,
@@ -124,6 +125,7 @@
           </div>
 
           @!component('emails/footer', {
+            i18n,
             appName,
             currentYear,
           })
