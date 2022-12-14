@@ -2,7 +2,7 @@ import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
-import { CountryOptions } from 'App/Constants/Addresses'
+import { CountryOptions } from 'App/constants/addresses'
 
 export default class CreateOrderValidator {
   constructor(protected ctx: HttpContextContract) {}

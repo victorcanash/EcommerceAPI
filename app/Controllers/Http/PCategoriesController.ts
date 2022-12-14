@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/Lists'
+import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/constants/lists'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductsService from 'App/Services/ProductsService'
 import { PCategoriesResponse, PCategoryResponse, BasicResponse } from 'App/Controllers/Http/types'

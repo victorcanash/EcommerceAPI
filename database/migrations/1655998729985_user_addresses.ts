@@ -1,6 +1,6 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-import { AddressTypes, CountryOptions } from 'App/Constants/Addresses'
+import { AddressTypes, CountryOptions } from 'App/constants/addresses'
 
 export default class extends BaseSchema {
   protected tableName = 'user_addresses'

@@ -1,6 +1,6 @@
 import { AuthContract, GuardsList } from '@ioc:Adonis/Addons/Auth'
 
-import { Roles } from 'App/Constants/Auth'
+import { Roles } from 'App/constants/auth'
 import User from 'App/Models/User'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 

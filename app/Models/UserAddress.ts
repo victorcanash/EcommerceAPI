@@ -1,6 +1,6 @@
 import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 
-import { AddressTypes, CountryOptions } from 'App/Constants/Addresses'
+import { AddressTypes, CountryOptions } from 'App/constants/addresses'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import User from 'App/Models/User'
 
