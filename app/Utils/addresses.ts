@@ -1,4 +1,4 @@
-import { CountryOptions } from 'App/constants/addresses'
+import { CountryOptions } from 'App/Constants/addresses'
 
 export const getCountryCode = (countryName: CountryOptions) => {
   const indexOfS = Object.values(CountryOptions).indexOf(countryName as unknown as CountryOptions)

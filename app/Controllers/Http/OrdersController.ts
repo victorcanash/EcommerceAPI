@@ -1,7 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import I18n from '@ioc:Adonis/Addons/I18n'
 
-import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/constants/lists'
+import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import Order from 'App/Models/Order'
 import OrdersService from 'App/Services/OrdersService'
 import UsersService from 'App/Services/UsersService'

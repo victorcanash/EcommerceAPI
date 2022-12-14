@@ -2,7 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
-import { CountryOptions } from 'App/constants/addresses'
+import { CountryOptions } from 'App/Constants/addresses'
 
 export default class UpdateUAddressesValidator {
   constructor(protected ctx: HttpContextContract) {}

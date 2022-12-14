@@ -1,7 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/constants/lists'
-import { AddressTypes } from 'App/constants/addresses'
+import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
+import { AddressTypes } from 'App/Constants/addresses'
 import User from 'App/Models/User'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'

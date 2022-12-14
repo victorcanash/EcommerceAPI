@@ -1,7 +1,7 @@
 import { BasePolicy as BouncerBasePolicy } from '@ioc:Adonis/Addons/Bouncer'
 
 import User from 'App/Models/User'
-import { Roles } from 'App/constants/auth'
+import { Roles } from 'App/Constants/auth'
 
 export default class BasePolicy extends BouncerBasePolicy {
   public async before(user: User | null, _actionName: string) {

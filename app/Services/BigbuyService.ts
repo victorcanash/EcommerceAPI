@@ -2,7 +2,7 @@ import Env from '@ioc:Adonis/Core/Env'
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 
-import { CountryOptions } from 'App/constants/addresses'
+import { CountryOptions } from 'App/Constants/addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { getCountryCode } from 'App/Utils/addresses'
