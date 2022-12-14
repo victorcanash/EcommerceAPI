@@ -12,8 +12,8 @@
     "format": "prettier --write ."
   },
   "engines": {
-    "node": "18.9.0",
-    "npm": "8.19.1"
+    "node": "16.18.0",
+    "npm": "8.19.2"
   },
   "eslintConfig": {
     "extends": [
