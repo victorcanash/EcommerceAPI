@@ -2,7 +2,7 @@ import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
-import { CountryOptions } from 'App/Constants/addresses'
+import { addressSchema } from 'App/Validators/shared'
 
 export default class CreateOrderValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -17,15 +17,7 @@ export default class CreateOrderValidator {
     braintreeTransactionId: schema.string({}, [
       rules.unique({ table: 'orders', column: 'braintree_transaction_id' }),
     ]),
-    shipping: schema.object().members({
-      firstName: schema.string(),
-      lastName: schema.string(),
-      addressLine1: schema.string(),
-      addressLine2: schema.string.optional(),
-      postalCode: schema.string(),
-      locality: schema.string(),
-      country: schema.enum(Object.values(CountryOptions)),
-    }),
+    shipping: addressSchema,
     products: schema.array([rules.minLength(1)]).members(
       schema.object().members({
         quantity: schema.number(),

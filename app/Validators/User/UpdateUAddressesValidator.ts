@@ -2,7 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
-import { CountryOptions } from 'App/Constants/addresses'
+import { addressSchema } from 'App/Validators/shared'
 
 export default class UpdateUAddressesValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -10,24 +10,8 @@ export default class UpdateUAddressesValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    billing: schema.object().members({
-      firstName: schema.string(),
-      lastName: schema.string(),
-      addressLine1: schema.string(),
-      addressLine2: schema.string.optional(),
-      postalCode: schema.string(),
-      locality: schema.string(),
-      country: schema.enum(Object.values(CountryOptions)),
-    }),
-    shipping: schema.object().members({
-      firstName: schema.string(),
-      lastName: schema.string(),
-      addressLine1: schema.string(),
-      addressLine2: schema.string.optional(),
-      postalCode: schema.string(),
-      locality: schema.string(),
-      country: schema.enum(Object.values(CountryOptions)),
-    }),
+    billing: addressSchema,
+    shipping: addressSchema,
   })
 
   public messages: CustomMessages = {}
