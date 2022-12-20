@@ -52,7 +52,7 @@ export default class AuthController {
 
     const user = await UsersService.getUserByEmail(validatedData.email, true)
     if (!user.isActivated) {
-      throw new ConflictException(`User with email ${validatedData.email} was already activated`)
+      throw new ConflictException(`User with email ${validatedData.email} is not activated yet`)
     }
     if (user.lockedOut) {
       throw new PermissionException(`User with email ${validatedData.email} is locked out`)
