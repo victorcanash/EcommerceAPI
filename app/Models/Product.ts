@@ -11,20 +11,14 @@ import {
   scope,
 } from '@ioc:Adonis/Lucid/Orm'
 
-import AppBaseModel from 'App/Models/AppBaseModel'
+import ProductBaseModel from 'App/Models/ProductBaseModel'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 
-export default class Product extends AppBaseModel {
+export default class Product extends ProductBaseModel {
   @column()
   public categoryId: number
-
-  @column()
-  public name: string
-
-  @column()
-  public description: string
 
   @column({ serializeAs: null })
   public images: string
@@ -95,17 +89,31 @@ export default class Product extends AppBaseModel {
       query
         .where((query) => {
           query
-            .where('name', 'ILIKE', `%${keywords}%`)
-            .orWhere('description', 'ILIKE', `%${keywords}%`)
+            .whereHas('name', (query) => {
+              query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
+            })
+            .orWhereHas('description', (query) => {
+              query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
+            })
             .orWhereHas('category', (query) => {
               query
-                .where('name', 'ILIKE', `%${keywords}%`)
-                .orWhere('description', 'ILIKE', `%${keywords}%`)
+                .whereHas('name', (query) => {
+                  query
+                    .where('en', 'ILIKE', `%${keywords}%`)
+                    .orWhere('es', 'ILIKE', `%${keywords}%`)
+                })
+                .orWhereHas('description', (query) => {
+                  query
+                    .where('en', 'ILIKE', `%${keywords}%`)
+                    .orWhere('es', 'ILIKE', `%${keywords}%`)
+                })
             })
         })
         .whereHas('category', (query) => {
           if (categoryName) {
-            query.where('name', categoryName)
+            query.whereHas('name', (query) => {
+              query.where('en', categoryName).orWhere('es', categoryName)
+            })
           }
         })
     }

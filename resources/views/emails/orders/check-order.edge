@@ -88,14 +88,14 @@
                   @each(product in order.bigbuy.products)
                     <li>
                       @if(product.inventory)
-                        {{product.inventory.product.name}}
+                        {{product.inventory.product.name.current}}
                       @else
                         {{product.name}}
                       @end
                       <ul style="list-style-type: disc;">
                         @if(product.inventory)
                           <li>
-                            {{product.inventory.name}}
+                            {{product.inventory.name.current}}
                           </li>
                         @else
                           <li>

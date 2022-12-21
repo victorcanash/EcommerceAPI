@@ -6,8 +6,18 @@ export default class extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-      table.string('name', 255).notNullable()
-      table.string('description', 255).notNullable()
+      table
+        .integer('name_id')
+        .unsigned()
+        .references('id')
+        .inTable('localized_texts')
+        .onDelete('CASCADE')
+      table
+        .integer('description_id')
+        .unsigned()
+        .references('id')
+        .inTable('localized_texts')
+        .onDelete('CASCADE')
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

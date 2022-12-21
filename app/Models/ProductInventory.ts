@@ -7,23 +7,17 @@ import {
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 
-import AppBaseModel from 'App/Models/AppBaseModel'
+import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
 import BigbuyService from 'App/Services/BigbuyService'
 import { roundTwoDecimals } from 'App/Utils/numbers'
 
-export default class ProductInventory extends AppBaseModel {
+export default class ProductInventory extends ProductBaseModel {
   @column()
   public productId: number
 
   @column()
   public sku: string
-
-  @column()
-  public name: string
-
-  @column()
-  public description: string
 
   @column()
   public price: number

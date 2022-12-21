@@ -2,6 +2,7 @@ import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
+import { reqLocalizedTextSchema } from 'App/Validators/shared'
 
 export default class CreatePInventoryValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -11,8 +12,8 @@ export default class CreatePInventoryValidator {
   public schema = schema.create({
     productId: schema.number([rules.exists({ table: 'products', column: 'id' })]),
     sku: schema.string({}, [rules.unique({ table: 'product_inventories', column: 'sku' })]),
-    name: schema.string(),
-    description: schema.string(),
+    name: reqLocalizedTextSchema,
+    description: reqLocalizedTextSchema,
     price: schema.number(),
   })
 

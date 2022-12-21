@@ -12,8 +12,18 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('product_categories')
         .onDelete('CASCADE')
-      table.string('name', 255).notNullable()
-      table.string('description', 255).notNullable()
+      table
+        .integer('name_id')
+        .unsigned()
+        .references('id')
+        .inTable('localized_texts')
+        .onDelete('CASCADE')
+      table
+        .integer('description_id')
+        .unsigned()
+        .references('id')
+        .inTable('localized_texts')
+        .onDelete('CASCADE')
       table.text('images', 'longtext').nullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()

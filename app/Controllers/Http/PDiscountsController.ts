@@ -11,7 +11,14 @@ export default class PDiscountsController {
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePDiscountValidator)
 
-    const productDiscount = await ProductDiscount.create(validatedData)
+    const textsData = await ProductsService.createLocalizedTexts(
+      validatedData.name,
+      validatedData.description
+    )
+    const productDiscount = await ProductDiscount.create({
+      ...validatedData,
+      ...textsData,
+    })
 
     const successMsg = 'Successfully created product discount'
     logRouteSuccess(request, successMsg)
@@ -27,6 +34,11 @@ export default class PDiscountsController {
 
     const validatedData = await request.validate(UpdatePDiscountValidator)
 
+    await ProductsService.updateLocalizedTexts(
+      productDiscount,
+      validatedData.name,
+      validatedData.description
+    )
     productDiscount.merge(validatedData)
     await productDiscount.save()
 

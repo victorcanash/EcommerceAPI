@@ -84,7 +84,14 @@ export default class ProductsController {
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateProductValidator)
 
-    const product = await Product.create(validatedData)
+    const textsData = await ProductsService.createLocalizedTexts(
+      validatedData.name,
+      validatedData.description
+    )
+    const product = await Product.create({
+      ...validatedData,
+      ...textsData,
+    })
 
     const successMsg = 'Successfully created product'
     logRouteSuccess(request, successMsg)
@@ -100,6 +107,11 @@ export default class ProductsController {
 
     const validatedData = await request.validate(UpdateProductValidator)
 
+    await ProductsService.updateLocalizedTexts(
+      product,
+      validatedData.name,
+      validatedData.description
+    )
     product.merge(validatedData)
     await product.save()
 

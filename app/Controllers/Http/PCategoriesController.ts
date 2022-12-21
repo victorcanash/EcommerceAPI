@@ -37,7 +37,11 @@ export default class PCategoriesController {
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePCategoryValidator)
 
-    const productCategory = await ProductCategory.create(validatedData)
+    const textsData = await ProductsService.createLocalizedTexts(
+      validatedData.name,
+      validatedData.description
+    )
+    const productCategory = await ProductCategory.create(textsData)
 
     const successMsg = 'Successfully created product category'
     logRouteSuccess(request, successMsg)
@@ -53,8 +57,11 @@ export default class PCategoriesController {
 
     const validatedData = await request.validate(UpdatePCategoryValidator)
 
-    productCategory.merge(validatedData)
-    await productCategory.save()
+    await ProductsService.updateLocalizedTexts(
+      productCategory,
+      validatedData.name,
+      validatedData.description
+    )
 
     const successMsg = `Successfully updated product category by id ${id}`
     logRouteSuccess(request, successMsg)

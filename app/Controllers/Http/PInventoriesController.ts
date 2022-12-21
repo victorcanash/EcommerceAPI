@@ -11,7 +11,14 @@ export default class PInventoriesController {
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePInventoryValidator)
 
-    const productInventory = await ProductInventory.create(validatedData)
+    const textsData = await ProductsService.createLocalizedTexts(
+      validatedData.name,
+      validatedData.description
+    )
+    const productInventory = await ProductInventory.create({
+      ...validatedData,
+      ...textsData,
+    })
 
     const successMsg = 'Successfully created product inventory'
     logRouteSuccess(request, successMsg)
@@ -27,6 +34,11 @@ export default class PInventoriesController {
 
     const validatedData = await request.validate(UpdatePInventoryValidator)
 
+    await ProductsService.updateLocalizedTexts(
+      productInventory,
+      validatedData.name,
+      validatedData.description
+    )
     productInventory.merge(validatedData)
     await productInventory.save()
 

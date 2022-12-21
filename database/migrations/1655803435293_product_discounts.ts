@@ -12,8 +12,18 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('products')
         .onDelete('CASCADE')
-      table.string('name', 255).notNullable()
-      table.string('description', 255).notNullable()
+      table
+        .integer('name_id')
+        .unsigned()
+        .references('id')
+        .inTable('localized_texts')
+        .onDelete('CASCADE')
+      table
+        .integer('description_id')
+        .unsigned()
+        .references('id')
+        .inTable('localized_texts')
+        .onDelete('CASCADE')
       table.float('discount_percent', 255).notNullable()
       table.boolean('active').defaultTo(true).notNullable()
 

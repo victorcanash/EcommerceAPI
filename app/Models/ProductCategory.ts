@@ -1,15 +1,9 @@
-import { column, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import { hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 
-import AppBaseModel from 'App/Models/AppBaseModel'
+import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
 
-export default class ProductCategory extends AppBaseModel {
-  @column()
-  public name: string
-
-  @column()
-  public description: string
-
+export default class ProductCategory extends ProductBaseModel {
   @hasMany(() => Product)
   public products: HasMany<typeof Product>
 }

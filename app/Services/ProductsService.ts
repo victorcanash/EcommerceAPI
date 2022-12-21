@@ -1,9 +1,11 @@
 import Drive from '@ioc:Adonis/Core/Drive'
 
+import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
+import LocalizedText from 'App/Models/LocalizedText'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 
@@ -46,6 +48,41 @@ export default class ProductsService {
     }
 
     return productImages[id]
+  }
+
+  public static async createLocalizedTexts(
+    name: {
+      en: string
+      es: string
+    },
+    description: {
+      en: string
+      es: string
+    }
+  ) {
+    const nameText = await LocalizedText.create(name)
+    const descriptionText = await LocalizedText.create(description)
+    return {
+      nameId: nameText.id,
+      descriptionId: descriptionText.id,
+    }
+  }
+
+  public static async updateLocalizedTexts(
+    productBaseModel: ProductBaseModel,
+    name: {
+      en: string | undefined
+      es: string | undefined
+    },
+    description: {
+      en: string | undefined
+      es: string | undefined
+    }
+  ) {
+    productBaseModel.name.merge(name)
+    await productBaseModel.name.save()
+    productBaseModel.description.merge(description)
+    await productBaseModel.description.save()
   }
 
   private static async getProductByField(

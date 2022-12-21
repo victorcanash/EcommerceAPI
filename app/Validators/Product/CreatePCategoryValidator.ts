@@ -1,7 +1,8 @@
-import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
+import { reqLocalizedTextSchema } from 'App/Validators/shared'
 
 export default class CreatePCategoryValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -9,8 +10,8 @@ export default class CreatePCategoryValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    name: schema.string({}, [rules.unique({ table: 'product_categories', column: 'name' })]),
-    description: schema.string(),
+    name: reqLocalizedTextSchema,
+    description: reqLocalizedTextSchema,
   })
 
   public messages: CustomMessages = {}
