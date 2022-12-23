@@ -51,7 +51,7 @@ const databaseConfig: DatabaseConfig = {
       healthCheck: false,
       debug: false,
     },
-    pg_heroku: {
+    pg_url: {
       client: 'pg',
       connection: {
         host: Env.get('PG_HOST', DATABASE_URL.hostname),
