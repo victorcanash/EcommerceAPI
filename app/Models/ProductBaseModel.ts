@@ -5,10 +5,9 @@ import {
   beforeFetch,
   beforeFind,
   afterDelete,
-  beforeCreate,
+  afterCreate,
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import LocalizedText from 'App/Models/LocalizedText'
@@ -31,28 +30,32 @@ export default class ProductBaseModel extends AppBaseModel {
   public description: BelongsTo<typeof LocalizedText>
 
   @beforeFetch()
-  public static async loadDataOnFetch(query: ModelQueryBuilderContract<typeof ProductBaseModel>) {
-    Logger.error('beforeFetch')
-    query.preload('name').preload('description')
+  public static async onFetch(query: ModelQueryBuilderContract<typeof ProductBaseModel>) {
+    this.loadDataQuery(query)
   }
 
   @beforeFind()
-  public static async loadDataOnFind(query: ModelQueryBuilderContract<typeof ProductBaseModel>) {
-    Logger.error('beforeFind')
-    query.preload('name').preload('description')
+  public static async onFind(query: ModelQueryBuilderContract<typeof ProductBaseModel>) {
+    this.loadDataQuery(query)
   }
 
-  @beforeCreate()
-  public static async loadDataOnCreate(model: ProductBaseModel) {
-    Logger.error('beforeCreate')
-    await model.load('name')
-    await model.load('description')
+  @afterCreate()
+  public static async onCreate(model: ProductBaseModel) {
+    this.loadDataModel(model)
   }
 
   @afterDelete()
-  public static async deleteLocalizedTexts(model: ProductBaseModel) {
-    Logger.error(JSON.stringify(model))
+  public static async onDelete(model: ProductBaseModel) {
     await model.name.delete()
     await model.description.delete()
+  }
+
+  private static async loadDataQuery(query: ModelQueryBuilderContract<typeof ProductBaseModel>) {
+    query.preload('name').preload('description')
+  }
+
+  private static async loadDataModel(model: ProductBaseModel) {
+    await model.load('name')
+    await model.load('description')
   }
 }
