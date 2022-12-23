@@ -117,7 +117,15 @@ export default class ProductsService {
 
   private static async getCategoryByField(field: string, value: string | number) {
     let category: ProductCategory | null = null
-    category = await ProductCategory.findBy(field, value)
+    if (field === 'name' || field === 'description') {
+      category = await ProductCategory.query()
+        .whereHas(field, (query) => {
+          query.where('en', value).orWhere('es', value)
+        })
+        .first()
+    } else {
+      category = await ProductCategory.findBy(field, value)
+    }
     if (!category) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product category`)
     }
