@@ -18,6 +18,7 @@ export default class CreateUserValidator {
     firstName: schema.string(),
     lastName: schema.string(),
     birthday: schema.date(),
+    getEmails: schema.boolean(),
   })
 
   public messages: CustomMessages = {}

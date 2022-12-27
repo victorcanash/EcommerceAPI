@@ -12,6 +12,7 @@ export default class UpdateUserValidator {
     firstName: schema.string.optional(),
     lastName: schema.string.optional(),
     birthday: schema.date.optional(),
+    getEmails: schema.boolean.optional(),
   })
 
   public messages: CustomMessages = {}

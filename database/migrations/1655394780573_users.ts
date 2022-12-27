@@ -17,6 +17,7 @@ export default class UsersSchema extends BaseSchema {
       table.string('first_name', 255).notNullable()
       table.string('last_name', 255).notNullable()
       table.date('birthday').notNullable()
+      table.boolean('get_emails').notNullable()
       table.boolean('locked_out').defaultTo(false).notNullable()
       table.string('braintree_id', 64).defaultTo('')
 

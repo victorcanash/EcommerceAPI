@@ -48,6 +48,9 @@ export default class User extends AppBaseModel {
   public birthday: DateTime
 
   @column()
+  public getEmails: boolean
+
+  @column()
   public lockedOut: boolean
 
   @column()
