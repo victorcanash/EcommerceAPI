@@ -41,13 +41,12 @@ export default class ProductBaseModel extends AppBaseModel {
 
   @afterCreate()
   public static async onCreate(model: ProductBaseModel) {
-    this.loadDataModel(model)
+    await this.loadDataModel(model)
   }
 
   @afterDelete()
   public static async onDelete(model: ProductBaseModel) {
-    await model.name.delete()
-    await model.description.delete()
+    await this.deleteDataModel(model)
   }
 
   private static async loadDataQuery(query: ModelQueryBuilderContract<typeof ProductBaseModel>) {
@@ -57,5 +56,10 @@ export default class ProductBaseModel extends AppBaseModel {
   private static async loadDataModel(model: ProductBaseModel) {
     await model.load('name')
     await model.load('description')
+  }
+
+  private static async deleteDataModel(model: ProductBaseModel) {
+    await model.name.delete()
+    await model.description.delete()
   }
 }
