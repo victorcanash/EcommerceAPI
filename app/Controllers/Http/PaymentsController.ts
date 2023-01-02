@@ -37,10 +37,17 @@ export default class PaymentsController {
       validatedData.paymentMethodNonce
     )
 
-    user.merge({
-      braintreeId: braintreeResult.transaction.customer.id,
-    })
-    await user.save()
+    if (validatedData.remember) {
+      user.merge({
+        braintreeId: braintreeResult.transaction.customer.id,
+      })
+      await user.save()
+    } else if (user.braintreeId) {
+      user.merge({
+        braintreeId: '',
+      })
+      await user.save()
+    }
 
     const braintreeTransactionId = braintreeResult.transaction.id
 
