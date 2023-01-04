@@ -34,6 +34,18 @@ export default class PCategoriesController {
     } as PCategoriesResponse)
   }
 
+  public async show({ params: { id }, request, response }: HttpContextContract) {
+    const productCategory = await ProductsService.getCategoryById(id)
+
+    const successMsg = `Successfully got product category by id ${id}`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      productCategory: productCategory,
+    } as PCategoryResponse)
+  }
+
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePCategoryValidator)
 

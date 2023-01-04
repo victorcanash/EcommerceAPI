@@ -87,7 +87,6 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-categories', 'PCategoriesController')
-    .except(['show'])
     .middleware({
       store: ['auth:api', 'admin'],
       update: ['auth:api', 'admin'],
