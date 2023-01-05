@@ -6,6 +6,7 @@ import ProductsService from 'App/Services/ProductsService'
 import { PCategoriesResponse, PCategoryResponse, BasicResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
+import FilterPCategoryValidator from 'App/Validators/Product/FilterPCategoryValidator'
 import CreatePCategoryValidator from 'App/Validators/Product/CreatePCategoryValidator'
 import UpdatePCategoryValidator from 'App/Validators/Product/UpdatePCategoryValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
@@ -20,7 +21,17 @@ export default class PCategoriesController {
     const sortBy = validatedSortData.sortBy || defaultSortBy
     const order = validatedSortData.order || defaultOrder
 
-    const categories = await ProductCategory.query().orderBy(sortBy, order).paginate(page, limit)
+    const validatedFilterData = await request.validate(FilterPCategoryValidator)
+    const ids = validatedFilterData.ids || []
+
+    const categories = await ProductCategory.query()
+      .where((query) => {
+        if (ids.length > 0) {
+          query.whereIn('id', ids)
+        }
+      })
+      .orderBy(sortBy, order)
+      .paginate(page, limit)
     const result = categories.toJSON()
 
     const successMsg = 'Successfully got product categories'
