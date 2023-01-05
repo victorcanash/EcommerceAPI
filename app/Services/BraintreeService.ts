@@ -127,7 +127,7 @@ export default class BraintreeService {
     let transactionResponse: braintree.ValidatedResponse<braintree.Transaction>
     try {
       transactionResponse = await this.gateway.transaction.sale({
-        amount: amount.toString(),
+        amount: amount.toFixed(2),
         paymentMethodNonce: paymentMethodNonce,
         // deviceData: deviceDataFromTheClient,
         customerId,
