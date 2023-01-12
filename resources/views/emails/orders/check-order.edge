@@ -110,7 +110,7 @@
                           </li>
                         @if(product.inventory)
                           <li>
-                            {{(product.inventory.realPrice * product.quantity).toFixed(2)}} €
+                            {{ t('messages.emails.checkOrder.totalField', { amount: (product.inventory.realPrice * product.quantity).toFixed(2) }) }} €
                           </li>
                         @end
                       </ul>
