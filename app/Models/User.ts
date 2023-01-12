@@ -100,6 +100,7 @@ export default class User extends AppBaseModel {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
+        .from(Env.get('SMTP_EMAIL'))
         .to(this.email)
         .subject(i18n.formatMessage('messages.emails.auth.activation.subject'))
         .htmlView('emails/auth', {
@@ -124,6 +125,7 @@ export default class User extends AppBaseModel {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
+        .from(Env.get('SMTP_EMAIL'))
         .to(this.email)
         .subject(i18n.formatMessage('messages.emails.auth.resetPsw.subject'))
         .htmlView('emails/auth', {
@@ -158,7 +160,7 @@ export default class User extends AppBaseModel {
       ? i18n.formatMessage('messages.emails.auth.revertEmail.button')
       : i18n.formatMessage('messages.emails.auth.updateEmail.button')
     Mail.send((message) => {
-      message.to(email).subject(subject).htmlView('emails/auth', {
+      message.from(Env.get('SMTP_EMAIL')).to(email).subject(subject).htmlView('emails/auth', {
         i18n,
         appName,
         appDomain,
@@ -180,6 +182,7 @@ export default class User extends AppBaseModel {
     const currentYear = new Date().getFullYear()
     Mail.send((message) => {
       message
+        .from(Env.get('SMTP_EMAIL'))
         .to(this.email)
         .subject(i18n.formatMessage('messages.emails.checkOrder.subject'))
         .htmlView('emails/orders/check-order', {
@@ -212,7 +215,8 @@ export default class User extends AppBaseModel {
     const currentDate = new Date().toLocaleDateString()
     Mail.send((message) => {
       message
-        .to(Env.get('SMTP_USERNAME'))
+        .from(Env.get('SMTP_EMAIL'))
+        .to(Env.get('SMTP_EMAIL'))
         .subject('Error creating new order')
         .htmlView('emails/orders/error-create-order', {
           locale: i18n.locale,
@@ -240,7 +244,8 @@ export default class User extends AppBaseModel {
     const currentDate = new Date().toLocaleDateString()
     Mail.send((message) => {
       message
-        .to(Env.get('SMTP_USERNAME'))
+        .from(Env.get('SMTP_EMAIL'))
+        .to(Env.get('SMTP_EMAIL'))
         .subject('Error sending new order email')
         .htmlView('emails/orders/error-get-order-email', {
           locale: i18n.locale,
