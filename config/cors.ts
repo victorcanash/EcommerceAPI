@@ -45,7 +45,15 @@ const corsConfig: CorsConfig = {
   |                     one of the above values.
   |
   */
-  origin: [Env.get('DEV_CORS_ORIGIN', ''), Env.get('PROD_CORS_ORIGIN', '')],
+  origin: [
+    Env.get('DEV_CORS_ORIGIN', ''),
+    Env.get('PROD_CORS_ORIGIN_1', ''),
+    Env.get('PROD_CORS_ORIGIN_2', ''),
+    Env.get('PROD_CORS_ORIGIN_3', ''),
+    Env.get('PROD_CORS_ORIGIN_4', ''),
+    Env.get('PROD_CORS_ORIGIN_5', ''),
+    Env.get('PROD_CORS_ORIGIN_6', ''),
+  ],
 
   /*
   |--------------------------------------------------------------------------
