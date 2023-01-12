@@ -37,7 +37,7 @@ const i18nConfig: I18nConfig = {
   | is not supported by the your app
   |
   */
-  defaultLocale: 'en',
+  defaultLocale: 'es',
 
   /*
   |--------------------------------------------------------------------------
@@ -49,7 +49,7 @@ const i18nConfig: I18nConfig = {
   | inside the `resources/lang` directory.
   |
   */
-  supportedLocales: ['en', 'es'],
+  supportedLocales: ['es', 'en'],
 
   /*
   |--------------------------------------------------------------------------
