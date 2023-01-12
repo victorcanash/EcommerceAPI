@@ -20,6 +20,9 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
+Route.get('', async () => {
+  return { hello: 'Welcome to Ecommerce API made by Victor Canas' }
+})
 Route.group(() => {
   Route.get('', async () => {
     return { hello: 'Welcome to Ecommerce API made by Victor Canas' }
