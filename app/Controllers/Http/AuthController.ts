@@ -2,7 +2,7 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
-import Logger from '@ioc:Adonis/Core/Logger'
+
 import UsersService from 'App/Services/UsersService'
 import BraintreeService from 'App/Services/BraintreeService'
 import {
@@ -66,7 +66,7 @@ export default class AuthController {
       .catch((_error) => {
         throw new ModelNotFoundException(`Invalid password to login user`)
       })
-    Logger.error('CUSTOM ERROR PASA X AQUI')
+
     const braintreeService = new BraintreeService()
     let braintreeToken = await braintreeService.generateClientToken(user.braintreeId)
 

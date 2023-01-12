@@ -1,5 +1,5 @@
 import Env from '@ioc:Adonis/Core/Env'
-import Logger from '@ioc:Adonis/Core/Logger'
+
 import braintree, { BraintreeGateway, KeyGatewayConfig } from 'braintree'
 
 import User from 'App/Models/User'
@@ -66,12 +66,10 @@ export default class BraintreeService {
         if (result && result.clientToken) {
           clientToken = result.clientToken
         } else {
-          Logger.error('CUSTOM ERROR2')
           throw new InternalServerException('Something went wrong, empty braintree client token')
         }
       })
       .catch((error) => {
-        Logger.error('CUSTOM ERROR: ' + error.message)
         throw new InternalServerException(error.message)
       })
     return clientToken
