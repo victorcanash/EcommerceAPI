@@ -8,7 +8,7 @@ import InternalServerException from 'App/Exceptions/InternalServerException'
 import { getCountryCode } from 'App/Utils/addresses'
 
 export default class BigbuyService {
-  public static async getProductInfo(sku: string) {
+  public static async getProductInfo(sku: string, restrict = false) {
     let result = {
       id: 0,
       name: '',
@@ -31,7 +31,9 @@ export default class BigbuyService {
         }
       })
       .catch((error) => {
-        throw new ModelNotFoundException(error.message)
+        if (restrict) {
+          throw new ModelNotFoundException(error.message)
+        }
       })
     return result
   }
