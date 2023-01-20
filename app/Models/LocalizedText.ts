@@ -12,10 +12,11 @@ export default class LocalizedText extends AppBaseModel {
 
   @computed()
   public get current() {
-    const ctx = HttpContext.get()
+    /*const ctx = HttpContext.get()
     if (ctx && ctx.i18n.locale === 'es') {
       return this.es
     }
-    return this.en
+    return this.en*/
+    return this.es
   }
 }
