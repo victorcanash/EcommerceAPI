@@ -1,5 +1,5 @@
 import { column, computed } from '@ioc:Adonis/Lucid/Orm'
-import HttpContext from '@ioc:Adonis/Core/HttpContext'
+// import HttpContext from '@ioc:Adonis/Core/HttpContext'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 
