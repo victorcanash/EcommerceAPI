@@ -6,6 +6,7 @@ import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import LocalizedText from 'App/Models/LocalizedText'
+import BigbuyService from 'App/Services/BigbuyService'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 
@@ -107,11 +108,19 @@ export default class ProductsService {
     if (!product) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product`)
     }
+
     if (bigbuyData && product.inventories && product.inventories.length > 0) {
-      for (let i = 0; i < product.inventories.length; i++) {
-        await product.inventories[i].loadBigbuyData()
-      }
+      let skus = [] as string[]
+      product.inventories.forEach((inventory) => {
+        skus.push(inventory.sku)
+      })
+      const stocks = await BigbuyService.getProductsStocks(skus)
+      product.inventories.forEach((inventory) => {
+        let stock = stocks.find((stock) => stock.sku === inventory.sku)
+        inventory.bigbuyData.quantity = stock?.quantity || 0
+      })
     }
+
     return product
   }
 
@@ -142,9 +151,13 @@ export default class ProductsService {
     if (!inventory) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product inventory`)
     }
+
     if (bigbuyData) {
-      inventory.loadBigbuyData()
+      const stocks = await BigbuyService.getProductsStocks([inventory.sku])
+      inventory.bigbuyData.quantity =
+        stocks.length > 0 && stocks[0].sku === inventory.sku ? stocks[0].quantity : 0
     }
+
     return inventory
   }
 

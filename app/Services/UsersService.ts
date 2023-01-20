@@ -2,6 +2,7 @@ import { AuthContract, GuardsList } from '@ioc:Adonis/Addons/Auth'
 
 import { Roles } from 'App/Constants/auth'
 import User from 'App/Models/User'
+import BigbuyService from 'App/Services/BigbuyService'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class UsersService {
@@ -42,13 +43,23 @@ export default class UsersService {
     if (!user) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting user`)
     }
+
     if (bigbuyData && user.cart?.items && user.cart.items.length > 0) {
-      for (let i = 0; i < user.cart.items.length; i++) {
-        if (user.cart.items[i].inventory) {
-          await user.cart.items[i].inventory.loadBigbuyData()
+      let skus = [] as string[]
+      user.cart.items.forEach((item) => {
+        if (item.inventory) {
+          skus.push(item.inventory.sku)
         }
-      }
+      })
+      const stocks = await BigbuyService.getProductsStocks(skus)
+      user.cart.items.forEach((item) => {
+        if (item.inventory) {
+          let stock = stocks.find((stock) => stock.sku === item.inventory.sku)
+          item.inventory.bigbuyData.quantity = stock?.quantity || 0
+        }
+      })
     }
+
     return user
   }
 }
