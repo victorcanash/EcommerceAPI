@@ -47,6 +47,7 @@
     "@japa/preset-adonis": "^1.1.0",
     "@japa/runner": "^2.0.9",
     "@types/braintree": "^3.3.3",
+    "@types/uuid": "^9.0.0",
     "adonis-preset-ts": "^2.1.0",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
@@ -78,6 +79,7 @@
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.21",
-    "url-parse": "^1.5.10"
+    "url-parse": "^1.5.10",
+    "uuid": "^9.0.0"
   }
 }

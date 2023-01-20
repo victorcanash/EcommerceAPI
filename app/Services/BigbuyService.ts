@@ -1,6 +1,7 @@
 import Env from '@ioc:Adonis/Core/Env'
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 
 import { CountryOptions } from 'App/Constants/addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
@@ -189,7 +190,7 @@ export default class BigbuyService {
         `${Env.get('BIGBUY_API_URL')}/rest/order/create.json`,
         {
           order: {
-            internalReference,
+            internalReference: `${internalReference}-${uuidv4()}`,
             language: 'es',
             paymentMethod: 'moneybox',
             carriers: [
