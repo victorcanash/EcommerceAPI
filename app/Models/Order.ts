@@ -11,6 +11,9 @@ export default class Order extends AppBaseModel {
   public userId: number
 
   @column()
+  public bigbuyId?: string
+
+  @column()
   public braintreeTransactionId: string
 
   @computed()
@@ -66,8 +69,8 @@ export default class Order extends AppBaseModel {
   }
 
   public async loadBigbuyData() {
-    if (this.bigbuyData.id <= 0) {
-      const orderInfo = await BigbuyService.getOrderInfo(this.id.toString())
+    if (this.bigbuyData.id <= 0 && this.bigbuyId) {
+      const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
       const products = [] as {
         id: string
         reference: string

@@ -110,12 +110,14 @@ export default class OrdersController {
     }
 
     try {
-      await BigbuyService.createOrder(
+      const bigbuyId = await BigbuyService.createOrder(
         order.id.toString(),
         user.email,
         validatedData.shipping,
         orderProducts
       )
+      order.merge({ bigbuyId })
+      await order.save()
     } catch (error) {
       await order.delete()
       throw new InternalServerException(error.message)

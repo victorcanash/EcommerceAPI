@@ -72,7 +72,14 @@ export default class PaymentsController {
     await CartItem.query().whereIn('id', cartItemsId).delete()
 
     try {
-      await BigbuyService.createOrder(order.id.toString(), user.email, user.shipping, orderProducts)
+      const bigbuyId = await BigbuyService.createOrder(
+        order.id.toString(),
+        user.email,
+        user.shipping,
+        orderProducts
+      )
+      order.merge({ bigbuyId })
+      await order.save()
     } catch (error) {
       await order.delete()
       await user.sendErrorCreateOrderEmail(

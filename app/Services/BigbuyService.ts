@@ -134,19 +134,7 @@ export default class BigbuyService {
       headers: this.getAuthHeaders(),
     }
     await axios
-      .get(`${Env.get('BIGBUY_API_URL')}/rest/order/reference/${orderId}.json`, options)
-      .then(async (response: AxiosResponse) => {
-        if (response.status === 200) {
-          result.id = response.data.id
-        } else {
-          throw new Error('Something went wrong')
-        }
-      })
-      .catch((error) => {
-        throw new ModelNotFoundException(error.message)
-      })
-    await axios
-      .get(`${Env.get('BIGBUY_API_URL')}/rest/order/${result.id}.json`, options)
+      .get(`${Env.get('BIGBUY_API_URL')}/rest/order/${orderId}.json`, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 200) {
           result = response.data
