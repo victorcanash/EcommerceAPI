@@ -184,9 +184,9 @@ export default class User extends AppBaseModel {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(Env.get('SMTP_EMAIL'))
-        .subject(i18n.formatMessage('messages.emails.contact.subject'))
+        .subject('User Contact')
         .htmlView('emails/contact', {
-          i18n,
+          locale: i18n.locale,
           appName,
           appDomain,
           currentYear,
