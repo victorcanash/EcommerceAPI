@@ -26,6 +26,12 @@
         "button": "Revert Email"
       }
     },
+    "contact": {
+      "subject": "User contact",
+      "description": "{ firstName } wants to contact with you.",
+      "tlfField": "Telephone: { tlf }",
+      "commentsField": "Comments: { comments }"
+    },
     "checkOrder": {
       "subject": "Please check your order",
       "description": "You have realized a new order:",

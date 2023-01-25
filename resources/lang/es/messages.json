@@ -26,6 +26,12 @@
         "button": "Revertir Correo"
       }
     },
+    "contact": {
+      "subject": "Contacto de usuario",
+      "description": "{ firstName } quiere ponerse en contacto contigo.",
+      "tlfField": "Teléfono: { tlf }",
+      "commentsField": "Comentarios: { comments }"
+    },
     "checkOrder": {
       "subject": "Porfavor mira tu pedido",
       "description": "Has realizado un nuevo pedido:",

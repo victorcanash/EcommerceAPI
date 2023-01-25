@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  </head>
+  <body style="padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; margin: 0; -ms-text-size-adjust: 100%;" marginheight="0" marginwidth="0">
+    <table cellpadding="8" cellspacing="0" style="padding: 0; width: 100% !important; margin: 0;" border="0">
+      <tr>
+        <td valign="top">
+
+          @!component('emails/header', {
+            i18n,
+            appName,
+            appDomain,
+            user: userContact,
+          })
+
+          <div style="text-align: center;">
+            <p style="font-size: 18px;">
+              {{ t('messages.emails.contact.description', { firstName: userContact.firstName }) }}
+            </p>
+            <ul style="list-style-type: disc; line-height: 24px; display: inline-block; text-align: left;">
+              @if(userContact.tlf)
+                <li>
+                  {{ t('messages.emails.contact.tlfField', { tlf: userContact.tlf }) }}
+                </li>
+              @end
+              <li>
+                {{ t('messages.emails.contact.commentsField', { comments: userContact.comments }) }}
+              </li>
+            </ul>
+          </div>
+
+          @!component('emails/footer', {
+            i18n,
+            appName,
+            currentYear,
+          })
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

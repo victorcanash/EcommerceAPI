@@ -17,6 +17,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
 import UpdateUAddressesValidator from 'App/Validators/User/UpdateUAddressesValidator'
+import SendContactEmailValidator from 'App/Validators/User/SendContactEmailValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class UsersController {
@@ -154,6 +155,24 @@ export default class UsersController {
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
+      message: successMsg,
+    } as BasicResponse)
+  }
+
+  public async sendContactEmail({ response, request, i18n }: HttpContextContract) {
+    const validatedData = await request.validate(SendContactEmailValidator)
+
+    await User.sendContactEmail(i18n, validatedData.appName, validatedData.appDomain, {
+      email: validatedData.email,
+      firstName: validatedData.firstName,
+      tlf: validatedData.tlf,
+      comments: validatedData.comments,
+    })
+
+    const successMsg = `Successfully sent contact email to ${validatedData.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
       message: successMsg,
     } as BasicResponse)
   }

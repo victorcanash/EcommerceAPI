@@ -51,6 +51,7 @@ Route.group(() => {
     })
     .apiOnly()
   Route.put('users/:id/addresses', 'UsersController.updateAddresses').middleware('auth:api')
+  Route.post('users/send-email/contact', 'UsersController.sendContactEmail')
 
   /*
   Route.resource('user-addresses', 'UAddressesController')

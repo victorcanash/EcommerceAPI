@@ -173,6 +173,28 @@ export default class User extends AppBaseModel {
     })
   }
 
+  public static async sendContactEmail(
+    i18n: I18nContract,
+    appName: string,
+    appDomain: string,
+    userContact: { email: string; firstName: string; tlf?: string; comments: string }
+  ) {
+    const currentYear = new Date().getFullYear()
+    Mail.send((message) => {
+      message
+        .from(Env.get('SMTP_EMAIL'))
+        .to(userContact.email)
+        .subject(i18n.formatMessage('messages.emails.contact.subject'))
+        .htmlView('emails/contact', {
+          i18n,
+          appName,
+          appDomain,
+          currentYear,
+          userContact,
+        })
+    })
+  }
+
   public async sendCheckOrderEmail(
     i18n: I18nContract,
     appName: string,
