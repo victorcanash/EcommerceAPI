@@ -29,6 +29,7 @@
     "contact": {
       "subject": "Contacto de usuario",
       "description": "{ firstName } quiere ponerse en contacto contigo.",
+      "emailField": "Correo: { email }",
       "tlfField": "Teléfono: { tlf }",
       "commentsField": "Comentarios: { comments }"
     },

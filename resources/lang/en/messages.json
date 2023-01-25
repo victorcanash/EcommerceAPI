@@ -29,6 +29,7 @@
     "contact": {
       "subject": "User contact",
       "description": "{ firstName } wants to contact with you.",
+      "emailField": "Email: { email }",
       "tlfField": "Telephone: { tlf }",
       "commentsField": "Comments: { comments }"
     },

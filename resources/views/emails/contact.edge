@@ -20,6 +20,9 @@
               {{ t('messages.emails.contact.description', { firstName: userContact.firstName }) }}
             </p>
             <ul style="list-style-type: disc; line-height: 24px; display: inline-block; text-align: left;">
+              <li>
+                {{ t('messages.emails.contact.emailField', { email: userContact.email }) }}
+              </li>
               @if(userContact.tlf)
                 <li>
                   {{ t('messages.emails.contact.tlfField', { tlf: userContact.tlf }) }}
