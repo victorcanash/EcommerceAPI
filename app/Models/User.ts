@@ -183,7 +183,7 @@ export default class User extends AppBaseModel {
     Mail.send((message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
-        .to(userContact.email)
+        .to(Env.get('SMTP_EMAIL'))
         .subject(i18n.formatMessage('messages.emails.contact.subject'))
         .htmlView('emails/contact', {
           i18n,
