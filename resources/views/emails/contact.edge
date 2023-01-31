@@ -30,8 +30,11 @@
                   Telephone: {{ userContact.tlf }}
                 </li>
               @end
-              <li style="white-space: pre-line;">
-                Comments:\n {{ userContact.comments }}
+              <li>
+                Comments:
+                <p style="white-space: pre-line;">
+                  {{ userContact.comments }}
+                </p>
               </li>
             </ul>
           </div>
