@@ -155,6 +155,17 @@ export type PInventoryResponse = {
 }
 
 /**
+ * Product inventories JSON response for Controllers
+ */
+export type PInventoriesResponse = {
+  code: number
+  message: string
+  productInventories: ProductInventory[]
+  totalPages: number
+  currentPage: number
+}
+
+/**
  * Order JSON response for Controllers
  */
 export type OrderResponse = {

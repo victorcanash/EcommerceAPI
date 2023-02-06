@@ -106,9 +106,11 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-inventories', 'PInventoriesController')
-    .except(['index', 'show'])
+    .except(['show'])
     .middleware({
-      '*': ['auth:api', 'admin'],
+      store: ['auth:api', 'admin'],
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
     })
     .apiOnly()
 
