@@ -186,6 +186,15 @@ export type OrdersResponse = {
 }
 
 /**
+ * Braintree Token JSON response for Controllers
+ */
+export type BraintreeTokenResponse = {
+  code: number
+  message: string
+  braintreeToken: string
+}
+
+/**
  * Stripe JSON response for Controllers
  */
 /*export type StripeResponse = {

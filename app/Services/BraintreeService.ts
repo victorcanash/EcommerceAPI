@@ -54,8 +54,8 @@ export default class BraintreeService {
     return response
   }
 
-  public async generateClientToken(braintreeId: string) {
-    const customer = await this.getCustomer(braintreeId)
+  public async generateClientToken(braintreeId?: string) {
+    const customer = braintreeId ? await this.getCustomer(braintreeId) : undefined
     let customerId = customer?.id || undefined
     let clientToken = ''
     await this.gateway.clientToken

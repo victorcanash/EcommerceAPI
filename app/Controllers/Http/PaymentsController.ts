@@ -5,12 +5,32 @@ import CartItem from 'App/Models/CartItem'
 import UsersService from 'App/Services/UsersService'
 import BraintreeService from 'App/Services/BraintreeService'
 import BigbuyService from 'App/Services/BigbuyService'
-import { OrderResponse } from 'App/Controllers/Http/types'
+import { BraintreeTokenResponse, OrderResponse } from 'App/Controllers/Http/types'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PaymentsController {
+  public async getBraintreeToken({ request, response, auth }: HttpContextContract) {
+    let braintreeId: string | undefined
+    const validToken = await auth.use('api').check()
+    if (validToken) {
+      const email = await UsersService.getAuthEmail(auth)
+      braintreeId = await (await UsersService.getUserByEmail(email, true)).braintreeId
+    }
+
+    const braintreeService = new BraintreeService()
+    let braintreeToken = await braintreeService.generateClientToken(braintreeId)
+
+    const successMsg = `Successfully got braintree client token`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      braintreeToken: braintreeToken,
+    } as BraintreeTokenResponse)
+  }
+
   public async createTransaction({ request, response, auth, i18n }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth)
     const user = await UsersService.getUserByEmail(email, true)
