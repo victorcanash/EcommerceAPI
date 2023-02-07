@@ -1,6 +1,8 @@
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
-import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
+import ProductInventory from 'App/Models/ProductInventory'
+import BigbuyService from 'App/Services/BigbuyService'
+import { GuestCartCheck, GuestCartCheckItem, GuestCartItem } from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class CartsService {
@@ -40,6 +42,45 @@ export default class CartsService {
         query.where('cartId', cart.id)
       })
       .delete()
+  }
+
+  public static async createGuestCartCheck(items?: GuestCartItem[], bigbuyData = false) {
+    let cart: GuestCartCheck = { items: [] }
+    if (items && items.length > 0) {
+      const inventories = await ProductInventory.query().whereIn(
+        'id',
+        items.map((item) => {
+          return item.inventoryId
+        })
+      )
+      if (inventories.length > 0) {
+        if (bigbuyData) {
+          const stocks = await BigbuyService.getProductsStocks(
+            inventories.map((inventory) => {
+              return inventory.sku
+            })
+          )
+          inventories.forEach((inventory) => {
+            let stock = stocks.find((stock) => stock.sku === inventory.sku)
+            inventory.bigbuyData.quantity = stock?.quantity || 0
+          })
+        }
+        const cartItems: GuestCartCheckItem[] = []
+        items.forEach((item) => {
+          let inventory = inventories.find((inventory) => inventory.id === item.inventoryId)
+          if (inventory) {
+            cartItems.push({
+              inventory,
+              quantity: item.quantity,
+            })
+          }
+        })
+        cart = {
+          items: cartItems,
+        }
+      }
+    }
+    return cart
   }
 
   private static async getCartByField(field: string, value: string | number) {

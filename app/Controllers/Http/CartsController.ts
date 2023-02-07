@@ -1,10 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Cart from 'App/Models/Cart'
-import ProductInventory from 'App/Models/ProductInventory'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
-import BigbuyService from 'App/Services/BigbuyService'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { CheckCartResponse } from 'App/Controllers/Http/types'
 import CheckCartValidator from 'App/Validators/Cart/CheckCartValidator'
@@ -24,47 +22,11 @@ export default class CartsController {
     } else {
       const validatedCheckCartData = await request.validate(CheckCartValidator)
 
-      let items = validatedCheckCartData.guestCart?.items
-      if (items && items.length > 0) {
-        const inventories = await ProductInventory.query().whereIn(
-          'id',
-          items.map((item) => {
-            return item.inventoryId
-          })
-        )
-        if (inventories.length > 0) {
-          const stocks = await BigbuyService.getProductsStocks(
-            inventories.map((inventory) => {
-              return inventory.sku
-            })
-          )
-          inventories.forEach((inventory) => {
-            let stock = stocks.find((stock) => stock.sku === inventory.sku)
-            inventory.bigbuyData.quantity = stock?.quantity || 0
-          })
-          const cartItems: GuestCartCheckItem[] = []
-          items.forEach((item) => {
-            let inventory = inventories.find((inventory) => inventory.id === item.inventoryId)
-            if (inventory) {
-              cartItems.push({
-                inventory,
-                quantity: item.quantity,
-              })
-            }
-          })
-          cart = {
-            items: cartItems,
-          }
-        }
-      }
+      cart = await CartsService.createGuestCartCheck(validatedCheckCartData.guestCart?.items, true)
     }
 
     let changedItemsByInventory = [] as GuestCartCheckItem[]
-    if (cart) {
-      changedItemsByInventory = await CartsService.checkCartItemsQuantity(cart)
-    } else {
-      cart = { items: [] } as GuestCartCheck
-    }
+    changedItemsByInventory = await CartsService.checkCartItemsQuantity(cart)
 
     let successMsg = 'Successfully checked cart'
     if (validToken) {

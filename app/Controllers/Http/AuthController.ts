@@ -3,8 +3,6 @@ import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
 
-import CartItem from 'App/Models/CartItem'
-import ProductInventory from 'App/Models/ProductInventory'
 import UsersService from 'App/Services/UsersService'
 import BraintreeService from 'App/Services/BraintreeService'
 import {
@@ -69,34 +67,7 @@ export default class AuthController {
         throw new ModelNotFoundException(`Invalid password to login user`)
       })
 
-    if (validatedData.guestCart?.items && validatedData.guestCart.items.length > 0) {
-      for (let i = 0; i < validatedData.guestCart.items.length; i++) {
-        const guestCartItem = validatedData.guestCart.items[i]
-        const cartItem = await CartItem.query()
-          .where('cartId', user.cart.id)
-          .where('inventoryId', guestCartItem.inventoryId)
-          .first()
-        if (cartItem) {
-          const diffQuantity = guestCartItem.quantity - cartItem.quantity
-          if (diffQuantity > 0) {
-            cartItem.merge({ quantity: cartItem.quantity + diffQuantity })
-            cartItem.save()
-          }
-        } else {
-          const guestCartInventory = await ProductInventory.query()
-            .where('id', guestCartItem.inventoryId)
-            .first()
-          if (guestCartInventory) {
-            await CartItem.create({
-              inventoryId: guestCartInventory.id,
-              quantity: guestCartItem.quantity,
-              cartId: user.cart.id,
-            })
-          }
-        }
-      }
-      user = await UsersService.getUserByEmail(validatedData.email, true)
-    }
+    user = await UsersService.addGuestCart(user, validatedData.guestCart?.items)
 
     const braintreeService = new BraintreeService()
     let braintreeToken = await braintreeService.generateClientToken(user.braintreeId)

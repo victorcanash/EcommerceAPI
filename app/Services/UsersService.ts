@@ -2,7 +2,10 @@ import { AuthContract, GuardsList } from '@ioc:Adonis/Addons/Auth'
 
 import { Roles } from 'App/Constants/auth'
 import User from 'App/Models/User'
+import CartItem from 'App/Models/CartItem'
+import ProductInventory from 'App/Models/ProductInventory'
 import BigbuyService from 'App/Services/BigbuyService'
+import { GuestCartItem } from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class UsersService {
@@ -23,6 +26,39 @@ export default class UsersService {
 
   public static async isAuthAdmin(auth: AuthContract) {
     return auth.use('api').user?.role === Roles.ADMIN
+  }
+
+  public static async addGuestCart(user: User, items?: GuestCartItem[]) {
+    let newUser = user
+    if (items && items.length > 0) {
+      for (let i = 0; i < items.length; i++) {
+        const guestCartItem = items[i]
+        const cartItem = await CartItem.query()
+          .where('cartId', user.cart.id)
+          .where('inventoryId', guestCartItem.inventoryId)
+          .first()
+        if (cartItem) {
+          const diffQuantity = guestCartItem.quantity - cartItem.quantity
+          if (diffQuantity > 0) {
+            cartItem.merge({ quantity: cartItem.quantity + diffQuantity })
+            cartItem.save()
+          }
+        } else {
+          const guestCartInventory = await ProductInventory.query()
+            .where('id', guestCartItem.inventoryId)
+            .first()
+          if (guestCartInventory) {
+            await CartItem.create({
+              inventoryId: guestCartInventory.id,
+              quantity: guestCartItem.quantity,
+              cartId: user.cart.id,
+            })
+          }
+        }
+      }
+      newUser = await UsersService.getUserByEmail(user.email, true)
+    }
+    return newUser
   }
 
   private static async getUserByField(
