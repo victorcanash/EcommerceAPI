@@ -22,7 +22,7 @@ export const addressSchema = schema.object().members({
   country: schema.enum(Object.values(CountryOptions)),
 })
 
-export const guestCartSchema = schema.object().members({
+export const guestCartSchema = schema.object.optional().members({
   items: schema.array
     .optional()
     .members(schema.object().members({ inventoryId: schema.number(), quantity: schema.number() })),

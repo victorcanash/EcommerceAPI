@@ -24,8 +24,7 @@ export default class CartsController {
     } else {
       const validatedCheckCartData = await request.validate(CheckCartValidator)
 
-      let items = validatedCheckCartData.guestCart.items
-
+      let items = validatedCheckCartData.guestCart?.items
       if (items && items.length > 0) {
         const inventories = await ProductInventory.query().whereIn(
           'id',
