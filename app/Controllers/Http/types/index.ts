@@ -7,6 +7,7 @@ import ProductCategory from 'App/Models/ProductCategory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
 import Order from 'App/Models/Order'
+import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 
 /**
  * Basic JSON response for Controllers
@@ -73,8 +74,8 @@ export type UAddressesResponse = {
 export type CheckCartResponse = {
   code: number
   message: string
-  cart: Cart
-  changedItemsByInventory: CartItem[]
+  cart: Cart | GuestCartCheck
+  changedItemsByInventory: CartItem[] | GuestCartCheckItem[]
 }
 
 /**

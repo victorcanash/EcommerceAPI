@@ -63,7 +63,7 @@ Route.group(() => {
 
   // Cart routes
 
-  Route.put('carts/:id/check', 'CartsController.check').middleware('auth:api')
+  Route.put('carts/:id/check', 'CartsController.check')
 
   Route.resource('cart-items', 'CItemsController')
     .except(['index', 'show'])

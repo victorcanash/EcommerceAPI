@@ -1,5 +1,6 @@
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
+import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class CartsService {
@@ -12,14 +13,22 @@ export default class CartsService {
   }
 
   // Check if there are the quantity desired by user and if there are items with 0 quantity
-  public static async checkCartItemsQuantity(cart: Cart) {
-    const changedItems: CartItem[] = []
+  public static async checkCartItemsQuantity(cart: Cart | GuestCartCheck) {
+    const changedItems: CartItem[] | GuestCartCheckItem[] = []
     for (let i = 0; i < cart.items.length; i++) {
       let item = cart.items[i]
       if (item.quantity > item.inventory.bigbuy.quantity) {
-        item.merge({ quantity: item.inventory.bigbuy.quantity })
-        await item.save()
-        changedItems.push(item)
+        if ((cart as Cart)?.userId) {
+          ;(item as CartItem).merge({ quantity: item.inventory.bigbuy.quantity })
+          await (item as CartItem).save()
+          changedItems.push(item as CartItem)
+        } else {
+          ;(item as GuestCartCheckItem).quantity = item.inventory.bigbuy.quantity
+          ;(changedItems as GuestCartCheckItem[]).push({
+            inventory: (item as GuestCartCheckItem).inventory,
+            quantity: item.inventory.bigbuy.quantity,
+          })
+        }
       }
     }
     return changedItems
