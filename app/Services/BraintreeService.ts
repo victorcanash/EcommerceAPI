@@ -3,6 +3,10 @@ import Env from '@ioc:Adonis/Core/Env'
 import braintree, { BraintreeGateway, KeyGatewayConfig } from 'braintree'
 
 import User from 'App/Models/User'
+import Cart from 'App/Models/Cart'
+import CartsService from 'App/Services/CartsService'
+import { GuestUser } from 'App/Types/user'
+import { GuestCartCheck } from 'App/Types/cart'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
@@ -89,24 +93,32 @@ export default class BraintreeService {
   }
 
   public async createTransaction(
-    user: User,
-    braintreeCustomer: braintree.Customer | undefined,
-    paymentMethodNonce: string
+    paymentMethodNonce: string,
+    user: User | GuestUser,
+    braintreeCustomer?: braintree.Customer,
+    guestCartCheck?: GuestCartCheck
   ) {
+    let cart: Cart | GuestCartCheck | undefined
+    if ((user as User)?.id) {
+      cart = (user as User).cart
+    } else {
+      cart = guestCartCheck
+    }
+
     if (!user.shipping) {
       throw new PermissionException(`You don't have an existing shipping address`)
     }
     if (!user.billing) {
       throw new PermissionException(`You don't have an existing billing address`)
     }
-    if (!user.cart) {
+    if (!cart) {
       throw new PermissionException(`You don't have an existing cart`)
     }
-    if (user.cart.items && user.cart.items.length <= 0) {
+    if (cart.items && cart.items.length <= 0) {
       throw new PermissionException(`You don't have selected items in your cart`)
     }
 
-    const amount = user.cart.amount
+    const amount = CartsService.getAmount(cart)
     if (amount <= 0) {
       throw new PermissionException(`Your don't have cart amount`)
     }
@@ -114,8 +126,8 @@ export default class BraintreeService {
     const customer = braintreeCustomer
       ? undefined
       : {
-          firstName: user.firstName,
-          lastName: user.lastName,
+          firstName: (user as User)?.firstName || user.billing.firstName,
+          lastName: (user as User)?.lastName || user.billing.lastName,
           // company: "Braintree",
           // phone: "312-555-1234",
           // fax: "312-555-12346",

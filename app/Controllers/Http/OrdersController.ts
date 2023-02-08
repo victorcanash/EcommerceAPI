@@ -5,14 +5,16 @@ import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Cons
 import Order from 'App/Models/Order'
 import OrdersService from 'App/Services/OrdersService'
 import UsersService from 'App/Services/UsersService'
+import CartsService from 'App/Services/CartsService'
 import BigbuyService from 'App/Services/BigbuyService'
-import ProductsService from 'App/Services/ProductsService'
+import MailService from 'App/Services/MailService'
+import { SendOrderProduct } from 'App/Types/order'
 import { OrderResponse, OrdersResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
 import CreateOrderValidator from 'App/Validators/Order/CreateOrderValidator'
-import SendCheckOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
+import SendOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
@@ -84,23 +86,30 @@ export default class OrdersController {
       throw new BadRequestException(`Unsupported locale: ${validatedData.locale}`)
     }
 
-    const user = await UsersService.getUserById(validatedData.userId, false)
+    const user = validatedData.userId
+      ? await UsersService.getUserById(validatedData.userId, false)
+      : undefined
+    if (!user && !validatedData.userEmail) {
+      throw new BadRequestException('Missing user email or user id')
+    }
 
+    if (!validatedData.products?.items || validatedData.products.items.length <= 0) {
+      throw new BadRequestException('Missing products')
+    }
     const order = await Order.create({
-      userId: user.id,
+      userId: user?.id || -1,
       braintreeTransactionId: validatedData.braintreeTransactionId,
     })
-    const orderProducts = [] as { reference: string; quantity: number; internalReference: string }[]
-    for (const item of validatedData.products) {
-      const inventory = await ProductsService.getInventoryById(item.inventoryId)
+    const orderCart = await CartsService.createGuestCartCheck(validatedData.products.items)
+    const orderProducts = orderCart.items.map((item) => {
       if (item.quantity > 0) {
-        orderProducts.push({
-          reference: inventory.sku,
+        return {
+          reference: item.inventory.sku,
           quantity: item.quantity,
-          internalReference: inventory.id.toString(),
-        })
+          internalReference: item.inventory.id.toString(),
+        } as SendOrderProduct
       }
-    }
+    })
 
     try {
       await order.loadBraintreeData()
@@ -112,7 +121,7 @@ export default class OrdersController {
     try {
       const bigbuyId = await BigbuyService.createOrder(
         order.id.toString(),
-        user.email,
+        user?.email || validatedData.userEmail || '',
         validatedData.shipping,
         orderProducts
       )
@@ -125,14 +134,16 @@ export default class OrdersController {
 
     try {
       await order.loadBigbuyData()
-      await user.sendCheckOrderEmail(
+      await MailService.sendCheckOrderEmail(
         I18n.locale(locale),
         validatedData.appName,
         validatedData.appDomain,
+        user?.email || validatedData.userEmail || '',
+        user?.firstName || validatedData.shipping.firstName,
         order
       )
     } catch (error) {
-      await user.sendErrorGetOrderEmail(
+      await MailService.sendErrorGetOrderEmail(
         I18n.locale(locale),
         validatedData.appName,
         validatedData.appDomain,
@@ -153,19 +164,30 @@ export default class OrdersController {
 
   public async sendCheckEmail({ params: { id }, request, response }: HttpContextContract) {
     const order = await OrdersService.getOrderById(id, true, true)
-    const user = await UsersService.getUserById(order.userId, false)
+    const user =
+      order.userId !== -1 ? await UsersService.getUserById(order.userId, false) : undefined
 
-    const validatedData = await request.validate(SendCheckOrderEmailValidator)
+    const validatedData = await request.validate(SendOrderEmailValidator)
 
     const locale = I18n.getSupportedLocale(validatedData.locale)
     if (!locale) {
       throw new BadRequestException(`Unsupported locale: ${validatedData.locale}`)
     }
+    if (!user) {
+      if (!validatedData.userEmail) {
+        throw new BadRequestException('Missing user email')
+      }
+      if (!validatedData.userFirstName) {
+        throw new BadRequestException('Missing user first name')
+      }
+    }
 
-    await user.sendCheckOrderEmail(
+    await MailService.sendCheckOrderEmail(
       I18n.locale(locale),
       validatedData.appName,
       validatedData.appDomain,
+      user?.email || validatedData.userEmail || '',
+      user?.firstName || validatedData.userFirstName || '',
       order
     )
 

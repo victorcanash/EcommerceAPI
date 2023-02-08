@@ -14,6 +14,15 @@ export default class CartsService {
     return this.getCartItemByField('id', id)
   }
 
+  public static getAmount(cart: Cart | GuestCartCheck) {
+    let amount = 0
+    cart.items.forEach((item) => {
+      const inventory = item.inventory.serialize()
+      amount += inventory.realPrice * item.quantity
+    })
+    return amount
+  }
+
   // Check if there are the quantity desired by user and if there are items with 0 quantity
   public static async checkCartItemsQuantity(cart: Cart | GuestCartCheck) {
     const changedItems: CartItem[] | GuestCartCheckItem[] = []
@@ -36,12 +45,16 @@ export default class CartsService {
     return changedItems
   }
 
-  public static async deleteCartItems(cart: Cart) {
+  public static async deleteItemsByCart(cart: Cart) {
     await CartItem.query()
       .where((query) => {
         query.where('cartId', cart.id)
       })
       .delete()
+  }
+
+  public static async deleteItemsByIds(ids: number[]) {
+    await CartItem.query().whereIn('id', ids).delete()
   }
 
   public static async createGuestCartCheck(items?: GuestCartItem[], bigbuyData = false) {

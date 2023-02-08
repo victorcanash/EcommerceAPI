@@ -1,12 +1,20 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
+import User from 'App/Models/User'
 import Order from 'App/Models/Order'
+import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import UsersService from 'App/Services/UsersService'
+import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import BigbuyService from 'App/Services/BigbuyService'
+import MailService from 'App/Services/MailService'
+import { GuestUser } from 'App/Types/user'
+import { SendOrderProduct } from 'App/Types/order'
+import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { BraintreeTokenResponse, OrderResponse } from 'App/Controllers/Http/types'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
+import BadRequestException from 'App/Exceptions/BadRequestException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
@@ -32,41 +40,63 @@ export default class PaymentsController {
   }
 
   public async createTransaction({ request, response, auth, i18n }: HttpContextContract) {
-    const email = await UsersService.getAuthEmail(auth)
-    const user = await UsersService.getUserByEmail(email, true)
+    // Get user and cart data
 
     const validatedData = await request.validate(CreateTransactionValidator)
+
+    let user: User | GuestUser | undefined
+    let cart: Cart | GuestCartCheck | undefined
+
+    const validToken = await auth.use('api').check()
+    if (validToken) {
+      const email = await UsersService.getAuthEmail(auth)
+      user = await UsersService.getUserByEmail(email, true)
+      cart = (user as User).cart
+    } else {
+      user = validatedData.guestUser
+      if (!user) {
+        throw new BadRequestException('Missing guestUser')
+      }
+      if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
+        throw new BadRequestException('Missing guestCart')
+      }
+      cart = await CartsService.createGuestCartCheck(validatedData.guestCart.items)
+    }
 
     // Braintree Transaction
 
     const braintreeService = new BraintreeService()
 
-    const braintreeCustomer = await braintreeService.getCustomer(user.braintreeId)
+    const braintreeCustomer = (user as User)?.id
+      ? await braintreeService.getCustomer((user as User).braintreeId)
+      : undefined
     if (
+      (user as User)?.id &&
       braintreeCustomer &&
-      (braintreeCustomer.firstName !== user.firstName ||
-        braintreeCustomer.lastName !== user.lastName ||
+      (braintreeCustomer.firstName !== (user as User).firstName ||
+        braintreeCustomer.lastName !== (user as User).lastName ||
         braintreeCustomer.email !== user.email)
     ) {
-      await braintreeService.updateCustomer(braintreeCustomer.id, user)
+      await braintreeService.updateCustomer(braintreeCustomer.id, user as User)
     }
 
     const braintreeResult = await braintreeService.createTransaction(
+      validatedData.paymentMethodNonce,
       user,
       braintreeCustomer,
-      validatedData.paymentMethodNonce
+      (cart as Cart)?.id ? undefined : (cart as GuestCartCheck)
     )
 
-    if (validatedData.remember) {
-      user.merge({
+    if ((user as User)?.id && validatedData.remember) {
+      ;(user as User).merge({
         braintreeId: braintreeResult.transaction.customer.id,
       })
-      await user.save()
-    } else if (user.braintreeId) {
-      user.merge({
+      await (user as User).save()
+    } else if ((user as User)?.braintreeId) {
+      ;(user as User).merge({
         braintreeId: '',
       })
-      await user.save()
+      await (user as User).save()
     }
 
     const braintreeTransactionId = braintreeResult.transaction.id
@@ -74,22 +104,26 @@ export default class PaymentsController {
     // Bigbuy Order
 
     const order = await Order.create({
-      userId: user.id,
+      userId: (user as User)?.id || -1,
       braintreeTransactionId: braintreeTransactionId,
     })
-    const cartItemsId = [] as number[]
-    const orderProducts = user.cart.items.map((item) => {
+    const cartItemIds = [] as number[]
+    const orderProducts = cart.items.map((item: CartItem | GuestCartCheckItem) => {
       if (item.quantity > 0) {
-        cartItemsId.push(item.id)
+        if ((item as CartItem)?.id) {
+          cartItemIds.push((item as CartItem).id)
+        }
         return {
           reference: item.inventory.sku,
           quantity: item.quantity,
           internalReference: item.inventory.id.toString(),
-        }
+        } as SendOrderProduct
       }
     })
 
-    await CartItem.query().whereIn('id', cartItemsId).delete()
+    if ((cart as Cart)?.id) {
+      await CartsService.deleteItemsByIds(cartItemIds)
+    }
 
     try {
       const bigbuyId = await BigbuyService.createOrder(
@@ -102,10 +136,12 @@ export default class PaymentsController {
       await order.save()
     } catch (error) {
       await order.delete()
-      await user.sendErrorCreateOrderEmail(
+      await MailService.sendErrorCreateOrderEmail(
         i18n,
         validatedData.appName,
         validatedData.appDomain,
+        user.email,
+        user.shipping,
         error.message,
         braintreeTransactionId,
         orderProducts
@@ -116,9 +152,16 @@ export default class PaymentsController {
     try {
       await order.loadBigbuyData()
       await order.loadBraintreeData()
-      await user.sendCheckOrderEmail(i18n, validatedData.appName, validatedData.appDomain, order)
+      await MailService.sendCheckOrderEmail(
+        i18n,
+        validatedData.appName,
+        validatedData.appDomain,
+        user.email,
+        (user as User)?.firstName ? (user as User).firstName : user.shipping.firstName,
+        order
+      )
     } catch (error) {
-      await user.sendErrorGetOrderEmail(
+      await MailService.sendErrorGetOrderEmail(
         i18n,
         validatedData.appName,
         validatedData.appDomain,
@@ -130,7 +173,7 @@ export default class PaymentsController {
 
     // Response
 
-    const successMsg = `Successfully created transaction and order with user email ${email}`
+    const successMsg = `Successfully created transaction and order with user email ${user.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,

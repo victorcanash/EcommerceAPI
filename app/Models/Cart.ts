@@ -17,13 +17,4 @@ export default class Cart extends AppBaseModel {
     },
   })
   public items: HasMany<typeof CartItem>
-
-  public get amount() {
-    let amount = 0
-    this.items.forEach((item) => {
-      const inventory = item.inventory.serialize()
-      amount += inventory.realPrice * item.quantity
-    })
-    return amount
-  }
 }

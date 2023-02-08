@@ -3,10 +3,11 @@ import Env from '@ioc:Adonis/Core/Env'
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 
-import { CountryOptions } from 'App/Constants/addresses'
+import { GuestUserAddress } from 'App/Types/user'
+import { GetOrderProduct, SendOrderProduct } from 'App/Types/order'
+import { getCountryCode } from 'App/Utils/addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
-import { getCountryCode } from 'App/Utils/addresses'
 
 export default class BigbuyService {
   public static async getProductInfo(sku: string) {
@@ -123,12 +124,7 @@ export default class BigbuyService {
         email: '',
         companyName: '',
       },
-      products: [] as {
-        id: string
-        reference: string
-        quantity: number
-        name: string
-      }[],
+      products: [] as GetOrderProduct[],
     }
     const options: AxiosRequestConfig = {
       headers: this.getAuthHeaders(),
@@ -151,23 +147,8 @@ export default class BigbuyService {
   public static async createOrder(
     internalReference: string,
     email: string,
-    shipping: {
-      firstName: string
-      lastName: string
-      addressLine1: string
-      addressLine2?: string
-      postalCode: string
-      locality: string
-      country: CountryOptions
-    },
-    products: (
-      | {
-          reference: string
-          quantity: number
-          internalReference: string
-        }
-      | undefined
-    )[]
+    shipping: GuestUserAddress,
+    products: (SendOrderProduct | undefined)[]
   ) {
     let orderId = ''
     const options: AxiosRequestConfig = {

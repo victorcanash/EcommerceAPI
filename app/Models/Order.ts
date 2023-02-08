@@ -4,6 +4,7 @@ import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
 import BigbuyService from 'App/Services/BigbuyService'
 import BraintreeService from 'App/Services/BraintreeService'
+import { GetOrderProduct } from 'App/Types/order'
 import { getCountryName } from 'App/Utils/addresses'
 
 export default class Order extends AppBaseModel {
@@ -39,13 +40,7 @@ export default class Order extends AppBaseModel {
       addressLine2: '',
       phone: '',
     },
-    products: [] as {
-      id: string
-      reference: string
-      quantity: number
-      name: string
-      inventory: ProductInventory | null
-    }[],
+    products: [] as GetOrderProduct[],
   }
 
   public braintreeData = {
@@ -71,13 +66,7 @@ export default class Order extends AppBaseModel {
   public async loadBigbuyData() {
     if (this.bigbuyData.id <= 0 && this.bigbuyId) {
       const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
-      const products = [] as {
-        id: string
-        reference: string
-        quantity: number
-        name: string
-        inventory: ProductInventory | null
-      }[]
+      const products = [] as GetOrderProduct[]
       for (let i = 0; i < orderInfo.products.length; i++) {
         const item = orderInfo.products[i]
         const inventory = await ProductInventory.findBy('sku', item.reference)

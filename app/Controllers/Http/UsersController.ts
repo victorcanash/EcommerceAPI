@@ -6,6 +6,7 @@ import User from 'App/Models/User'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
 import UsersService from 'App/Services/UsersService'
+import MailService from 'App/Services/MailService'
 import {
   UsersResponse,
   UserResponse,
@@ -162,7 +163,7 @@ export default class UsersController {
   public async sendContactEmail({ response, request, i18n }: HttpContextContract) {
     const validatedData = await request.validate(SendContactEmailValidator)
 
-    await User.sendContactEmail(i18n, validatedData.appName, validatedData.appDomain, {
+    await MailService.sendContactEmail(i18n, validatedData.appName, validatedData.appDomain, {
       email: validatedData.email,
       firstName: validatedData.firstName,
       tlf: validatedData.tlf,
