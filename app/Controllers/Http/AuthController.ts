@@ -5,6 +5,7 @@ import { DateTime } from 'luxon'
 
 import UsersService from 'App/Services/UsersService'
 import BraintreeService from 'App/Services/BraintreeService'
+import MailService from 'App/Services/MailService'
 import {
   BasicResponse,
   AuthResponse,
@@ -181,7 +182,8 @@ export default class AuthController {
       expiresIn: Env.get('ACTIVATION_TOKEN_EXPIRY', '3h'),
     })
 
-    await user.sendActivationEmail(
+    await MailService.sendActivationEmail(
+      user,
       i18n,
       validatedData.appName,
       validatedData.appDomain,
@@ -205,7 +207,8 @@ export default class AuthController {
       expiresIn: Env.get('UPDATE_TOKEN_EXPIRY', '3h'),
     })
 
-    await user.sendResetPswEmail(
+    await MailService.sendResetPswEmail(
+      user,
       i18n,
       validatedData.appName,
       validatedData.appDomain,
@@ -237,7 +240,8 @@ export default class AuthController {
     })
 
     if (validatedData.newEmail && validatedData.newEmail !== user.email) {
-      await user.sendUpdateEmail(
+      await MailService.sendUpdateEmail(
+        user,
         i18n,
         validatedData.appName,
         validatedData.appDomain,
