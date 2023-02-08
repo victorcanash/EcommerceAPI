@@ -6,17 +6,17 @@
     },
     "auth": {
       "activation": {
-        "subject": "Porfavor verifica tu correo",
+        "subject": "Por favor verifica tu correo",
         "description": "Pulsa abajo para activar tu cuenta.",
         "button": "Verificar Cuenta"
       },
       "resetPsw": {
-        "subject": "Porfavor añade tu nueva contraseña",
+        "subject": "Por favor añade tu nueva contraseña",
         "description": "Pulsa abajo para añadir tu nueva contraseña.",
         "button": "Actualizar Contraseña"
       },
       "updateEmail": {
-        "subject": "Porfavor verifica tu nuevo correo",
+        "subject": "Por favor verifica tu nuevo correo",
         "description": "Pulsa abajo para confirmar tu nuevo correo.",
         "button": "Actualizar Correo"
       },
@@ -26,8 +26,13 @@
         "button": "Revertir Correo"
       }
     },
+    "confirmTransaction": {
+      "subject": "Por favor confirma tu compra",
+      "description": "Pulsa abajo para ir a confirmar tu compra.",
+      "button": "Confirmar compra"
+    },
     "checkOrder": {
-      "subject": "Porfavor mira tu pedido",
+      "subject": "Por favor mira tu pedido",
       "description": "Has realizado un nuevo pedido:",
       "numberField": "Número de pedido: { id }",
       "statusField": "Estado: { status }",

@@ -1,6 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Env from '@ioc:Adonis/Core/Env'
 
 import User from 'App/Models/User'
+import GuestUser from 'App/Models/GuestUser'
 import Order from 'App/Models/Order'
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
@@ -9,11 +11,12 @@ import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import BigbuyService from 'App/Services/BigbuyService'
 import MailService from 'App/Services/MailService'
-import { GuestUser } from 'App/Types/user'
+import { GuestUserCheckout } from 'App/Types/user'
 import { SendOrderProduct } from 'App/Types/order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
-import { BraintreeTokenResponse, OrderResponse } from 'App/Controllers/Http/types'
+import { BasicResponse, BraintreeTokenResponse, OrderResponse } from 'App/Controllers/Http/types'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
+import SendConfirmTransactionEmailValidator from 'App/Validators/Payment/SendConfirmTransactionEmailValidator'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
@@ -44,7 +47,7 @@ export default class PaymentsController {
 
     const validatedData = await request.validate(CreateTransactionValidator)
 
-    let user: User | GuestUser | undefined
+    let user: User | GuestUserCheckout | undefined
     let cart: Cart | GuestCartCheck | undefined
 
     const validToken = await auth.use('api').check()
@@ -180,5 +183,46 @@ export default class PaymentsController {
       message: successMsg,
       order,
     } as OrderResponse)
+  }
+
+  public async sendConfirmTransactionEmail({ request, response, auth, i18n }: HttpContextContract) {
+    const validatedData = await request.validate(SendConfirmTransactionEmailValidator)
+
+    if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
+      throw new BadRequestException('Missing guestCart')
+    }
+
+    let guestUser = await GuestUser.query().where('email', validatedData.guestUser.email).first()
+    if (!guestUser) {
+      guestUser = await GuestUser.create({
+        email: validatedData.guestUser.email,
+      })
+    }
+    const shipping = validatedData.guestUser.shipping
+    const billing = validatedData.guestUser.billing
+
+    const tokenData = await auth.use('confirmation').generate(guestUser, {
+      expiresIn: Env.get('CONFIRMATION_TOKEN_EXPIRY', '30mins'),
+      payment_method_nonce: validatedData.paymentMethodNonce,
+      shipping: shipping,
+      billing: billing,
+      guest_cart: validatedData.guestCart,
+    })
+
+    await MailService.sendConfirmationEmail(
+      guestUser,
+      shipping.firstName,
+      i18n,
+      validatedData.appName,
+      validatedData.appDomain,
+      validatedData.url + `?token=${tokenData.token}`
+    )
+
+    const successMsg = `Successfully sent confirm transaction email to ${guestUser.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+    } as BasicResponse)
   }
 }

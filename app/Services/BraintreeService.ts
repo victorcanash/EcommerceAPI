@@ -5,7 +5,7 @@ import braintree, { BraintreeGateway, KeyGatewayConfig } from 'braintree'
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
 import CartsService from 'App/Services/CartsService'
-import { GuestUser } from 'App/Types/user'
+import { GuestUserCheckout } from 'App/Types/user'
 import { GuestCartCheck } from 'App/Types/cart'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -94,7 +94,7 @@ export default class BraintreeService {
 
   public async createTransaction(
     paymentMethodNonce: string,
-    user: User | GuestUser,
+    user: User | GuestUserCheckout,
     braintreeCustomer?: braintree.Customer,
     guestCartCheck?: GuestCartCheck
   ) {

@@ -118,6 +118,7 @@ Route.group(() => {
 
   Route.get('payments/braintree-token', 'PaymentsController.getBraintreeToken')
   Route.post('payments/transaction', 'PaymentsController.createTransaction')
+  Route.post('payments/send-email/transaction', 'PaymentsController.sendConfirmTransactionEmail')
 
   /*Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
     'auth:api'

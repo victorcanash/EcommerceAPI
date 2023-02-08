@@ -1,13 +1,14 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'orders'
+  protected tableName = 'guest_users'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-      table.integer('user_id', 255).notNullable()
-      table.string('braintree_transaction_id', 255).notNullable()
+      table.string('email', 255).notNullable()
+      table.date('email_verified_at').nullable()
+      table.string('remember_me_token').nullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

@@ -3,11 +3,39 @@ import Env from '@ioc:Adonis/Core/Env'
 import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import User from 'App/Models/User'
+import GuestUser from 'App/Models/GuestUser'
 import UserAddress from 'App/Models/UserAddress'
 import Order from 'App/Models/Order'
-import { GuestUserAddress } from 'App/Types/user'
+import { GuestUserCheckoutAddress } from 'App/Types/user'
 
 export default class MailService {
+  public static async sendConfirmationEmail(
+    guestUser: GuestUser,
+    username: string,
+    i18n: I18nContract,
+    appName: string,
+    appDomain: string,
+    btnUrl: string
+  ) {
+    const currentYear = new Date().getFullYear()
+    Mail.send((message) => {
+      message
+        .from(Env.get('SMTP_EMAIL'))
+        .to(guestUser.email)
+        .subject(i18n.formatMessage('messages.emails.confirmTransaction.subject'))
+        .htmlView('emails/auth', {
+          i18n,
+          appName,
+          appDomain,
+          currentYear,
+          username,
+          description: i18n.formatMessage('messages.emails.confirmTransaction.description'),
+          btnTxt: i18n.formatMessage('messages.emails.confirmTransaction.button'),
+          btnUrl,
+        })
+    })
+  }
+
   public static async sendActivationEmail(
     user: User,
     i18n: I18nContract,
@@ -26,7 +54,7 @@ export default class MailService {
           appName,
           appDomain,
           currentYear,
-          user,
+          username: user.firstName,
           description: i18n.formatMessage('messages.emails.auth.activation.description'),
           btnTxt: i18n.formatMessage('messages.emails.auth.activation.button'),
           btnUrl,
@@ -52,7 +80,7 @@ export default class MailService {
           appName,
           appDomain,
           currentYear,
-          user,
+          username: user.firstName,
           description: i18n.formatMessage('messages.emails.auth.resetPsw.description'),
           btnTxt: i18n.formatMessage('messages.emails.auth.resetPsw.button'),
           btnUrl,
@@ -85,7 +113,7 @@ export default class MailService {
         appName,
         appDomain,
         currentYear,
-        user,
+        username: user.firstName,
         description,
         btnTxt,
         btnUrl,
@@ -145,7 +173,7 @@ export default class MailService {
     appName: string,
     appDomain: string,
     userEmail: string,
-    shipping: UserAddress | GuestUserAddress,
+    shipping: UserAddress | GuestUserCheckoutAddress,
     errorMsg: string,
     braintreeTransactionId: string,
     products: (

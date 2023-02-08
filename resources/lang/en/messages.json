@@ -26,6 +26,11 @@
         "button": "Revert Email"
       }
     },
+    "confirmTransaction": {
+      "subject": "Please confirm your purchase",
+      "description": "Click below to go to confirm your purchase.",
+      "button": "Confirm purchase"
+    },
     "checkOrder": {
       "subject": "Please check your order",
       "description": "You have realized a new order:",

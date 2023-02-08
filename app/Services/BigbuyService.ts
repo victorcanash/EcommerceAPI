@@ -3,7 +3,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 
-import { GuestUserAddress } from 'App/Types/user'
+import { GuestUserCheckoutAddress } from 'App/Types/user'
 import { GetOrderProduct, SendOrderProduct } from 'App/Types/order'
 import { getCountryCode } from 'App/Utils/addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
@@ -147,7 +147,7 @@ export default class BigbuyService {
   public static async createOrder(
     internalReference: string,
     email: string,
-    shipping: GuestUserAddress,
+    shipping: GuestUserCheckoutAddress,
     products: (SendOrderProduct | undefined)[]
   ) {
     let orderId = ''

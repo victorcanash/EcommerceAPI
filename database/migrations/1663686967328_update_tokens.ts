@@ -12,9 +12,6 @@ export default class UpdateTokens extends BaseSchema {
       table.string('token', 64).notNullable().unique()
       table.string('new_email', 255).nullable()
 
-      /**
-       * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL
-       */
       table.timestamp('expires_at', { useTz: true }).nullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
     })

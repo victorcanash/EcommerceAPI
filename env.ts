@@ -30,6 +30,7 @@ export default Env.rules({
   PG_PASSWORD: Env.schema.string.optional(),
   PG_DB_NAME: Env.schema.string.optional(),
   API_TOKEN_EXPIRY: Env.schema.string(),
+  CONFIRMATION_TOKEN_EXPIRY: Env.schema.string(),
   ACTIVATION_TOKEN_EXPIRY: Env.schema.string(),
   UPDATE_TOKEN_EXPIRY: Env.schema.string(),
   LOG_LEVEL: Env.schema.string.optional(),
