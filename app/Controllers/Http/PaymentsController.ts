@@ -52,15 +52,15 @@ export default class PaymentsController {
     const email = await UsersService.getAuthEmail(auth, 'confirmation')
     const guestUser = await UsersService.getGuestUserByEmail(email)
 
-    await auth.use('confirmation').revoke()
-
-    guestUser.emailVerifiedAt = DateTime.local()
-    await guestUser.save()
-
     const paymentPayload = auth.use('confirmation').token?.meta?.payment_payload
     const shipping = auth.use('confirmation').token?.meta?.shipping
     const billing = auth.use('confirmation').token?.meta?.billing
     const guestCart = auth.use('confirmation').token?.meta?.guest_cart
+
+    await auth.use('confirmation').revoke()
+
+    guestUser.emailVerifiedAt = DateTime.local()
+    await guestUser.save()
 
     const guestCartCheck = await CartsService.createGuestCartCheck(guestCart?.items)
 
