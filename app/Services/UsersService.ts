@@ -2,6 +2,7 @@ import { AuthContract, GuardsList } from '@ioc:Adonis/Addons/Auth'
 
 import { Roles } from 'App/Constants/auth'
 import User from 'App/Models/User'
+import GuestUser from 'App/Models/GuestUser'
 import CartItem from 'App/Models/CartItem'
 import ProductInventory from 'App/Models/ProductInventory'
 import BigbuyService from 'App/Services/BigbuyService'
@@ -15,6 +16,10 @@ export default class UsersService {
 
   public static async getUserByEmail(email: string, allData: boolean, bigbuyData = false) {
     return this.getUserByField('email', email, allData, bigbuyData)
+  }
+
+  public static async getGuestUserByEmail(email: string) {
+    return this.getGuestUserByField('email', email)
   }
 
   public static async getAuthEmail(
@@ -97,5 +102,15 @@ export default class UsersService {
     }
 
     return user
+  }
+
+  private static async getGuestUserByField(field: string, value: string | number) {
+    let guestUser: GuestUser | null = null
+    guestUser = await GuestUser.query().where(field, value).first()
+    if (!guestUser) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting guest user`)
+    }
+
+    return guestUser
   }
 }

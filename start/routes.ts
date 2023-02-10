@@ -117,6 +117,9 @@ Route.group(() => {
   // Payment routes
 
   Route.get('payments/braintree-token', 'PaymentsController.getBraintreeToken')
+  Route.get('payments/guest-user-data', 'PaymentsController.getGuestUserData').middleware(
+    'auth:confirmation'
+  )
   Route.post('payments/transaction', 'PaymentsController.createTransaction')
   Route.post('payments/send-email/transaction', 'PaymentsController.sendConfirmTransactionEmail')
 

@@ -8,6 +8,7 @@ import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
 import Order from 'App/Models/Order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
+import { GuestUserCheckout } from 'App/Types/user'
 
 /**
  * Basic JSON response for Controllers
@@ -193,6 +194,17 @@ export type BraintreeTokenResponse = {
   code: number
   message: string
   braintreeToken: string
+}
+
+/**
+ * Guest User Data JSON response for Controllers
+ */
+export type GuestUserDataResponse = {
+  code: number
+  message: string
+  guestUser: GuestUserCheckout
+  guestCart: GuestCartCheck
+  paymentPayload: any
 }
 
 /**

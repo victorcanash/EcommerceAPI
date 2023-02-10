@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
+import { DateTime } from 'luxon'
 
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
@@ -11,10 +12,15 @@ import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import BigbuyService from 'App/Services/BigbuyService'
 import MailService from 'App/Services/MailService'
-import { GuestUserCheckout } from 'App/Types/user'
+import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
 import { SendOrderProduct } from 'App/Types/order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
-import { BasicResponse, BraintreeTokenResponse, OrderResponse } from 'App/Controllers/Http/types'
+import {
+  BasicResponse,
+  BraintreeTokenResponse,
+  GuestUserDataResponse,
+  OrderResponse,
+} from 'App/Controllers/Http/types'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
 import SendConfirmTransactionEmailValidator from 'App/Validators/Payment/SendConfirmTransactionEmailValidator'
 import BadRequestException from 'App/Exceptions/BadRequestException'
@@ -40,6 +46,37 @@ export default class PaymentsController {
       message: successMsg,
       braintreeToken: braintreeToken,
     } as BraintreeTokenResponse)
+  }
+
+  public async getGuestUserData({ request, response, auth }: HttpContextContract) {
+    const email = await UsersService.getAuthEmail(auth, 'confirmation')
+    const guestUser = await UsersService.getGuestUserByEmail(email)
+
+    guestUser.emailVerifiedAt = DateTime.local()
+    await guestUser.save()
+
+    const paymentPayload = auth.use('confirmation').token?.meta?.payment_payload
+    const shipping = auth.use('confirmation').token?.meta?.shipping
+    const billing = auth.use('confirmation').token?.meta?.billing
+    const guestCart = auth.use('confirmation').token?.meta?.guest_cart
+
+    const guestCartCheck = await CartsService.createGuestCartCheck(guestCart?.items)
+
+    await auth.use('confirmation').revoke()
+
+    const successMsg = `Successfully got guest user data with email ${email}`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      guestUser: {
+        email: email,
+        shipping: shipping as GuestUserCheckoutAddress,
+        billing: billing as GuestUserCheckoutAddress,
+      },
+      guestCart: guestCartCheck,
+      paymentPayload: paymentPayload,
+    } as GuestUserDataResponse)
   }
 
   public async createTransaction({ request, response, auth, i18n }: HttpContextContract) {
