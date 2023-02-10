@@ -203,7 +203,7 @@ export default class PaymentsController {
 
     const tokenData = await auth.use('confirmation').generate(guestUser, {
       expiresIn: Env.get('CONFIRMATION_TOKEN_EXPIRY', '30mins'),
-      payment_method_nonce: validatedData.paymentMethodNonce,
+      payment_payload: validatedData.paymentPayload,
       shipping: shipping,
       billing: billing,
       guest_cart: validatedData.guestCart,
