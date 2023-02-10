@@ -16,6 +16,7 @@ export default class SendConfirmTransactionEmailValidator {
     paymentPayload: schema.object().members({}),
     guestUser: schema.object().members({
       email: schema.string(),
+      password: schema.string(),
       shipping: addressSchema,
       billing: addressSchema,
     }),

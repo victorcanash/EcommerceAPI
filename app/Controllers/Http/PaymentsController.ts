@@ -52,6 +52,8 @@ export default class PaymentsController {
     const email = await UsersService.getAuthEmail(auth, 'confirmation')
     const guestUser = await UsersService.getGuestUserByEmail(email)
 
+    await auth.use('confirmation').revoke()
+
     guestUser.emailVerifiedAt = DateTime.local()
     await guestUser.save()
 
@@ -61,8 +63,6 @@ export default class PaymentsController {
     const guestCart = auth.use('confirmation').token?.meta?.guest_cart
 
     const guestCartCheck = await CartsService.createGuestCartCheck(guestCart?.items)
-
-    await auth.use('confirmation').revoke()
 
     const successMsg = `Successfully got guest user data with email ${email}`
     logRouteSuccess(request, successMsg)
@@ -233,6 +233,7 @@ export default class PaymentsController {
     if (!guestUser) {
       guestUser = await GuestUser.create({
         email: validatedData.guestUser.email,
+        password: validatedData.guestUser.password,
       })
     }
     const shipping = validatedData.guestUser.shipping
