@@ -13,7 +13,7 @@ export default class SendConfirmTransactionEmailValidator {
     appName: schema.string(),
     appDomain: schema.string(),
     url: schema.string(),
-    paymentPayload: schema.object().members({}),
+    paymentPayload: schema.object().anyMembers(),
     guestUser: schema.object().members({
       email: schema.string(),
       password: schema.string(),
