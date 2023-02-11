@@ -40,7 +40,7 @@ export default class ProductInventory extends ProductBaseModel {
   }
 
   public bigbuyData = {
-    id: 0,
+    id: '',
     name: '',
     description: '',
     price: 0,
@@ -48,7 +48,7 @@ export default class ProductInventory extends ProductBaseModel {
   }
 
   public async loadBigbuyData() {
-    if (this.bigbuyData.id <= 0) {
+    if (!this.bigbuyData.id) {
       const { id, name, description, price } = await BigbuyService.getProductInfo(this.sku)
       const quantity = await BigbuyService.getProductQuantity(id)
       this.bigbuyData = {

@@ -12,7 +12,7 @@ import InternalServerException from 'App/Exceptions/InternalServerException'
 export default class BigbuyService {
   public static async getProductInfo(sku: string) {
     let result = {
-      id: 0,
+      id: '',
       name: '',
       description: '',
       price: 0,
@@ -38,7 +38,7 @@ export default class BigbuyService {
     return result
   }
 
-  public static async getProductQuantity(bigbuyId: number) {
+  public static async getProductQuantity(bigbuyId: string) {
     let quantity = 0
     const options: AxiosRequestConfig = {
       headers: this.getAuthHeaders(),
@@ -109,7 +109,7 @@ export default class BigbuyService {
     return stocks
   }
 
-  public static async getOrderInfo(orderId: string) {
+  public static async getOrderInfo(bigbuyId: string) {
     let result = {
       id: '',
       status: '',
@@ -130,7 +130,7 @@ export default class BigbuyService {
       headers: this.getAuthHeaders(),
     }
     await axios
-      .get(`${Env.get('BIGBUY_API_URL')}/rest/order/${orderId}.json`, options)
+      .get(`${Env.get('BIGBUY_API_URL')}/rest/order/${bigbuyId}.json`, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 200) {
           result = response.data
