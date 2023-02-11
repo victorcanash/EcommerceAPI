@@ -31,7 +31,7 @@ export default class Order extends AppBaseModel {
   }
 
   public bigbuyData = {
-    id: 0,
+    id: '',
     status: '',
     shipping: {
       firstName: '',
@@ -67,7 +67,7 @@ export default class Order extends AppBaseModel {
   }
 
   public async loadBigbuyData() {
-    if (this.bigbuyData.id <= 0 && this.bigbuyId) {
+    if (!this.bigbuyData.id && this.bigbuyId) {
       const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
       const products = [] as GetOrderProduct[]
       for (let i = 0; i < orderInfo.products.length; i++) {

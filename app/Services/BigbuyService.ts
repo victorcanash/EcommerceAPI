@@ -111,7 +111,7 @@ export default class BigbuyService {
 
   public static async getOrderInfo(orderId: string) {
     let result = {
-      id: 0,
+      id: '',
       status: '',
       shippingAddress: {
         firstName: '',
