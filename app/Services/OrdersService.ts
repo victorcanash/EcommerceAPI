@@ -7,7 +7,7 @@ export default class OrdersService {
   }
 
   public static async getOrderByBigbuyId(
-    bigbuyId: number,
+    bigbuyId: string,
     bigbuyData = false,
     braintreeData = false
   ) {

@@ -76,7 +76,7 @@ export default class OrdersController {
       await bouncer.with('OrderPolicy').authorize('view', order)
     } else {
       const validatedFilterData = await request.validate(FilterOrderValidator)
-      order = await OrdersService.getOrderByBigbuyId(validatedFilterData.bigbuyId || -1, true, true)
+      order = await OrdersService.getOrderByBigbuyId(validatedFilterData.bigbuyId || '', true, true)
       if (order.userId) {
         throw new PermissionException('You have to be logged to get this order')
       }

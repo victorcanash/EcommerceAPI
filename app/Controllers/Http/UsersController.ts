@@ -183,7 +183,7 @@ export default class UsersController {
     }
 
     if (validatedData.type !== ContactTypes.NORMAL) {
-      const order = await OrdersService.getOrderByBigbuyId(validatedData.orderBigbuyId || -1)
+      const order = await OrdersService.getOrderByBigbuyId(validatedData.orderBigbuyId || '')
       if (validToken) {
         await bouncer.with('OrderPolicy').authorize('view', order)
       } else {

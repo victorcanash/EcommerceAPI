@@ -13,7 +13,7 @@ export default class SendContactEmailValidator {
     type: schema.enum(Object.values(ContactTypes)),
     email: schema.string({}, [rules.email(), rules.maxLength(255)]),
     firstName: schema.string(),
-    orderBigbuyId: schema.number.optional([rules.exists({ table: 'orders', column: 'id' })]),
+    orderBigbuyId: schema.string.optional([rules.exists({ table: 'orders', column: 'bigbuy_id' })]),
     comments: schema.string(),
     appName: schema.string(),
     appDomain: schema.string(),
