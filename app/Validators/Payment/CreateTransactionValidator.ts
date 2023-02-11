@@ -1,4 +1,4 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
@@ -15,7 +15,7 @@ export default class CreateTransactionValidator {
     paymentMethodNonce: schema.string(),
     remember: schema.boolean(),
     guestUser: schema.object.optional().members({
-      email: schema.string(),
+      email: schema.string([rules.exists({ table: 'guest_users', column: 'email' })]),
       shipping: addressSchema,
       billing: addressSchema,
     }),

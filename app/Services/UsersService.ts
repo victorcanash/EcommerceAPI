@@ -18,6 +18,10 @@ export default class UsersService {
     return this.getUserByField('email', email, allData, bigbuyData)
   }
 
+  public static async getGuestUserById(id: number) {
+    return this.getGuestUserByField('id', id)
+  }
+
   public static async getGuestUserByEmail(email: string) {
     return this.getGuestUserByField('email', email)
   }

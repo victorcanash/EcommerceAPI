@@ -12,8 +12,6 @@ export default class SendOrderEmailValidator {
     locale: schema.string(),
     appName: schema.string(),
     appDomain: schema.string(),
-    userEmail: schema.string.optional(),
-    userFirstName: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}

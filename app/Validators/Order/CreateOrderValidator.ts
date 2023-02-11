@@ -14,7 +14,9 @@ export default class CreateOrderValidator {
     appName: schema.string(),
     appDomain: schema.string(),
     userId: schema.number.optional([rules.exists({ table: 'users', column: 'id' })]),
-    userEmail: schema.string.optional(),
+    guestUserEmail: schema.string.optional([
+      rules.exists({ table: 'guest_users', column: 'email' }),
+    ]),
     braintreeTransactionId: schema.string({}, [
       rules.unique({ table: 'orders', column: 'braintree_transaction_id' }),
     ]),

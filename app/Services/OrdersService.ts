@@ -6,6 +6,14 @@ export default class OrdersService {
     return this.getOrderByField('id', id, bigbuyData, braintreeData)
   }
 
+  public static async getOrderByBigbuyId(
+    bigbuyId: number,
+    bigbuyData = false,
+    braintreeData = false
+  ) {
+    return this.getOrderByField('bigbuyId', bigbuyId, bigbuyData, braintreeData)
+  }
+
   private static async getOrderByField(
     field: string,
     value: string | number,

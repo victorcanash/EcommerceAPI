@@ -132,8 +132,8 @@ Route.group(() => {
   Route.resource('orders', 'OrdersController')
     .except(['update', 'destroy'])
     .middleware({
-      '*': ['auth:api'],
-      'store': ['admin'],
+      index: ['auth:api'],
+      store: ['auth:api, admin'],
     })
     .apiOnly()
   Route.post('orders/:id/send-email/check', 'OrdersController.sendCheckEmail').middleware([

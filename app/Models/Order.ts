@@ -9,13 +9,16 @@ import { getCountryName } from 'App/Utils/addresses'
 
 export default class Order extends AppBaseModel {
   @column()
-  public userId: number
+  public userId?: number
 
   @column()
-  public bigbuyId?: string
+  public guestUserId?: number
 
   @column()
   public braintreeTransactionId: string
+
+  @column()
+  public bigbuyId?: string
 
   @computed()
   public get bigbuy() {

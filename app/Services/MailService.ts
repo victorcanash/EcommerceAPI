@@ -131,7 +131,7 @@ export default class MailService {
       type: ContactTypes
       email: string
       firstName: string
-      orderId: number | undefined
+      orderBigbuyId: number | undefined
       comments: string
     },
     images: string[]

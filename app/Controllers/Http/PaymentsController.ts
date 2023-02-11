@@ -85,6 +85,7 @@ export default class PaymentsController {
     const validatedData = await request.validate(CreateTransactionValidator)
 
     let user: User | GuestUserCheckout | undefined
+    let guestUserId: number | undefined
     let cart: Cart | GuestCartCheck | undefined
 
     const validToken = await auth.use('api').check()
@@ -100,6 +101,7 @@ export default class PaymentsController {
       if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
         throw new BadRequestException('Missing guestCart')
       }
+      guestUserId = await (await UsersService.getGuestUserByEmail(user.email)).id
       cart = await CartsService.createGuestCartCheck(validatedData.guestCart.items)
     }
 
@@ -144,7 +146,8 @@ export default class PaymentsController {
     // Bigbuy Order
 
     const order = await Order.create({
-      userId: (user as User)?.id || -1,
+      userId: (user as User)?.id || undefined,
+      guestUserId: guestUserId,
       braintreeTransactionId: braintreeTransactionId,
     })
     const cartItemIds = [] as number[]
@@ -227,6 +230,11 @@ export default class PaymentsController {
 
     if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
       throw new BadRequestException('Missing guestCart')
+    }
+
+    let loggedUser = await User.query().where('email', validatedData.guestUser.email).first()
+    if (loggedUser) {
+      throw new BadRequestException('The email entered belongs to a registered user')
     }
 
     let guestUser = await GuestUser.query().where('email', validatedData.guestUser.email).first()

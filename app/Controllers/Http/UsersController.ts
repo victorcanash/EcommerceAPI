@@ -9,6 +9,7 @@ import User from 'App/Models/User'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
 import UsersService from 'App/Services/UsersService'
+import OrdersService from 'App/Services/OrdersService'
 import MailService from 'App/Services/MailService'
 import {
   UsersResponse,
@@ -23,6 +24,7 @@ import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
 import UpdateUAddressesValidator from 'App/Validators/User/UpdateUAddressesValidator'
 import SendContactEmailValidator from 'App/Validators/User/SendContactEmailValidator'
 import BadRequestException from 'App/Exceptions/BadRequestException'
+import PermissionException from 'App/Exceptions/PermissionException'
 import { logRouteSuccess } from 'App/Utils/logger'
 import { generateUniqueFilename } from 'App/Utils/uploader'
 
@@ -165,9 +167,11 @@ export default class UsersController {
     } as BasicResponse)
   }
 
-  public async sendContactEmail({ response, request, i18n }: HttpContextContract) {
+  public async sendContactEmail({ response, request, i18n, auth, bouncer }: HttpContextContract) {
+    const validToken = await auth.use('api').check()
     const validatedData = await request.validate(SendContactEmailValidator)
     let validatedImages = [] as MultipartFileContract[]
+
     if (validatedData.type === ContactTypes.REFUND_ORDER) {
       validatedImages = await request.files('images', {
         size: '2mb',
@@ -176,8 +180,20 @@ export default class UsersController {
       if (validatedImages.length < 1) {
         throw new BadRequestException('Images field must contain at least 1 file')
       }
-      if (!validatedData.orderId) {
-        throw new BadRequestException('Required order id field')
+    }
+
+    if (validatedData.type !== ContactTypes.NORMAL) {
+      const order = await OrdersService.getOrderByBigbuyId(validatedData.orderBigbuyId || -1)
+      if (validToken) {
+        await bouncer.with('OrderPolicy').authorize('view', order)
+      } else {
+        if (order.userId) {
+          throw new PermissionException('The order bigbuy id entered belongs to a registered user')
+        }
+        const guestUser = await UsersService.getGuestUserByEmail(validatedData.email || '')
+        if (guestUser.id !== order.guestUserId) {
+          throw new BadRequestException('Order bigbuy id does not pertain to the email sent')
+        }
       }
     }
     const images = [] as string[]
@@ -197,7 +213,7 @@ export default class UsersController {
         type: validatedData.type,
         email: validatedData.email,
         firstName: validatedData.firstName,
-        orderId: validatedData.orderId,
+        orderBigbuyId: validatedData.orderBigbuyId,
         comments: validatedData.comments,
       },
       images
