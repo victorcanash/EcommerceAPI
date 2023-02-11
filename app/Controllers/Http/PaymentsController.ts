@@ -2,6 +2,8 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import { DateTime } from 'luxon'
 
+import { v4 as uuidv4 } from 'uuid'
+
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import Order from 'App/Models/Order'
@@ -159,7 +161,7 @@ export default class PaymentsController {
         return {
           reference: item.inventory.sku,
           quantity: item.quantity,
-          internalReference: item.inventory.id.toString(),
+          internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
         } as SendOrderProduct
       }
     })
