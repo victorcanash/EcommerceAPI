@@ -1,7 +1,9 @@
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Env from '@ioc:Adonis/Core/Env'
 import { I18nContract } from '@ioc:Adonis/Addons/I18n'
+import Drive from '@ioc:Adonis/Core/Drive'
 
+import { ContactTypes } from 'App/Constants/contact'
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import UserAddress from 'App/Models/UserAddress'
@@ -125,10 +127,17 @@ export default class MailService {
     i18n: I18nContract,
     appName: string,
     appDomain: string,
-    userContact: { email: string; firstName: string; tlf?: string; comments: string }
+    userContact: {
+      type: ContactTypes
+      email: string
+      firstName: string
+      orderId: number | undefined
+      comments: string
+    },
+    images: string[]
   ) {
     const currentYear = new Date().getFullYear()
-    Mail.send((message) => {
+    Mail.send(async (message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(Env.get('SMTP_EMAIL'))
@@ -140,6 +149,14 @@ export default class MailService {
           currentYear,
           userContact,
         })
+      if (images.length > 0) {
+        for (let i = 0; i < images.length; i++) {
+          const imgContent = await Drive.get(`${images[i]}`)
+          message.attachData(imgContent, {
+            filename: images[i],
+          })
+        }
+      }
     })
   }
 

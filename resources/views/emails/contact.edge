@@ -22,12 +22,32 @@
               <li>
                 Locale: {{ locale }}
               </li>
+              @if(userContact.type === "normal")
+                <li>
+                  Case: Contact
+                </li>
+              @end
+              @if(userContact.type === "refundOrder")
+                <li>
+                  Case: Refund order
+                </li>
+              @end
+              @if(userContact.type === "modifyOrder")
+                <li>
+                  Case: Modify order
+                </li>
+              @end
+              @if(userContact.type === "cancelOrder")
+                <li>
+                  Case: Cancel order
+                </li>
+              @end
               <li>
                 Email: {{ userContact.email }}
               </li>
-              @if(userContact.tlf)
+              @if(userContact.orderId)
                 <li>
-                  Telephone: {{ userContact.tlf }}
+                  Order ID: {{ userContact.orderId }}
                 </li>
               @end
               <li>

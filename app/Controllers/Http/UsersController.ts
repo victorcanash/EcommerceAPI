@@ -1,7 +1,9 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import { AddressTypes } from 'App/Constants/addresses'
+import { ContactTypes } from 'App/Constants/contact'
 import User from 'App/Models/User'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
@@ -19,7 +21,9 @@ import CreateUserValidator from 'App/Validators/User/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
 import UpdateUAddressesValidator from 'App/Validators/User/UpdateUAddressesValidator'
 import SendContactEmailValidator from 'App/Validators/User/SendContactEmailValidator'
+import BadRequestException from 'App/Exceptions/BadRequestException'
 import { logRouteSuccess } from 'App/Utils/logger'
+import { generateUniqueFilename } from 'App/Utils/uploader'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
@@ -162,13 +166,41 @@ export default class UsersController {
 
   public async sendContactEmail({ response, request, i18n }: HttpContextContract) {
     const validatedData = await request.validate(SendContactEmailValidator)
+    let validatedImages = [] as MultipartFileContract[]
+    if (validatedData.type === ContactTypes.REFUND_ORDER) {
+      validatedImages = await request.files('images', {
+        size: '2mb',
+        extnames: ['jpg', 'jpeg', 'png'],
+      })
+      if (validatedImages.length < 1) {
+        throw new BadRequestException('Images field must contain at least 1 file')
+      }
+      if (!validatedData.orderId) {
+        throw new BadRequestException('Required order id field')
+      }
+    }
+    const images = [] as string[]
+    for (let i = 0; i < validatedImages.length; i++) {
+      const imageName = generateUniqueFilename(validatedImages[i].clientName)
+      await validatedImages[i].moveToDisk('./', {
+        name: imageName,
+      })
+      images.push(imageName)
+    }
 
-    await MailService.sendContactEmail(i18n, validatedData.appName, validatedData.appDomain, {
-      email: validatedData.email,
-      firstName: validatedData.firstName,
-      tlf: validatedData.tlf,
-      comments: validatedData.comments,
-    })
+    await MailService.sendContactEmail(
+      i18n,
+      validatedData.appName,
+      validatedData.appDomain,
+      {
+        type: validatedData.type,
+        email: validatedData.email,
+        firstName: validatedData.firstName,
+        orderId: validatedData.orderId,
+        comments: validatedData.comments,
+      },
+      images
+    )
 
     const successMsg = `Successfully sent contact email to ${validatedData.email}`
     logRouteSuccess(request, successMsg)
