@@ -20,7 +20,7 @@ export default class MailService {
     btnUrl: string
   ) {
     const currentYear = new Date().getFullYear()
-    Mail.send((message) => {
+    await Mail.send((message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(guestUser.email)
@@ -46,7 +46,7 @@ export default class MailService {
     btnUrl: string
   ) {
     const currentYear = new Date().getFullYear()
-    Mail.send((message) => {
+    await Mail.send((message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(user.email)
@@ -72,7 +72,7 @@ export default class MailService {
     btnUrl: string
   ) {
     const currentYear = new Date().getFullYear()
-    Mail.send((message) => {
+    await Mail.send((message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(user.email)
@@ -109,7 +109,7 @@ export default class MailService {
     const btnTxt = revert
       ? i18n.formatMessage('messages.emails.auth.revertEmail.button')
       : i18n.formatMessage('messages.emails.auth.updateEmail.button')
-    Mail.send((message) => {
+    await Mail.send((message) => {
       message.from(Env.get('SMTP_EMAIL')).to(email).subject(subject).htmlView('emails/auth', {
         i18n,
         appName,
@@ -137,7 +137,7 @@ export default class MailService {
     images: string[]
   ) {
     const currentYear = new Date().getFullYear()
-    Mail.send(async (message) => {
+    await Mail.send(async (message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(Env.get('SMTP_EMAIL'))
@@ -151,7 +151,7 @@ export default class MailService {
         })
       if (images.length > 0) {
         for (let i = 0; i < images.length; i++) {
-          const imgContent = await Drive.get(`${images[i]}`)
+          const imgContent = await Drive.get(images[i])
           message.attachData(imgContent, {
             filename: images[i],
           })
@@ -169,7 +169,7 @@ export default class MailService {
     order: Order
   ) {
     const currentYear = new Date().getFullYear()
-    Mail.send((message) => {
+    await Mail.send((message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(email)
@@ -204,7 +204,7 @@ export default class MailService {
   ) {
     const currentYear = new Date().getFullYear()
     const currentDate = new Date().toLocaleDateString()
-    Mail.send((message) => {
+    await Mail.send((message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(Env.get('SMTP_EMAIL'))
@@ -233,7 +233,7 @@ export default class MailService {
   ) {
     const currentYear = new Date().getFullYear()
     const currentDate = new Date().toLocaleDateString()
-    Mail.send((message) => {
+    await Mail.send((message) => {
       message
         .from(Env.get('SMTP_EMAIL'))
         .to(Env.get('SMTP_EMAIL'))

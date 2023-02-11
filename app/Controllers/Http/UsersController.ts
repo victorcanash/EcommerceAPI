@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser'
+import Drive from '@ioc:Adonis/Core/Drive'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import { AddressTypes } from 'App/Constants/addresses'
@@ -201,6 +202,10 @@ export default class UsersController {
       },
       images
     )
+
+    for (let i = 0; i < images.length; i++) {
+      await Drive.delete(images[i])
+    }
 
     const successMsg = `Successfully sent contact email to ${validatedData.email}`
     logRouteSuccess(request, successMsg)
