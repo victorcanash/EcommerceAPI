@@ -1,6 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import I18n from '@ioc:Adonis/Addons/I18n'
 
+import { v4 as uuidv4 } from 'uuid'
+
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import Order from 'App/Models/Order'
 import User from 'App/Models/User'
@@ -128,7 +130,7 @@ export default class OrdersController {
         return {
           reference: item.inventory.sku,
           quantity: item.quantity,
-          internalReference: item.inventory.id.toString(),
+          internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
         } as SendOrderProduct
       }
     })
