@@ -11,9 +11,7 @@ export default class FilterOrderValidator {
   public schema = schema.create({
     userId: schema.number.optional([rules.exists({ table: 'users', column: 'id' })]),
     bigbuyId: schema.string.optional([rules.exists({ table: 'orders', column: 'bigbuy_id' })]),
-    guestUserEmail: schema.string.optional([
-      rules.exists({ table: 'guest_users', column: 'email' }),
-    ]),
+    guestUserEmail: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}
