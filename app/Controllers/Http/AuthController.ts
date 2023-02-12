@@ -145,9 +145,6 @@ export default class AuthController {
       ? await UsersService.getUserById(id, true)
       : await UsersService.getUserByEmail(email, true)
 
-    await auth.use('api').revoke()
-    await auth.use('update').revoke()
-
     const validatedData = await request.validate(UpdateAuthValidator)
     const newEmail = isAdmin ? validatedData.newEmail : auth.use('update').token?.meta?.new_email
     const newPassword = validatedData.newPassword
@@ -159,6 +156,8 @@ export default class AuthController {
       user.password = newPassword
     }
     await user.save()
+
+    await auth.use('update').revoke()
 
     const tokenData = await auth.use('api').generate(user, {
       expiresIn: Env.get('API_TOKEN_EXPIRY', '7days'),
