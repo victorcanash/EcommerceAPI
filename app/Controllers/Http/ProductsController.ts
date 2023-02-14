@@ -70,7 +70,7 @@ export default class ProductsController {
       throw new PermissionException('You need to be an admin to get admin data')
     }
 
-    const product = await ProductsService.getProductById(id, true, adminData, true)
+    const product = await ProductsService.getProductById(id, true, adminData)
 
     const successMsg = `Successfully got product by id ${id}`
     logRouteSuccess(request, successMsg)

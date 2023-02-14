@@ -6,18 +6,13 @@ import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import LocalizedText from 'App/Models/LocalizedText'
-import BigbuyService from 'App/Services/BigbuyService'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
+import BigbuyService from './BigbuyService'
 
 export default class ProductsService {
-  public static async getProductById(
-    id: number,
-    allData: boolean,
-    adminData = false,
-    bigbuyData = false
-  ) {
-    return this.getProductByField('id', id, allData, adminData, bigbuyData)
+  public static async getProductById(id: number, allData: boolean, adminData = false) {
+    return this.getProductByField('id', id, allData, adminData)
   }
 
   public static async getCategoryById(id: number) {
@@ -28,8 +23,8 @@ export default class ProductsService {
     return this.getCategoryByField('name', name)
   }
 
-  public static async getInventoryById(id: number, bigbuyData = false) {
-    return this.getInventoryByField('id', id, bigbuyData)
+  public static async getInventoryById(id: number) {
+    return this.getInventoryByField('id', id)
   }
 
   public static async getDiscountById(id: number) {
@@ -90,8 +85,7 @@ export default class ProductsService {
     field: string,
     value: string | number,
     allData: boolean,
-    adminData: boolean,
-    bigbuyData = false
+    adminData: boolean
   ) {
     let product: Product | null = null
     product = await Product.query()
@@ -109,16 +103,25 @@ export default class ProductsService {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product`)
     }
 
-    if (bigbuyData && product.inventories && product.inventories.length > 0) {
-      let skus = [] as string[]
-      product.inventories.forEach((inventory) => {
-        skus.push(inventory.sku)
-      })
-      const stocks = await BigbuyService.getProductsStocks(skus)
-      product.inventories.forEach((inventory) => {
+    if (adminData && product.inventories && product.inventories.length > 0) {
+      const stocks = await BigbuyService.getProductsStocks(
+        product.inventories.map((item) => {
+          return item.sku
+        })
+      )
+      for (let i = 0; i < product.inventories.length; i++) {
+        const inventory = product.inventories[i]
         let stock = stocks.find((stock) => stock.sku === inventory.sku)
-        inventory.bigbuyData.quantity = stock?.quantity || 0
-      })
+        const { id, name, description, price } = await BigbuyService.getProductInfo(inventory.sku)
+        inventory.bigbuyData = {
+          id: id,
+          name: name,
+          description: description,
+          price: price,
+          quantity: stock?.quantity || 0,
+        }
+        inventory.merge({ quantity: stock?.quantity || 0 })
+      }
     }
 
     return product
@@ -141,21 +144,11 @@ export default class ProductsService {
     return category
   }
 
-  private static async getInventoryByField(
-    field: string,
-    value: string | number,
-    bigbuyData = false
-  ) {
+  private static async getInventoryByField(field: string, value: string | number) {
     let inventory: ProductInventory | null = null
     inventory = await ProductInventory.findBy(field, value)
     if (!inventory) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product inventory`)
-    }
-
-    if (bigbuyData) {
-      const stocks = await BigbuyService.getProductsStocks([inventory.sku])
-      inventory.bigbuyData.quantity =
-        stocks.length > 0 && stocks[0].sku === inventory.sku ? stocks[0].quantity : 0
     }
 
     return inventory

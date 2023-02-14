@@ -5,17 +5,16 @@ import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import CartItem from 'App/Models/CartItem'
 import ProductInventory from 'App/Models/ProductInventory'
-import BigbuyService from 'App/Services/BigbuyService'
 import { GuestCartItem } from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class UsersService {
-  public static async getUserById(id: number, allData: boolean, bigbuyData = false) {
-    return this.getUserByField('id', id, allData, bigbuyData)
+  public static async getUserById(id: number, allData: boolean) {
+    return this.getUserByField('id', id, allData)
   }
 
-  public static async getUserByEmail(email: string, allData: boolean, bigbuyData = false) {
-    return this.getUserByField('email', email, allData, bigbuyData)
+  public static async getUserByEmail(email: string, allData: boolean) {
+    return this.getUserByField('email', email, allData)
   }
 
   public static async getGuestUserById(id: number) {
@@ -70,12 +69,7 @@ export default class UsersService {
     return newUser
   }
 
-  private static async getUserByField(
-    field: string,
-    value: string | number,
-    allData: boolean,
-    bigbuyData = false
-  ) {
+  private static async getUserByField(field: string, value: string | number, allData: boolean) {
     let user: User | null = null
     user = await User.query()
       .where(field, value)
@@ -87,22 +81,6 @@ export default class UsersService {
       .first()
     if (!user) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting user`)
-    }
-
-    if (bigbuyData && user.cart?.items && user.cart.items.length > 0) {
-      let skus = [] as string[]
-      user.cart.items.forEach((item) => {
-        if (item.inventory) {
-          skus.push(item.inventory.sku)
-        }
-      })
-      const stocks = await BigbuyService.getProductsStocks(skus)
-      user.cart.items.forEach((item) => {
-        if (item.inventory) {
-          let stock = stocks.find((stock) => stock.sku === item.inventory.sku)
-          item.inventory.bigbuyData.quantity = stock?.quantity || 0
-        }
-      })
     }
 
     return user
