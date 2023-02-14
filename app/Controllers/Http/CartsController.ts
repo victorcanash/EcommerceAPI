@@ -18,11 +18,11 @@ export default class CartsController {
 
       await bouncer.with('CartPolicy').authorize('check', cart as Cart)
 
-      cart = await (await UsersService.getUserById((cart as Cart).userId, true, true)).cart
+      cart = await (await UsersService.getUserById((cart as Cart).userId, true)).cart
     } else {
       const validatedCheckCartData = await request.validate(CheckCartValidator)
 
-      cart = await CartsService.createGuestCartCheck(validatedCheckCartData.guestCart?.items, true)
+      cart = await CartsService.createGuestCartCheck(validatedCheckCartData.guestCart?.items)
     }
 
     let changedItemsByInventory = [] as GuestCartCheckItem[]
