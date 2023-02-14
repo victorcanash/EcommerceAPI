@@ -78,7 +78,10 @@ export default class PInventoriesController {
       validatedData.description
     )
     Logger.info(`quantity:${validatedData.quantity}`)
-    productInventory.merge(validatedData)
+    productInventory.merge({
+      ...validatedData,
+      quantity: validatedData.quantity || productInventory.quantity,
+    })
     await productInventory.save()
 
     const successMsg = `Successfully updated product inventory by id ${id}`
