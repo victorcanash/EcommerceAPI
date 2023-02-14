@@ -11,8 +11,13 @@ import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 import BigbuyService from './BigbuyService'
 
 export default class ProductsService {
-  public static async getProductById(id: number, allData: boolean, adminData = false) {
-    return this.getProductByField('id', id, allData, adminData)
+  public static async getProductById(
+    id: number,
+    allData: boolean,
+    adminData = false,
+    bigbuyData?: boolean
+  ) {
+    return this.getProductByField('id', id, allData, adminData, bigbuyData)
   }
 
   public static async getCategoryById(id: number) {
@@ -85,7 +90,8 @@ export default class ProductsService {
     field: string,
     value: string | number,
     allData: boolean,
-    adminData: boolean
+    adminData: boolean,
+    bigbuyData?: boolean
   ) {
     let product: Product | null = null
     product = await Product.query()
@@ -103,7 +109,7 @@ export default class ProductsService {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product`)
     }
 
-    if (adminData && product.inventories && product.inventories.length > 0) {
+    if (adminData && bigbuyData && product.inventories && product.inventories.length > 0) {
       const stocks = await BigbuyService.getProductsStocks(
         product.inventories.map((item) => {
           return item.sku
@@ -112,12 +118,12 @@ export default class ProductsService {
       for (let i = 0; i < product.inventories.length; i++) {
         const inventory = product.inventories[i]
         let stock = stocks.find((stock) => stock.sku === inventory.sku)
-        const { id, name, description, price } = await BigbuyService.getProductInfo(inventory.sku)
+        // const { id, name, description, price } = await BigbuyService.getProductInfo(inventory.sku)
         inventory.bigbuyData = {
-          id: id,
-          name: name,
-          description: description,
-          price: price,
+          id: '',
+          name: '',
+          description: '',
+          price: 0,
           quantity: stock?.quantity || 0,
         }
         inventory.merge({ quantity: stock?.quantity || 0 })

@@ -12,6 +12,7 @@ export default class FilterProductValidator {
     keywords: schema.string.optional(),
     categoryName: schema.string.optional(),
     adminData: schema.boolean.optional(),
+    bigbuyData: schema.boolean.optional(),
   })
 
   public messages: CustomMessages = {}

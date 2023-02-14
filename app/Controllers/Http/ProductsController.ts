@@ -65,12 +65,18 @@ export default class ProductsController {
   public async show({ params: { id }, request, response, auth }: HttpContextContract) {
     const validatedFilterData = await request.validate(FilterProductValidator)
     const adminData = validatedFilterData.adminData || false
+    const bigbuyData = validatedFilterData.adminData || false
 
-    if (adminData && !UsersService.isAuthAdmin(auth)) {
-      throw new PermissionException('You need to be an admin to get admin data')
+    if (!UsersService.isAuthAdmin(auth)) {
+      if (adminData) {
+        throw new PermissionException('You need to be an admin to get admin data')
+      }
+      if (bigbuyData) {
+        throw new PermissionException('You need to be an admin to get bigbuy data')
+      }
     }
 
-    const product = await ProductsService.getProductById(id, true, adminData)
+    const product = await ProductsService.getProductById(id, true, adminData, bigbuyData)
 
     const successMsg = `Successfully got product by id ${id}`
     logRouteSuccess(request, successMsg)
