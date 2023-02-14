@@ -27,16 +27,16 @@ export default class CartsService {
     const changedItems: CartItem[] | GuestCartCheckItem[] = []
     for (let i = 0; i < cart.items.length; i++) {
       let item = cart.items[i]
-      if (item.quantity > item.inventory.bigbuy.quantity) {
+      if (item.quantity > item.inventory.quantity) {
         if ((cart as Cart)?.userId) {
-          ;(item as CartItem).merge({ quantity: item.inventory.bigbuy.quantity })
+          ;(item as CartItem).merge({ quantity: item.inventory.quantity })
           await (item as CartItem).save()
           changedItems.push(item as CartItem)
         } else {
-          ;(item as GuestCartCheckItem).quantity = item.inventory.bigbuy.quantity
+          ;(item as GuestCartCheckItem).quantity = item.inventory.quantity
           ;(changedItems as GuestCartCheckItem[]).push({
             inventory: (item as GuestCartCheckItem).inventory,
-            quantity: item.inventory.bigbuy.quantity,
+            quantity: item.inventory.quantity,
           })
         }
       }
