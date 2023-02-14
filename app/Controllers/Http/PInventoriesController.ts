@@ -10,7 +10,6 @@ import FilterPInventoryValidator from 'App/Validators/Product/FilterPInventoryVa
 import CreatePInventoryValidator from 'App/Validators/Product/CreatePInventoryValidator'
 import UpdatePInventoryValidator from 'App/Validators/Product/UpdatePInventoryValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class PInventoriesController {
   public async index({ request, response }: HttpContextContract) {
@@ -77,11 +76,7 @@ export default class PInventoriesController {
       validatedData.name,
       validatedData.description
     )
-    Logger.info(`quantity:${validatedData.quantity}`)
-    productInventory.merge({
-      ...validatedData,
-      quantity: validatedData.quantity || productInventory.quantity,
-    })
+    productInventory.merge(validatedData)
     await productInventory.save()
 
     const successMsg = `Successfully updated product inventory by id ${id}`
