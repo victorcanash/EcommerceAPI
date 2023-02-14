@@ -118,7 +118,7 @@ export default class BraintreeService {
       throw new PermissionException(`You don't have selected items in your cart`)
     }
 
-    const amount = CartsService.getAmount(cart)
+    const { amount } = CartsService.getTotalAmount(cart)
     if (amount <= 0) {
       throw new PermissionException(`Your don't have cart amount`)
     }

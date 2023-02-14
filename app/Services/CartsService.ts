@@ -13,13 +13,18 @@ export default class CartsService {
     return this.getCartItemByField('id', id)
   }
 
-  public static getAmount(cart: Cart | GuestCartCheck) {
+  public static getTotalAmount(cart: Cart | GuestCartCheck) {
     let amount = 0
+    let quantity = 0
     cart.items.forEach((item) => {
       const inventory = item.inventory.serialize()
       amount += inventory.realPrice * item.quantity
+      quantity += item.quantity
     })
-    return amount
+    return {
+      amount,
+      quantity,
+    }
   }
 
   // Check if there are the quantity desired by user and if there are items with 0 quantity
@@ -42,6 +47,23 @@ export default class CartsService {
       }
     }
     return changedItems
+  }
+
+  public static async onBuyItems(cart: Cart | GuestCartCheck) {
+    const inventories = await ProductInventory.query().whereIn(
+      'id',
+      cart.items.map((item: CartItem | GuestCartCheckItem) => {
+        return item.inventory.id
+      })
+    )
+    for (let i = 0; i < inventories.length; i++) {
+      const buyQuantity =
+        cart.items.find(
+          (item: CartItem | GuestCartCheckItem) => inventories[i].id === item.inventory.id
+        )?.quantity || 0
+      inventories[i].merge({ quantity: inventories[i].quantity - buyQuantity })
+      await inventories[i].save()
+    }
   }
 
   public static async deleteItemsByCart(cart: Cart) {

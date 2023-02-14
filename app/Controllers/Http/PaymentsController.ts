@@ -166,6 +166,7 @@ export default class PaymentsController {
       }
     })
 
+    await CartsService.onBuyItems(cart)
     if ((cart as Cart)?.id) {
       await CartsService.deleteItemsByIds(cartItemIds)
     }
