@@ -121,6 +121,7 @@ export default class ProductsService {
           quantity: stock?.quantity || 0,
         }
         inventory.merge({ quantity: stock?.quantity || 0 })
+        await inventory.save()
       }
     }
 

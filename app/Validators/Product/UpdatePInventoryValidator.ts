@@ -21,6 +21,7 @@ export default class UpdatePInventoryValidator {
     name: optLocalizedTextSchema,
     description: optLocalizedTextSchema,
     price: schema.number.optional(),
+    quantity: schema.number.optional(),
   })
 
   public messages: CustomMessages = {}

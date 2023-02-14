@@ -15,6 +15,7 @@ export default class CreatePInventoryValidator {
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
     price: schema.number(),
+    quantity: schema.number(),
   })
 
   public messages: CustomMessages = {}

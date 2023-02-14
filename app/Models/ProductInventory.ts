@@ -9,7 +9,6 @@ import {
 
 import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
-import BigbuyService from 'App/Services/BigbuyService'
 import { roundTwoDecimals } from 'App/Utils/numbers'
 
 export default class ProductInventory extends ProductBaseModel {
@@ -21,6 +20,9 @@ export default class ProductInventory extends ProductBaseModel {
 
   @column()
   public price: number
+
+  @column()
+  public quantity: number
 
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
@@ -45,20 +47,6 @@ export default class ProductInventory extends ProductBaseModel {
     description: '',
     price: 0,
     quantity: 0,
-  }
-
-  public async loadBigbuyData() {
-    if (!this.bigbuyData.id) {
-      const { id, name, description, price } = await BigbuyService.getProductInfo(this.sku)
-      const quantity = await BigbuyService.getProductQuantity(id)
-      this.bigbuyData = {
-        id: id,
-        name: name,
-        description: description,
-        price: price,
-        quantity: quantity,
-      }
-    }
   }
 
   @beforeFetch()
