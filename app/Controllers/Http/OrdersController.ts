@@ -69,11 +69,16 @@ export default class OrdersController {
 
     let order: Order | undefined
     if (validToken) {
-      order = await OrdersService.getOrderById(id, true, true)
+      order = await OrdersService.getOrderById(id, true, true, true)
       await bouncer.with('OrderPolicy').authorize('view', order)
     } else {
       const validatedFilterData = await request.validate(FilterOrderValidator)
-      order = await OrdersService.getOrderByBigbuyId(validatedFilterData.bigbuyId || '', true, true)
+      order = await OrdersService.getOrderByBigbuyId(
+        validatedFilterData.bigbuyId || '',
+        true,
+        true,
+        true
+      )
       if (order.userId) {
         throw new PermissionException('You have to be logged to get this order')
       }
@@ -122,8 +127,8 @@ export default class OrdersController {
       userId: user?.id || undefined,
       guestUserId: guestUserId,
       braintreeTransactionId: validatedData.braintreeTransactionId,
-      products: guestCartItems,
     })
+    order.productsData = guestCartItems
     const { orderProducts } = await BigbuyService.createOrderProducts(orderCart)
 
     try {
@@ -148,6 +153,7 @@ export default class OrdersController {
     }
 
     try {
+      await order.loadItemsData()
       await order.loadBigbuyData()
       await MailService.sendCheckOrderEmail(
         I18n.locale(locale),
@@ -178,7 +184,7 @@ export default class OrdersController {
   }
 
   public async sendCheckEmail({ params: { id }, request, response }: HttpContextContract) {
-    const order = await OrdersService.getOrderById(id, true, true)
+    const order = await OrdersService.getOrderById(id, true, true, true)
     const user = order.userId
       ? await UsersService.getUserById(order.userId, false)
       : await UsersService.getGuestUserById(order.guestUserId || -1)

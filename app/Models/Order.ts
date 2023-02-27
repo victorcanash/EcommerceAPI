@@ -1,4 +1,4 @@
-import { column, computed } from '@ioc:Adonis/Lucid/Orm'
+import { column, computed, afterFetch, beforeSave, afterFind } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
@@ -22,24 +22,21 @@ export default class Order extends AppBaseModel {
   public bigbuyId?: string
 
   @column()
-  public products?: GuestCartItem[]
+  public products?: string
+
+  public productsData?: GuestCartItem[]
 
   @computed()
   public get items() {
     return this.itemsData
   }
 
+  public itemsData: GuestCartCheckItem[] = []
+
   @computed()
   public get bigbuy() {
     return this.bigbuyData
   }
-
-  @computed()
-  public get braintree() {
-    return this.braintreeData
-  }
-
-  public itemsData: GuestCartCheckItem[] = []
 
   public bigbuyData = {
     id: '',
@@ -63,6 +60,11 @@ export default class Order extends AppBaseModel {
     }[],
   }
 
+  @computed()
+  public get braintree() {
+    return this.braintreeData
+  }
+
   public braintreeData = {
     amount: '',
     billing: {
@@ -83,45 +85,65 @@ export default class Order extends AppBaseModel {
     },
   }
 
-  public async loadBigbuyData() {
-    if (!this.bigbuyData.id && this.bigbuyId) {
-      const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
+  @beforeSave()
+  public static async onSave(model: Order) {
+    model.products = model.productsData ? JSON.stringify(model.productsData) : undefined
+  }
 
-      if (this.products && this.products.length > 0) {
-        const inventories = await ProductInventory.query().whereIn(
-          'id',
-          this.products.map((item) => {
-            return item.inventoryId || -1
-          })
-        )
-        const packs = await ProductPack.query().whereIn(
-          'id',
-          this.products.map((item) => {
-            return item.packId || -1
-          })
-        )
-        for (let i = 0; i < this.products.length; i++) {
-          const product = this.products[i]
-          if (product.inventoryId) {
-            const inventory = inventories.find((item) => item.id === product.inventoryId)
-            if (inventory) {
-              this.itemsData.push({
-                inventory: inventory,
-                quantity: product.quantity,
-              })
-            }
-          } else if (product.packId) {
-            const pack = packs.find((item) => item.id === product.packId)
-            if (pack) {
-              this.itemsData.push({
-                pack: pack,
-                quantity: product.quantity,
-              })
-            }
+  @afterFetch()
+  public static afterFetch(model: Order) {
+    model.productsData = model.products
+      ? (JSON.parse(model.products) as GuestCartItem[])
+      : undefined
+  }
+
+  @afterFind()
+  public static afterFind(model: Order) {
+    model.productsData = model.products
+      ? (JSON.parse(model.products) as GuestCartItem[])
+      : undefined
+  }
+
+  public async loadItemsData() {
+    if (this.productsData && this.productsData.length > 0) {
+      const inventories = await ProductInventory.query().whereIn(
+        'id',
+        this.productsData.map((item) => {
+          return item.inventoryId || -1
+        })
+      )
+      const packs = await ProductPack.query().whereIn(
+        'id',
+        this.productsData.map((item) => {
+          return item.packId || -1
+        })
+      )
+      for (let i = 0; i < this.productsData.length; i++) {
+        const product = this.productsData[i]
+        if (product.inventoryId) {
+          const inventory = inventories.find((item) => item.id === product.inventoryId)
+          if (inventory) {
+            this.itemsData.push({
+              inventory: inventory,
+              quantity: product.quantity,
+            })
+          }
+        } else if (product.packId) {
+          const pack = packs.find((item) => item.id === product.packId)
+          if (pack) {
+            this.itemsData.push({
+              pack: pack,
+              quantity: product.quantity,
+            })
           }
         }
       }
+    }
+  }
 
+  public async loadBigbuyData() {
+    if (!this.bigbuyData.id && this.bigbuyId) {
+      const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
       this.bigbuyData = {
         id: orderInfo.id,
         status: orderInfo.status,
