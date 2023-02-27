@@ -18,12 +18,6 @@ export default class CartsService {
     let amount = 0
     let quantity = 0
     cart.items.forEach((item) => {
-      if (item.inventory) {
-        const inventory = item.inventory.serialize()
-        amount += inventory.realPrice * item.quantity
-      } else if (item.pack) {
-        amount += item.pack.price
-      }
       amount += item.inventory
         ? item.inventory.serialize().realPrice * item.quantity
         : item.pack?.price || 0
