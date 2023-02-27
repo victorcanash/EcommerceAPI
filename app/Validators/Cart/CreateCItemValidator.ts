@@ -9,7 +9,10 @@ export default class CreateCItemValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    inventoryId: schema.number([rules.exists({ table: 'product_inventories', column: 'id' })]),
+    inventoryId: schema.number.optional([
+      rules.exists({ table: 'product_inventories', column: 'id' }),
+    ]),
+    packId: schema.number.optional([rules.exists({ table: 'product_packs', column: 'id' })]),
     quantity: schema.number.optional(),
   })
 

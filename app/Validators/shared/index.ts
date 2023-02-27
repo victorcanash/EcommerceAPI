@@ -23,7 +23,11 @@ export const addressSchema = schema.object().members({
 })
 
 export const guestCartSchema = schema.object.optional().members({
-  items: schema.array
-    .optional()
-    .members(schema.object().members({ inventoryId: schema.number(), quantity: schema.number() })),
+  items: schema.array.optional().members(
+    schema.object().members({
+      inventoryId: schema.number.optional(),
+      packId: schema.number.optional(),
+      quantity: schema.number(),
+    })
+  ),
 })

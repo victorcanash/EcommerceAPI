@@ -3,8 +3,11 @@ import Env from '@ioc:Adonis/Core/Env'
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 
+import Cart from 'App/Models/Cart'
+import CartItem from 'App/Models/CartItem'
+import { SendOrderProduct } from 'App/Types/order'
+import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { GuestUserCheckoutAddress } from 'App/Types/user'
-import { GetOrderProduct, SendOrderProduct } from 'App/Types/order'
 import { getCountryCode } from 'App/Utils/addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
@@ -124,7 +127,11 @@ export default class BigbuyService {
         email: '',
         companyName: '',
       },
-      products: [] as GetOrderProduct[],
+      products: [] as {
+        reference: string
+        quantity: number
+        internalReference: string
+      }[],
     }
     const options: AxiosRequestConfig = {
       headers: this.getAuthHeaders(),
@@ -144,11 +151,45 @@ export default class BigbuyService {
     return result
   }
 
+  public static async createOrderProducts(cart: Cart | GuestCartCheck) {
+    const cartItemIds = [] as number[]
+    const orderProducts: SendOrderProduct[] = []
+    cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
+      if (item.quantity > 0) {
+        if (item.inventory) {
+          if ((item as CartItem)?.id) {
+            cartItemIds.push((item as CartItem).id)
+          }
+          orderProducts.push({
+            reference: item.inventory.sku,
+            quantity: item.quantity,
+            internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
+          } as SendOrderProduct)
+        } else if (item.pack) {
+          if ((item as CartItem)?.id) {
+            cartItemIds.push((item as CartItem).id)
+          }
+          item.pack.inventories.forEach((itemInventory) => {
+            orderProducts.push({
+              reference: itemInventory.sku,
+              quantity: item.quantity,
+              internalReference: `${item.pack?.id.toString()}-${uuidv4()}`,
+            } as SendOrderProduct)
+          })
+        }
+      }
+    })
+    return {
+      cartItemIds,
+      orderProducts,
+    }
+  }
+
   public static async createOrder(
     internalReference: string,
     email: string,
     shipping: GuestUserCheckoutAddress,
-    products: (SendOrderProduct | undefined)[]
+    products: SendOrderProduct[]
   ) {
     let orderId = ''
     const options: AxiosRequestConfig = {

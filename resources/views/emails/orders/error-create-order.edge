@@ -63,16 +63,19 @@
                 </ul>
               </li>
               <li>
-                Products:
+                Cart items:
                 <ul style="list-style-type: disc;">
-                  @each(product in products)
+                  @each(item in cart.items)
                     <li>
                       <ul style="list-style-type: disc;">
                         <li>
-                          Quantity: {{product.quantity.toString()}}
+                          Quantity: {{item.quantity.toString()}}
                         </li>
                         <li>
-                          Inventory ID: {{product.internalReference}}
+                          Inventory ID: {{item.inventory?.id}}
+                        </li>
+                        <li>
+                          Pack ID: {{item.pack?.id}}
                         </li>
                       </ul>
                     </li>

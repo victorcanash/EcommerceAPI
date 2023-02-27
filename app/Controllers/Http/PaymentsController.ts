@@ -2,21 +2,17 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import { DateTime } from 'luxon'
 
-import { v4 as uuidv4 } from 'uuid'
-
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import Order from 'App/Models/Order'
 import Cart from 'App/Models/Cart'
-import CartItem from 'App/Models/CartItem'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import BigbuyService from 'App/Services/BigbuyService'
 import MailService from 'App/Services/MailService'
 import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
-import { SendOrderProduct } from 'App/Types/order'
-import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
+import { GuestCartCheck } from 'App/Types/cart'
 import {
   BasicResponse,
   BraintreeTokenResponse,
@@ -152,19 +148,7 @@ export default class PaymentsController {
       guestUserId: guestUserId,
       braintreeTransactionId: braintreeTransactionId,
     })
-    const cartItemIds = [] as number[]
-    const orderProducts = cart.items.map((item: CartItem | GuestCartCheckItem) => {
-      if (item.quantity > 0) {
-        if ((item as CartItem)?.id) {
-          cartItemIds.push((item as CartItem).id)
-        }
-        return {
-          reference: item.inventory.sku,
-          quantity: item.quantity,
-          internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
-        } as SendOrderProduct
-      }
-    })
+    const { cartItemIds, orderProducts } = await BigbuyService.createOrderProducts(cart)
 
     await CartsService.onBuyItems(cart)
     if ((cart as Cart)?.id) {
@@ -190,7 +174,7 @@ export default class PaymentsController {
         user.shipping,
         error.message,
         braintreeTransactionId,
-        orderProducts
+        cart
       )
       throw new InternalServerException('Create bigbuy order error')
     }

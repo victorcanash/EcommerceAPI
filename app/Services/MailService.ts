@@ -8,7 +8,9 @@ import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import UserAddress from 'App/Models/UserAddress'
 import Order from 'App/Models/Order'
+import Cart from 'App/Models/Cart'
 import { GuestUserCheckoutAddress } from 'App/Types/user'
+import { GuestCartCheck } from 'App/Types/cart'
 
 export default class MailService {
   public static async sendConfirmationEmail(
@@ -193,14 +195,7 @@ export default class MailService {
     shipping: UserAddress | GuestUserCheckoutAddress,
     errorMsg: string,
     braintreeTransactionId: string,
-    products: (
-      | {
-          reference: string
-          quantity: number
-          internalReference: string
-        }
-      | undefined
-    )[]
+    cart: Cart | GuestCartCheck
   ) {
     const currentYear = new Date().getFullYear()
     const currentDate = new Date().toLocaleDateString()
@@ -219,7 +214,7 @@ export default class MailService {
           errorMsg,
           braintreeTransactionId,
           shipping,
-          products,
+          cart,
         })
     })
   }

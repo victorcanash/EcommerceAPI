@@ -1,8 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import I18n from '@ioc:Adonis/Addons/I18n'
 
-import { v4 as uuidv4 } from 'uuid'
-
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import Order from 'App/Models/Order'
 import User from 'App/Models/User'
@@ -11,7 +9,6 @@ import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import BigbuyService from 'App/Services/BigbuyService'
 import MailService from 'App/Services/MailService'
-import { SendOrderProduct } from 'App/Types/order'
 import { OrderResponse, OrdersResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
@@ -125,15 +122,7 @@ export default class OrdersController {
       braintreeTransactionId: validatedData.braintreeTransactionId,
     })
     const orderCart = await CartsService.createGuestCartCheck(validatedData.products.items)
-    const orderProducts = orderCart.items.map((item) => {
-      if (item.quantity > 0) {
-        return {
-          reference: item.inventory.sku,
-          quantity: item.quantity,
-          internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
-        } as SendOrderProduct
-      }
-    })
+    const { orderProducts } = await BigbuyService.createOrderProducts(orderCart)
 
     try {
       await order.loadBraintreeData()

@@ -4,8 +4,9 @@ import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
 import BigbuyService from 'App/Services/BigbuyService'
 import BraintreeService from 'App/Services/BraintreeService'
-import { GetOrderProduct } from 'App/Types/order'
+import { GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryName } from 'App/Utils/addresses'
+import ProductPack from './ProductPack'
 
 export default class Order extends AppBaseModel {
   @column()
@@ -43,7 +44,7 @@ export default class Order extends AppBaseModel {
       addressLine2: '',
       phone: '',
     },
-    products: [] as GetOrderProduct[],
+    products: [] as GuestCartCheckItem[],
   }
 
   public braintreeData = {
@@ -69,19 +70,24 @@ export default class Order extends AppBaseModel {
   public async loadBigbuyData() {
     if (!this.bigbuyData.id && this.bigbuyId) {
       const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
-      const products = [] as GetOrderProduct[]
+      const products: GuestCartCheckItem[] = []
       for (let i = 0; i < orderInfo.products.length; i++) {
         const item = orderInfo.products[i]
-        const inventory = await ProductInventory.findBy('sku', item.reference)
-        await inventory?.load('product')
-        await inventory?.product?.load('activeDiscount')
-        products.push({
-          id: item.id,
-          reference: item.reference,
-          quantity: item.quantity,
-          name: item.name,
-          inventory: inventory,
-        })
+        const packId = item.internalReference.substring(0, item.internalReference.indexOf('-'))
+        const pack = (await ProductPack.findBy('id', parseInt(packId))) || undefined
+        let inventory: ProductInventory | undefined
+        if (pack) {
+          products.push({
+            pack: pack,
+            quantity: item.quantity,
+          })
+        } else {
+          inventory = (await ProductInventory.findBy('sku', item.reference)) || undefined
+          products.push({
+            inventory: inventory,
+            quantity: item.quantity,
+          })
+        }
       }
       this.bigbuyData = {
         id: orderInfo.id,

@@ -5,6 +5,7 @@ import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import CartItem from 'App/Models/CartItem'
 import ProductInventory from 'App/Models/ProductInventory'
+import ProductPack from 'App/Models/ProductPack'
 import { GuestCartItem } from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
@@ -41,26 +42,51 @@ export default class UsersService {
     if (items && items.length > 0) {
       for (let i = 0; i < items.length; i++) {
         const guestCartItem = items[i]
-        const cartItem = await CartItem.query()
-          .where('cartId', user.cart.id)
-          .where('inventoryId', guestCartItem.inventoryId)
-          .first()
-        if (cartItem) {
-          const diffQuantity = guestCartItem.quantity - cartItem.quantity
-          if (diffQuantity > 0) {
-            cartItem.merge({ quantity: cartItem.quantity + diffQuantity })
-            cartItem.save()
-          }
-        } else {
-          const guestCartInventory = await ProductInventory.query()
-            .where('id', guestCartItem.inventoryId)
+        if (guestCartItem.inventoryId) {
+          const cartItem = await CartItem.query()
+            .where('cartId', user.cart.id)
+            .where('inventoryId', guestCartItem.inventoryId)
             .first()
-          if (guestCartInventory) {
-            await CartItem.create({
-              inventoryId: guestCartInventory.id,
-              quantity: guestCartItem.quantity,
-              cartId: user.cart.id,
-            })
+          if (cartItem) {
+            const diffQuantity = guestCartItem.quantity - cartItem.quantity
+            if (diffQuantity > 0) {
+              cartItem.merge({ quantity: cartItem.quantity + diffQuantity })
+              cartItem.save()
+            }
+          } else {
+            const guestCartInventory = await ProductInventory.query()
+              .where('id', guestCartItem.inventoryId)
+              .first()
+            if (guestCartInventory) {
+              await CartItem.create({
+                inventoryId: guestCartInventory.id,
+                quantity: guestCartItem.quantity,
+                cartId: user.cart.id,
+              })
+            }
+          }
+        } else if (guestCartItem.packId) {
+          const cartItem = await CartItem.query()
+            .where('cartId', user.cart.id)
+            .where('packId', guestCartItem.packId)
+            .first()
+          if (cartItem) {
+            const diffQuantity = guestCartItem.quantity - cartItem.quantity
+            if (diffQuantity > 0) {
+              cartItem.merge({ quantity: cartItem.quantity + diffQuantity })
+              cartItem.save()
+            }
+          } else {
+            const guestCartPack = await ProductPack.query()
+              .where('id', guestCartItem.packId)
+              .first()
+            if (guestCartPack) {
+              await CartItem.create({
+                packId: guestCartPack.id,
+                quantity: guestCartItem.quantity,
+                cartId: user.cart.id,
+              })
+            }
           }
         }
       }
