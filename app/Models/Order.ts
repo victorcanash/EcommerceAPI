@@ -4,7 +4,7 @@ import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
 import BigbuyService from 'App/Services/BigbuyService'
 import BraintreeService from 'App/Services/BraintreeService'
-import { GuestCartCheckItem } from 'App/Types/cart'
+import { GuestCartItem, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryName } from 'App/Utils/addresses'
 import ProductPack from './ProductPack'
 
@@ -21,6 +21,14 @@ export default class Order extends AppBaseModel {
   @column()
   public bigbuyId?: string
 
+  @column()
+  public products?: GuestCartItem[]
+
+  @computed()
+  public get items() {
+    return this.itemsData
+  }
+
   @computed()
   public get bigbuy() {
     return this.bigbuyData
@@ -30,6 +38,8 @@ export default class Order extends AppBaseModel {
   public get braintree() {
     return this.braintreeData
   }
+
+  public itemsData: GuestCartCheckItem[] = []
 
   public bigbuyData = {
     id: '',
@@ -44,7 +54,13 @@ export default class Order extends AppBaseModel {
       addressLine2: '',
       phone: '',
     },
-    products: [] as GuestCartCheckItem[],
+    products: [] as {
+      id: string
+      reference: string
+      quantity: number
+      name: string
+      internalReference: string
+    }[],
   }
 
   public braintreeData = {
@@ -70,25 +86,42 @@ export default class Order extends AppBaseModel {
   public async loadBigbuyData() {
     if (!this.bigbuyData.id && this.bigbuyId) {
       const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
-      const products: GuestCartCheckItem[] = []
-      for (let i = 0; i < orderInfo.products.length; i++) {
-        const item = orderInfo.products[i]
-        const packId = item.internalReference.substring(0, item.internalReference.indexOf('-'))
-        const pack = (await ProductPack.findBy('id', parseInt(packId))) || undefined
-        let inventory: ProductInventory | undefined
-        if (pack) {
-          products.push({
-            pack: pack,
-            quantity: item.quantity,
+
+      if (this.products && this.products.length > 0) {
+        const inventories = await ProductInventory.query().whereIn(
+          'id',
+          this.products.map((item) => {
+            return item.inventoryId || -1
           })
-        } else {
-          inventory = (await ProductInventory.findBy('sku', item.reference)) || undefined
-          products.push({
-            inventory: inventory,
-            quantity: item.quantity,
+        )
+        const packs = await ProductPack.query().whereIn(
+          'id',
+          this.products.map((item) => {
+            return item.packId || -1
           })
+        )
+        for (let i = 0; i < this.products.length; i++) {
+          const product = this.products[i]
+          if (product.inventoryId) {
+            const inventory = inventories.find((item) => item.id === product.inventoryId)
+            if (inventory) {
+              this.itemsData.push({
+                inventory: inventory,
+                quantity: product.quantity,
+              })
+            }
+          } else if (product.packId) {
+            const pack = packs.find((item) => item.id === product.packId)
+            if (pack) {
+              this.itemsData.push({
+                pack: pack,
+                quantity: product.quantity,
+              })
+            }
+          }
         }
       }
+
       this.bigbuyData = {
         id: orderInfo.id,
         status: orderInfo.status,
@@ -102,7 +135,7 @@ export default class Order extends AppBaseModel {
           addressLine2: '',
           phone: orderInfo.shippingAddress.phone,
         },
-        products: products,
+        products: orderInfo.products,
       }
     }
   }

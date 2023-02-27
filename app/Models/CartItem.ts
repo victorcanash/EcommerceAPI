@@ -10,10 +10,10 @@ export default class CartItem extends AppBaseModel {
   public cartId: number
 
   @column()
-  public inventoryId: number
+  public inventoryId?: number
 
   @column()
-  public packId: number
+  public packId?: number
 
   @column()
   public quantity: number

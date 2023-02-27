@@ -128,8 +128,10 @@ export default class BigbuyService {
         companyName: '',
       },
       products: [] as {
+        id: string
         reference: string
         quantity: number
+        name: string
         internalReference: string
       }[],
     }

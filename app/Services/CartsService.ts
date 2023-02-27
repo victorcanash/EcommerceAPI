@@ -164,6 +164,22 @@ export default class CartsService {
     return cart
   }
 
+  public static async convertToGuestCartItems(cart: Cart | GuestCartCheck) {
+    let items: GuestCartItem[] = []
+    cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
+      items.push({
+        inventoryId: (item as CartItem)?.id
+          ? (item as CartItem).inventoryId
+          : (item as GuestCartCheckItem).inventory?.id,
+        packId: (item as CartItem)?.id
+          ? (item as CartItem).packId
+          : (item as GuestCartCheckItem).pack?.id,
+        quantity: item.quantity,
+      })
+    })
+    return items
+  }
+
   private static async getCartByField(field: string, value: string | number) {
     let cart: Cart | null = null
     cart = await Cart.findBy(field, value)

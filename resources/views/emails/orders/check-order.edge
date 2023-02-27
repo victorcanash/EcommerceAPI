@@ -85,12 +85,12 @@
               <li>
                 {{ t('messages.emails.checkOrder.products') }}
                 <ul style="list-style-type: disc;">
-                  @each(product in order.bigbuy.products)
+                  @each(item in order.items)
                     <li>
-                      @if(product.pack)
-                        {{product.pack.name}}
+                      @if(item.pack)
+                        {{item.pack.name}}
                         <ul style="list-style-type: disc;">
-                          @each(inventory in order.bigbuy.products.pack.inventories)
+                          @each(inventory in item.pack.inventories)
                             <li>
                               {{inventory.product.name.current}}
                               <ul style="list-style-type: disc;">
@@ -98,7 +98,7 @@
                                   {{inventory.name.current}}
                                 </li>
                                 <li>
-                                  {{ t('messages.emails.checkOrder.quantityField', { quantity: product.quantity.toString() }) }}
+                                  {{ t('messages.emails.checkOrder.quantityField', { quantity: item.quantity.toString() }) }}
                                 </li>
                                 <li>
                                   {{ t('messages.emails.checkOrder.skuField', { sku: inventory.sku }) }}
@@ -107,28 +107,28 @@
                             </li>
                           @end
                         </ul>
-                        {{ t('messages.emails.checkOrder.totalField', { amount: (product.pack.price * product.quantity).toFixed(2) }) }} €
-                      @elseif(product.inventory)
-                        {{product.inventory.product.name.current}}
+                        {{ t('messages.emails.checkOrder.totalField', { amount: (item.pack.price * item.quantity).toFixed(2) }) }} €
+                      @elseif(item.inventory)
+                        {{item.inventory.product.name.current}}
                         <ul style="list-style-type: disc;">
                           <li>
-                            {{product.inventory.name.current}}
+                            {{item.inventory.name.current}}
                           </li>
                           <li>
-                            {{ t('messages.emails.checkOrder.quantityField', { quantity: product.quantity.toString() }) }}
+                            {{ t('messages.emails.checkOrder.quantityField', { quantity: item.quantity.toString() }) }}
                           </li>
                           <li>
-                            {{ t('messages.emails.checkOrder.skuField', { sku: product.inventory.sku }) }}
+                            {{ t('messages.emails.checkOrder.skuField', { sku: item.inventory.sku }) }}
                           </li>
                           <li>
-                            {{ t('messages.emails.checkOrder.totalField', { amount: (product.inventory.realPrice * product.quantity).toFixed(2) }) }} €
+                            {{ t('messages.emails.checkOrder.totalField', { amount: (item.inventory.realPrice * item.quantity).toFixed(2) }) }} €
                           </li>
                         </ul>
                       @else
-                        {{product.name}}
+                        {{ t('messages.emails.checkOrder.productReference') }}
                         <ul style="list-style-type: disc;">
                           <li>
-                            {{ t('messages.emails.checkOrder.productReference') }}
+                            {{ t('messages.emails.checkOrder.quantityField', { quantity: item.quantity.toString() }) }}
                           </li>
                         </ul>
                       @end

@@ -116,12 +116,14 @@ export default class OrdersController {
     if (!validatedData.products?.items || validatedData.products.items.length <= 0) {
       throw new BadRequestException('Missing products')
     }
+    const orderCart = await CartsService.createGuestCartCheck(validatedData.products.items)
+    const guestCartItems = await CartsService.convertToGuestCartItems(orderCart)
     const order = await Order.create({
       userId: user?.id || undefined,
       guestUserId: guestUserId,
       braintreeTransactionId: validatedData.braintreeTransactionId,
+      products: guestCartItems,
     })
-    const orderCart = await CartsService.createGuestCartCheck(validatedData.products.items)
     const { orderProducts } = await BigbuyService.createOrderProducts(orderCart)
 
     try {

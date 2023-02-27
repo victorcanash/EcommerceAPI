@@ -143,13 +143,14 @@ export default class PaymentsController {
 
     // Bigbuy Order
 
+    const guestCartItems = await CartsService.convertToGuestCartItems(cart)
     const order = await Order.create({
       userId: (user as User)?.id || undefined,
       guestUserId: guestUserId,
       braintreeTransactionId: braintreeTransactionId,
+      products: guestCartItems,
     })
     const { cartItemIds, orderProducts } = await BigbuyService.createOrderProducts(cart)
-
     await CartsService.onBuyItems(cart)
     if ((cart as Cart)?.id) {
       await CartsService.deleteItemsByIds(cartItemIds)
