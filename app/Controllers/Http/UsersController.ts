@@ -11,11 +11,13 @@ import Cart from 'App/Models/Cart'
 import UsersService from 'App/Services/UsersService'
 import OrdersService from 'App/Services/OrdersService'
 import MailService from 'App/Services/MailService'
+import BraintreeService from 'App/Services/BraintreeService'
 import {
+  BasicResponse,
   UsersResponse,
   UserResponse,
   UAddressesResponse,
-  BasicResponse,
+  BraintreeTokenResponse,
 } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
@@ -159,12 +161,16 @@ export default class UsersController {
 
     await user.delete()
 
+    const braintreeService = new BraintreeService()
+    let braintreeToken = await braintreeService.generateClientToken()
+
     const successMsg = `Successfully deleted user by id ${id}`
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
-    } as BasicResponse)
+      braintreeToken: braintreeToken,
+    } as BraintreeTokenResponse)
   }
 
   public async sendContactEmail({ response, request, i18n, auth, bouncer }: HttpContextContract) {

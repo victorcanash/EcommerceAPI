@@ -30,13 +30,13 @@ Route.group(() => {
 
   // User routes
 
-  Route.post('register', 'UsersController.store')
-  Route.put('activate', 'AuthController.activate').middleware('auth:activation')
-  Route.post('login', 'AuthController.login')
-  Route.post('logout', 'AuthController.logout').middleware('auth:api')
-  Route.get('auth', 'AuthController.getLogged').middleware('auth:api')
-  Route.get('auth/admin', 'AuthController.isAdmin').middleware('auth:api')
+  Route.post('auth/init-user', 'AuthController.initUser')
+  Route.post('auth/register', 'UsersController.store')
+  Route.put('auth/activate', 'AuthController.activate').middleware('auth:activation')
+  Route.post('auth/login', 'AuthController.login')
+  Route.post('auth/logout', 'AuthController.logout').middleware('auth:api')
   Route.put('auth/:id', 'AuthController.update')
+  Route.get('auth/admin', 'AuthController.isAdmin').middleware('auth:api')
 
   Route.post('auth/send-email/activation', 'AuthController.sendActivationEmail')
   Route.post('auth/send-email/reset', 'AuthController.sendResetPswEmail')
@@ -106,17 +106,14 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-inventories', 'PInventoriesController')
-    .except(['show'])
+    .except(['index', 'show'])
     .middleware({
-      store: ['auth:api', 'admin'],
-      update: ['auth:api', 'admin'],
-      destroy: ['auth:api', 'admin'],
+      '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 
   // Payment routes
 
-  Route.get('payments/braintree-token', 'PaymentsController.getBraintreeToken')
   Route.get('payments/guest-user-data', 'PaymentsController.getGuestUserData').middleware(
     'auth:confirmation'
   )

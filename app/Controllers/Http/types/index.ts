@@ -21,6 +21,17 @@ export type BasicResponse = {
 /**
  * Auth JSON response for Controllers
  */
+export type InitAuthResponse = {
+  code: number
+  message: string
+  user?: User
+  braintreeToken: string
+  guestCart?: GuestCartCheck
+}
+
+/**
+ * Auth JSON response for Controllers
+ */
 export type AuthResponse = {
   code: number
   message: string
@@ -154,17 +165,6 @@ export type PInventoryResponse = {
   code: number
   message: string
   productInventory: ProductInventory
-}
-
-/**
- * Product inventories JSON response for Controllers
- */
-export type PInventoriesResponse = {
-  code: number
-  message: string
-  productInventories: ProductInventory[]
-  totalPages: number
-  currentPage: number
 }
 
 /**
