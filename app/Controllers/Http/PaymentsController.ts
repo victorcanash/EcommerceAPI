@@ -13,12 +13,7 @@ import BigbuyService from 'App/Services/BigbuyService'
 import MailService from 'App/Services/MailService'
 import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck } from 'App/Types/cart'
-import {
-  BasicResponse,
-  BraintreeTokenResponse,
-  GuestUserDataResponse,
-  OrderResponse,
-} from 'App/Controllers/Http/types'
+import { BasicResponse, GuestUserDataResponse, OrderResponse } from 'App/Controllers/Http/types'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
 import SendConfirmTransactionEmailValidator from 'App/Validators/Payment/SendConfirmTransactionEmailValidator'
 import BadRequestException from 'App/Exceptions/BadRequestException'
@@ -26,26 +21,6 @@ import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PaymentsController {
-  public async getBraintreeToken({ request, response, auth }: HttpContextContract) {
-    let braintreeId: string | undefined
-    const validToken = await auth.use('api').check()
-    if (validToken) {
-      const email = await UsersService.getAuthEmail(auth)
-      braintreeId = await (await UsersService.getUserByEmail(email, true)).braintreeId
-    }
-
-    const braintreeService = new BraintreeService()
-    let braintreeToken = await braintreeService.generateClientToken(braintreeId)
-
-    const successMsg = `Successfully got braintree client token`
-    logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
-      message: successMsg,
-      braintreeToken: braintreeToken,
-    } as BraintreeTokenResponse)
-  }
-
   public async getGuestUserData({ request, response, auth }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth, 'confirmation')
     const guestUser = await UsersService.getGuestUserByEmail(email)

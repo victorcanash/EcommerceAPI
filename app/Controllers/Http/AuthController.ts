@@ -44,7 +44,7 @@ export default class AuthController {
     const braintreeService = new BraintreeService()
     let braintreeToken = await braintreeService.generateClientToken(user?.braintreeId)
 
-    const successMsg = `Successfully got logged user`
+    const successMsg = `Successfully init user`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
