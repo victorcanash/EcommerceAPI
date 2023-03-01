@@ -161,6 +161,15 @@ export type PInventoryResponse = {
 }
 
 /**
+ * Product pack JSON response for Controllers
+ */
+export type PPackResponse = {
+  code: number
+  message: string
+  productPack: ProductPack
+}
+
+/**
  * Order JSON response for Controllers
  */
 export type OrderResponse = {

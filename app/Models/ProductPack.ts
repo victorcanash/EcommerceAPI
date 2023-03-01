@@ -16,16 +16,21 @@ export default class ProductPack extends ProductBaseModel {
 
   @manyToMany(() => ProductInventory, {
     pivotTable: 'product_packs_inventories',
+    pivotTimestamps: true,
+    localKey: 'id',
     pivotForeignKey: 'pack_id',
+    relatedKey: 'id',
     pivotRelatedForeignKey: 'inventory_id',
   })
   public inventories: ManyToMany<typeof ProductInventory>
 
   @computed()
   public get quantity() {
-    let quantity = 0
+    let quantity: number | undefined
     this.inventories.forEach((item) => {
-      quantity = item.quantity > quantity ? item.quantity : quantity
+      if (!quantity || item.quantity < quantity) {
+        quantity = item.quantity
+      }
     })
     return quantity
   }

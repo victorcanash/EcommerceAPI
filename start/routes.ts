@@ -111,6 +111,13 @@ Route.group(() => {
     })
     .apiOnly()
 
+  Route.resource('product-packs', 'PPacksController')
+    .except(['index', 'show'])
+    .middleware({
+      '*': ['auth:api', 'admin'],
+    })
+    .apiOnly()
+
   // Payment routes
 
   Route.get('payments/guest-user-data', 'PaymentsController.getGuestUserData').middleware(

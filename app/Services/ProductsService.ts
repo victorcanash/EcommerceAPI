@@ -5,10 +5,11 @@ import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
+import ProductPack from 'App/Models/ProductPack'
 import LocalizedText from 'App/Models/LocalizedText'
+import BigbuyService from 'App/Services/BigbuyService'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
-import BigbuyService from './BigbuyService'
 
 export default class ProductsService {
   public static async getProductById(
@@ -34,6 +35,10 @@ export default class ProductsService {
 
   public static async getDiscountById(id: number) {
     return this.getDiscountByField('id', id)
+  }
+
+  public static async getPackById(id: number) {
+    return this.getPackByField('id', id)
   }
 
   public static async getImageById(product: Product, id: number) {
@@ -168,5 +173,15 @@ export default class ProductsService {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product discount`)
     }
     return discount
+  }
+
+  private static async getPackByField(field: string, value: string | number) {
+    let pack: ProductPack | null = null
+    pack = await ProductPack.findBy(field, value)
+    if (!pack) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting product pack`)
+    }
+
+    return pack
   }
 }
