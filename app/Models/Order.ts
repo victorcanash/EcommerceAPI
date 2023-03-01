@@ -21,7 +21,9 @@ export default class Order extends AppBaseModel {
   @column()
   public bigbuyId?: string
 
-  @column()
+  @column({
+    prepare: (value: GuestCartItem[]) => JSON.stringify(value),
+  })
   public products: GuestCartItem[]
 
   @computed()
