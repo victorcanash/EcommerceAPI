@@ -16,7 +16,7 @@ export default class BraintreeService {
 
   constructor() {
     let braintreeEnvironment = braintree.Environment.Sandbox
-    if (Env.get('NODE_ENV') === 'production') {
+    if (Env.get('BRAINTREE_ENV') === 'production') {
       braintreeEnvironment = braintree.Environment.Production
     }
     const env: KeyGatewayConfig = {

@@ -55,6 +55,7 @@ export default Env.rules({
   // STRIPE_SUCCESS_ENDPOINT: Env.schema.string(),
   // STRIPE_CANCEL_ENDPOINT: Env.schema.string(),
   // STRIPE_WEBHOOKS_SECRET: Env.schema.string(),
+  BRAINTREE_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   BRAINTREE_MERCHANT_ID: Env.schema.string(),
   BRAINTREE_PUBLIC_KEY: Env.schema.string(),
   BRAINTREE_PRIVATE_KEY: Env.schema.string(),
