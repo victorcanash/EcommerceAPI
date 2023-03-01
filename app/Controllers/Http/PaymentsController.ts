@@ -123,8 +123,8 @@ export default class PaymentsController {
       userId: (user as User)?.id || undefined,
       guestUserId: guestUserId,
       braintreeTransactionId: braintreeTransactionId,
+      products: guestCartItems,
     })
-    order.productsData = guestCartItems
     const { cartItemIds, orderProducts } = await BigbuyService.createOrderProducts(cart)
     await CartsService.onBuyItems(cart)
     if ((cart as Cart)?.id) {

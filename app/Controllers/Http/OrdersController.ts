@@ -127,8 +127,8 @@ export default class OrdersController {
       userId: user?.id || undefined,
       guestUserId: guestUserId,
       braintreeTransactionId: validatedData.braintreeTransactionId,
+      products: guestCartItems,
     })
-    order.productsData = guestCartItems
     const { orderProducts } = await BigbuyService.createOrderProducts(orderCart)
 
     try {
