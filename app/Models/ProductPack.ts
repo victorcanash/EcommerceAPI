@@ -32,7 +32,7 @@ export default class ProductPack extends ProductBaseModel {
         quantity = item.quantity
       }
     })
-    return quantity
+    return quantity || 0
   }
 
   @computed()
