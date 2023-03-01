@@ -6,6 +6,7 @@ import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
+import ProductPack from 'App/Models/ProductPack'
 import Order from 'App/Models/Order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { GuestUserCheckout } from 'App/Types/user'
@@ -24,6 +25,9 @@ export type BasicResponse = {
 export type InitAuthResponse = {
   code: number
   message: string
+  categories: ProductCategory[]
+  products: Product[]
+  packs: ProductPack[]
   user?: User
   braintreeToken: string
   guestCart?: GuestCartCheck
@@ -136,17 +140,6 @@ export type PCategoryResponse = {
   code: number
   message: string
   productCategory: ProductCategory
-}
-
-/**
- * Product categories JSON response for Controllers
- */
-export type PCategoriesResponse = {
-  code: number
-  message: string
-  productCategories: ProductCategory[]
-  totalPages: number
-  currentPage: number
 }
 
 /**

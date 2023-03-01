@@ -30,7 +30,7 @@ Route.group(() => {
 
   // User routes
 
-  Route.post('auth/init-user', 'AuthController.initUser')
+  Route.post('auth/init', 'AuthController.init')
   Route.post('auth/register', 'UsersController.store')
   Route.put('auth/activate', 'AuthController.activate').middleware('auth:activation')
   Route.post('auth/login', 'AuthController.login')
@@ -91,10 +91,9 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-categories', 'PCategoriesController')
+    .except(['index', 'show'])
     .middleware({
-      store: ['auth:api', 'admin'],
-      update: ['auth:api', 'admin'],
-      destroy: ['auth:api', 'admin'],
+      '*': ['auth:api', 'admin'],
     })
     .apiOnly()
 

@@ -4,6 +4,9 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
 
 import User from 'App/Models/User'
+import Product from 'App/Models/Product'
+import ProductCategory from 'App/Models/ProductCategory'
+import ProductPack from 'App/Models/ProductPack'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
@@ -16,7 +19,7 @@ import {
   BraintreeTokenResponse,
 } from 'App/Controllers/Http/types'
 import { GuestCartCheck } from 'App/Types/cart'
-import InitUserValidator from 'App/Validators/Auth/InitUserValidator'
+import InitValidator from 'App/Validators/Auth/InitValidator'
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
 import UpdateAuthValidator from 'App/Validators/Auth/UpdateAuthValidator'
 import SendActivationEmailValidator from 'App/Validators/Auth/SendActivationEmailValidator'
@@ -29,7 +32,32 @@ import ConflictException from 'App/Exceptions/ConflictException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class AuthController {
-  public async initUser({ request, response, auth }: HttpContextContract) {
+  public async init({ request, response, auth }: HttpContextContract) {
+    const validatedData = await request.validate(InitValidator)
+
+    const categoryIds = validatedData.categoryIds || []
+    const productIds = validatedData.productIds || []
+    const packIds = validatedData.packIds || []
+    const categories = await ProductCategory.query().where((query) => {
+      if (categoryIds.length > 0) {
+        query.whereIn('id', categoryIds)
+      }
+    })
+    const products = await Product.query()
+      .where((query) => {
+        if (productIds.length > 0) {
+          query.whereIn('id', productIds)
+        }
+      })
+      .apply((scopes) => {
+        scopes.getAllData()
+      })
+    const packs = await ProductPack.query().where((query) => {
+      if (packIds.length > 0) {
+        query.whereIn('id', packIds)
+      }
+    })
+
     const validToken = await auth.use('api').check()
     let user: User | undefined
     let guestCart: GuestCartCheck | undefined
@@ -37,10 +65,8 @@ export default class AuthController {
       const email = await UsersService.getAuthEmail(auth)
       user = await UsersService.getUserByEmail(email, true)
     } else {
-      const validatedData = await request.validate(InitUserValidator)
       guestCart = await CartsService.createGuestCartCheck(validatedData.guestCart?.items)
     }
-
     const braintreeService = new BraintreeService()
     let braintreeToken = await braintreeService.generateClientToken(user?.braintreeId)
 
@@ -49,6 +75,9 @@ export default class AuthController {
     return response.created({
       code: 201,
       message: successMsg,
+      categories: categories,
+      products: products,
+      packs: packs,
       user: user,
       braintreeToken: braintreeToken,
       guestCart: guestCart,

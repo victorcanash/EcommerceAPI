@@ -2,8 +2,6 @@ import {
   column,
   belongsTo,
   BelongsTo,
-  manyToMany,
-  ManyToMany,
   computed,
   beforeFetch,
   ModelQueryBuilderContract,
@@ -12,7 +10,6 @@ import {
 import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
 import { roundTwoDecimals } from 'App/Utils/numbers'
-import ProductPack from './ProductPack'
 
 export default class ProductInventory extends ProductBaseModel {
   @column()
@@ -29,13 +26,6 @@ export default class ProductInventory extends ProductBaseModel {
 
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
-
-  @manyToMany(() => ProductPack, {
-    pivotTable: 'product_packs_inventories',
-    pivotForeignKey: 'inventory_id',
-    pivotRelatedForeignKey: 'pack_id',
-  })
-  public packs: ManyToMany<typeof ProductPack>
 
   @computed()
   public get realPrice() {
