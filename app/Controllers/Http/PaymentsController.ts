@@ -2,6 +2,8 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import { DateTime } from 'luxon'
 
+import { v4 as uuidv4 } from 'uuid'
+
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import Order from 'App/Models/Order'
@@ -195,6 +197,9 @@ export default class PaymentsController {
     if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
       throw new BadRequestException('Missing guestCart')
     }
+    if (!validatedData.guestUser) {
+      throw new BadRequestException('Missing guestUser')
+    }
 
     let loggedUser = await User.query().where('email', validatedData.guestUser.email).first()
     if (loggedUser) {
@@ -205,7 +210,7 @@ export default class PaymentsController {
     if (!guestUser) {
       guestUser = await GuestUser.create({
         email: validatedData.guestUser.email,
-        password: validatedData.guestUser.password,
+        password: `${validatedData.guestUser.email}-${uuidv4()}`,
       })
     }
     const shipping = validatedData.guestUser.shipping
