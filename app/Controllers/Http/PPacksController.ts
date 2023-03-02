@@ -45,7 +45,7 @@ export default class PPacksController {
       ...validatedData,
       ...textsData,
     })
-    await productPack.related('inventories').attach(validatedData.inventoryIds)
+    await productPack.related('inventories').attach(validatedData.inventoriesIds)
     await productPack.save()
 
     const successMsg = 'Successfully created product pack'
