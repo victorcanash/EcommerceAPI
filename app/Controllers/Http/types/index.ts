@@ -170,6 +170,17 @@ export type PPackResponse = {
 }
 
 /**
+ * Product packs JSON response for Controllers
+ */
+export type PPacksResponse = {
+  code: number
+  message: string
+  productPacks: ProductPack[]
+  totalPages: number
+  currentPage: number
+}
+
+/**
  * Order JSON response for Controllers
  */
 export type OrderResponse = {

@@ -112,7 +112,7 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-packs', 'PPacksController')
-    .except(['index', 'show'])
+    .except(['show'])
     .middleware({
       '*': ['auth:api', 'admin'],
     })
