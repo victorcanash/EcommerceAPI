@@ -25,6 +25,16 @@ export default class ProductPack extends ProductBaseModel {
   public inventories: ManyToMany<typeof ProductInventory>
 
   @computed()
+  public get inventoriesIds() {
+    if (this.inventories && this.inventories.length > 0) {
+      return this.inventories.map((item) => {
+        return item.id
+      })
+    }
+    return []
+  }
+
+  @computed()
   public get quantity() {
     let quantity: number | undefined
     this.inventories.forEach((item) => {
