@@ -13,7 +13,7 @@ export default class UpdatePPackValidator {
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
     price: schema.number.optional(),
-    inventoryIds: schema.array
+    inventoriesIds: schema.array
       .optional([rules.minLength(1)])
       .members(schema.number([rules.exists({ table: 'product_inventories', column: 'id' })])),
   })
