@@ -12,6 +12,7 @@ import {
 
 import ProductBaseModel from 'App/Models/ProductBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
+import { roundTwoDecimals } from 'App/Utils/numbers'
 
 export default class ProductPack extends ProductBaseModel {
   @column()
@@ -54,7 +55,7 @@ export default class ProductPack extends ProductBaseModel {
     this.inventories.forEach((item) => {
       originalPrice += item.realPrice
     })
-    return originalPrice
+    return roundTwoDecimals(originalPrice)
   }
 
   @beforeFetch()
