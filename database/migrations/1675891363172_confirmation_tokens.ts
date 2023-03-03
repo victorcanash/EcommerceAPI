@@ -15,7 +15,7 @@ export default class extends BaseSchema {
       table.string('name').notNullable()
       table.string('type').notNullable()
       table.string('token', 64).notNullable().unique()
-      table.string('payment_method_nonce', 255).notNullable()
+      table.json('payment_payload').notNullable()
       table.json('shipping').notNullable()
       table.json('billing').notNullable()
       table.json('guest_cart').notNullable()

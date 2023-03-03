@@ -18,7 +18,6 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('product_inventories')
         .onDelete('CASCADE')
-      table.unique(['pack_id', 'inventory_id'])
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })

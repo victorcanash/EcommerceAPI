@@ -13,6 +13,14 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('product_inventories')
         .onDelete('CASCADE')
+        .nullable()
+      table
+        .integer('pack_id')
+        .unsigned()
+        .references('id')
+        .inTable('product_packs')
+        .onDelete('CASCADE')
+        .nullable()
       table.integer('quantity', 255).defaultTo(1).notNullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()

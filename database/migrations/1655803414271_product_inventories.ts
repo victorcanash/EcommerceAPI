@@ -26,6 +26,7 @@ export default class extends BaseSchema {
         .inTable('localized_texts')
         .onDelete('CASCADE')
       table.float('price', 255).notNullable()
+      table.integer('quantity', 255).defaultTo(0).notNullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
