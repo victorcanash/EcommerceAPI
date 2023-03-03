@@ -51,6 +51,18 @@ export default class ProductPack extends ProductBaseModel {
 
   @computed()
   public get originalPrice() {
+    return this.getOriginalPrice()
+  }
+
+  @computed()
+  public get discountPercent() {
+    const originalPrice = this.getOriginalPrice()
+    const decreaseValue = originalPrice - this.price
+    const discountPercent = (decreaseValue / this.getOriginalPrice()) * 100
+    return roundTwoDecimals(discountPercent)
+  }
+
+  private getOriginalPrice() {
     let originalPrice = 0
     this.inventories.forEach((item) => {
       originalPrice += item.realPrice
