@@ -23,7 +23,7 @@ export default class PPacksController {
     const packs = await ProductPack.query().orderBy(sortBy, order).paginate(page, limit)
     const result = packs.toJSON()
 
-    const successMsg = 'Successfully got products'
+    const successMsg = 'Successfully got product packs'
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,

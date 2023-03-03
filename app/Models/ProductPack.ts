@@ -4,6 +4,9 @@ import {
   ManyToMany,
   computed,
   beforeFetch,
+  beforeFind,
+  afterCreate,
+  afterUpdate,
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 
@@ -56,6 +59,29 @@ export default class ProductPack extends ProductBaseModel {
 
   @beforeFetch()
   public static beforeFetch(query: ModelQueryBuilderContract<typeof ProductPack>) {
+    this.loadPackDataQuery(query)
+  }
+
+  @beforeFind()
+  public static async onFind(query: ModelQueryBuilderContract<typeof ProductPack>) {
+    this.loadPackDataQuery(query)
+  }
+
+  @afterCreate()
+  public static async onCreate(model: ProductPack) {
+    await this.loadPackDataModel(model)
+  }
+
+  @afterUpdate()
+  public static async onUpdate(model: ProductPack) {
+    await this.loadPackDataModel(model)
+  }
+
+  private static async loadPackDataQuery(query: ModelQueryBuilderContract<typeof ProductPack>) {
     query.preload('inventories')
+  }
+
+  private static async loadPackDataModel(model: ProductPack) {
+    await model.load('inventories')
   }
 }
