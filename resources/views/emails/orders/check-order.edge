@@ -88,7 +88,7 @@
                   @each(item in order.items)
                     <li>
                       @if(item.pack)
-                        {{item.pack.name}}
+                        {{item.pack.name.current}}
                         <ul style="list-style-type: disc;">
                           @each(inventory in item.pack.inventories)
                             <li>
@@ -98,16 +98,19 @@
                                   {{inventory.name.current}}
                                 </li>
                                 <li>
-                                  {{ t('messages.emails.checkOrder.quantityField', { quantity: item.quantity.toString() }) }}
-                                </li>
-                                <li>
                                   {{ t('messages.emails.checkOrder.skuField', { sku: inventory.sku }) }}
                                 </li>
                               </ul>
                             </li>
+                            <li>
+                              {{ t('messages.emails.checkOrder.quantityField', { quantity: item.quantity.toString() }) }}
+                            </li>
+                            <li>
+                              {{ t('messages.emails.checkOrder.totalField', { amount: (item.pack.price * item.quantity).toFixed(2) }) }} €
+                            </li>
                           @end
                         </ul>
-                        {{ t('messages.emails.checkOrder.totalField', { amount: (item.pack.price * item.quantity).toFixed(2) }) }} €
+
                       @elseif(item.inventory)
                         {{item.inventory.product.name.current}}
                         <ul style="list-style-type: disc;">
@@ -115,10 +118,10 @@
                             {{item.inventory.name.current}}
                           </li>
                           <li>
-                            {{ t('messages.emails.checkOrder.quantityField', { quantity: item.quantity.toString() }) }}
+                            {{ t('messages.emails.checkOrder.skuField', { sku: item.inventory.sku }) }}
                           </li>
                           <li>
-                            {{ t('messages.emails.checkOrder.skuField', { sku: item.inventory.sku }) }}
+                            {{ t('messages.emails.checkOrder.quantityField', { quantity: item.quantity.toString() }) }}
                           </li>
                           <li>
                             {{ t('messages.emails.checkOrder.totalField', { amount: (item.inventory.realPrice * item.quantity).toFixed(2) }) }} €
