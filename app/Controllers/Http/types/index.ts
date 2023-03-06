@@ -29,7 +29,9 @@ export type InitAuthResponse = {
   products: Product[]
   packs: ProductPack[]
   user?: User
-  braintreeToken: string
+  currency: string
+  braintreeToken?: string
+  paypalClientId?: string
   guestCart?: GuestCartCheck
 }
 
@@ -41,7 +43,7 @@ export type AuthResponse = {
   message: string
   token: string
   user: User
-  braintreeToken: string
+  braintreeToken?: string
 }
 
 /**
@@ -60,7 +62,7 @@ export type UserResponse = {
   code: number
   message: string
   user: User
-  braintreeToken: string
+  braintreeToken?: string
 }
 
 /**
@@ -206,7 +208,7 @@ export type OrdersResponse = {
 export type BraintreeTokenResponse = {
   code: number
   message: string
-  braintreeToken: string
+  braintreeToken?: string
 }
 
 /**
@@ -221,10 +223,10 @@ export type GuestUserDataResponse = {
 }
 
 /**
- * Stripe JSON response for Controllers
+ * Paypal JSON response for Controllers
  */
-/*export type StripeResponse = {
+export type PaypalResponse = {
   code: number
   message: string
-  sessionId: string
-}*/
+  paypalOrderId: string
+}

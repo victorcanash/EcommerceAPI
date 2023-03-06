@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
-import { SendOrderProduct } from 'App/Types/order'
+import { BigbuyOrderProduct } from 'App/Types/order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { GuestUserCheckoutAddress } from 'App/Types/user'
 import { getCountryCode } from 'App/Utils/addresses'
@@ -155,7 +155,7 @@ export default class BigbuyService {
 
   public static async createOrderProducts(cart: Cart | GuestCartCheck) {
     const cartItemIds = [] as number[]
-    const orderProducts: SendOrderProduct[] = []
+    const orderProducts: BigbuyOrderProduct[] = []
     cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
       if (item.quantity > 0) {
         if (item.inventory) {
@@ -166,7 +166,7 @@ export default class BigbuyService {
             reference: item.inventory.sku,
             quantity: item.quantity,
             internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
-          } as SendOrderProduct)
+          } as BigbuyOrderProduct)
         } else if (item.pack) {
           if ((item as CartItem)?.id) {
             cartItemIds.push((item as CartItem).id)
@@ -176,7 +176,7 @@ export default class BigbuyService {
               reference: itemInventory.sku,
               quantity: item.quantity,
               internalReference: `${item.pack?.id.toString()}-${uuidv4()}`,
-            } as SendOrderProduct)
+            } as BigbuyOrderProduct)
           })
         }
       }
@@ -191,7 +191,7 @@ export default class BigbuyService {
     internalReference: string,
     email: string,
     shipping: GuestUserCheckoutAddress,
-    products: SendOrderProduct[]
+    products: BigbuyOrderProduct[]
   ) {
     let orderId = ''
     const options: AxiosRequestConfig = {

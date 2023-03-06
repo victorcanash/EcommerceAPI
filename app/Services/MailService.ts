@@ -194,7 +194,8 @@ export default class MailService {
     userEmail: string,
     shipping: UserAddress | GuestUserCheckoutAddress,
     errorMsg: string,
-    braintreeTransactionId: string,
+    braintreeTransactionId: string | undefined,
+    paypalTransactionId: string | undefined,
     cart: Cart | GuestCartCheck
   ) {
     const currentYear = new Date().getFullYear()
@@ -213,6 +214,7 @@ export default class MailService {
           currentDate,
           errorMsg,
           braintreeTransactionId,
+          paypalTransactionId,
           shipping,
           cart,
         })

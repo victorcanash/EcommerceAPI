@@ -161,8 +161,7 @@ export default class UsersController {
 
     await user.delete()
 
-    const braintreeService = new BraintreeService()
-    let braintreeToken = await braintreeService.generateClientToken()
+    const braintreeToken = await new BraintreeService().generateClientToken()
 
     const successMsg = `Successfully deleted user by id ${id}`
     logRouteSuccess(request, successMsg)

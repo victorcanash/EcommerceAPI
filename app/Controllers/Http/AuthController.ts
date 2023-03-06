@@ -10,6 +10,7 @@ import ProductPack from 'App/Models/ProductPack'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
+import PaypalService from 'App/Services/PaypalService'
 import MailService from 'App/Services/MailService'
 import {
   BasicResponse,
@@ -32,7 +33,7 @@ import ConflictException from 'App/Exceptions/ConflictException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class AuthController {
-  public async init({ request, response, auth }: HttpContextContract) {
+  public async init({ request, response, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(InitValidator)
 
     const categoryIds = validatedData.categoryIds || []
@@ -67,8 +68,9 @@ export default class AuthController {
     } else {
       guestCart = await CartsService.createGuestCartCheck(validatedData.guestCart?.items)
     }
-    const braintreeService = new BraintreeService()
-    let braintreeToken = await braintreeService.generateClientToken(user?.braintreeId)
+
+    const braintreeToken = await new BraintreeService().generateClientToken(user?.braintreeId)
+    const paypalClientId = await PaypalService.generateClientToken(i18n)
 
     const successMsg = `Successfully init user`
     logRouteSuccess(request, successMsg)
@@ -79,7 +81,9 @@ export default class AuthController {
       products: products,
       packs: packs,
       user: user,
+      currency: Env.get('CURRENCY', 'EUR'),
       braintreeToken: braintreeToken,
+      paypalClientId: paypalClientId,
       guestCart: guestCart,
     } as InitAuthResponse)
   }
@@ -131,8 +135,7 @@ export default class AuthController {
 
     user = await UsersService.addGuestCart(user, validatedData.guestCart?.items)
 
-    const braintreeService = new BraintreeService()
-    let braintreeToken = await braintreeService.generateClientToken(user.braintreeId)
+    const braintreeToken = await new BraintreeService().generateClientToken(user.braintreeId)
 
     const successMsg = `Successfully logged in user with email ${user.email}`
     logRouteSuccess(request, successMsg)
@@ -150,8 +153,7 @@ export default class AuthController {
 
     await auth.use('api').revoke()
 
-    const braintreeService = new BraintreeService()
-    let braintreeToken = await braintreeService.generateClientToken()
+    const braintreeToken = await new BraintreeService().generateClientToken()
 
     const successMsg = `Successfully logged out user with email ${email}`
     logRouteSuccess(request, successMsg)

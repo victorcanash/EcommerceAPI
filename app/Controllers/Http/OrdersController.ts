@@ -131,7 +131,7 @@ export default class OrdersController {
     const { orderProducts } = await BigbuyService.createOrderProducts(orderCart)
 
     try {
-      await order.loadBraintreeData()
+      await order.loadPaymentData()
     } catch (error) {
       await order.delete()
       throw new InternalServerException('Braintree error')

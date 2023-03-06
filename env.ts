@@ -58,7 +58,9 @@ export default Env.rules({
   SMTP_EMAIL: Env.schema.string(),
 
   PAYMENT_MODE: Env.schema.enum(['paypal', 'braintree'] as const),
+  CURRENCY: Env.schema.string(),
   PAYPAL_ENV: Env.schema.enum(['sandbox', 'production'] as const),
+  PAYPAL_MERCHANT_ID: Env.schema.string(),
   PAYPAL_CLIENT_ID: Env.schema.string(),
   PAYPAL_SECRET_KEY: Env.schema.string(),
   BRAINTREE_ENV: Env.schema.enum(['sandbox', 'production'] as const),

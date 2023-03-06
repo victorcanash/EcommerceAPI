@@ -1,4 +1,4 @@
-import { column, computed /*,afterFetch, beforeSave, afterFind*/ } from '@ioc:Adonis/Lucid/Orm'
+import { column, computed } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
@@ -16,7 +16,10 @@ export default class Order extends AppBaseModel {
   public guestUserId?: number
 
   @column()
-  public braintreeTransactionId: string
+  public braintreeTransactionId?: string
+
+  @column()
+  public paypalTransactionId?: string
 
   @column()
   public bigbuyId?: string
@@ -85,25 +88,6 @@ export default class Order extends AppBaseModel {
     },
   }
 
-  /*@beforeSave()
-  public static async onSave(model: Order) {
-    model.products = model.productsData ? JSON.stringify(model.productsData) : '[]'
-  }*/
-
-  /*@afterFetch()
-  public static afterFetch(model: Order) {
-    model.productsData = model.products
-      ? (JSON.parse(model.products) as GuestCartItem[])
-      : undefined
-  }*/
-
-  /*@afterFind()
-  public static afterFind(model: Order) {
-    model.productsData = model.products
-      ? (JSON.parse(model.products) as GuestCartItem[])
-      : undefined
-  }*/
-
   public async loadItemsData() {
     if (this.products.length > 0) {
       const inventories = await ProductInventory.query().whereIn(
@@ -162,8 +146,8 @@ export default class Order extends AppBaseModel {
     }
   }
 
-  public async loadBraintreeData() {
-    if (this.braintreeData.amount === '') {
+  public async loadPaymentData() {
+    if (this.braintreeData.amount === '' && this.braintreeTransactionId) {
       const braintreeService = new BraintreeService()
       const transactionInfo = await braintreeService.getTransactionInfo(this.braintreeTransactionId)
       this.braintreeData = {

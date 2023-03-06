@@ -120,11 +120,12 @@ Route.group(() => {
 
   // Payment routes
 
+  Route.post('payments/send-email/transaction', 'PaymentsController.sendConfirmTransactionEmail')
   Route.get('payments/guest-user-data', 'PaymentsController.getGuestUserData').middleware(
     'auth:confirmation'
   )
   Route.post('payments/transaction', 'PaymentsController.createTransaction')
-  Route.post('payments/send-email/transaction', 'PaymentsController.sendConfirmTransactionEmail')
+  Route.post('payments/paypal-transaction/:id', 'PaymentsController.capturePaypalTransaction')
 
   /*Route.post('stripe/checkout-session', 'StripeController.createCheckoutSession').middleware(
     'auth:api'

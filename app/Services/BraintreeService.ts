@@ -3,29 +3,28 @@ import Env from '@ioc:Adonis/Core/Env'
 import braintree, { BraintreeGateway, KeyGatewayConfig } from 'braintree'
 
 import User from 'App/Models/User'
-import Cart from 'App/Models/Cart'
-import CartsService from 'App/Services/CartsService'
 import { GuestUserCheckout } from 'App/Types/user'
-import { GuestCartCheck } from 'App/Types/cart'
-import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import InternalServerException from 'App/Exceptions/InternalServerException'
 
 export default class BraintreeService {
   private gateway: BraintreeGateway
 
   constructor() {
-    let braintreeEnvironment = braintree.Environment.Sandbox
-    if (Env.get('BRAINTREE_ENV') === 'production') {
-      braintreeEnvironment = braintree.Environment.Production
+    if (Env.get('PAYMENT_MODE', 'braintree') === 'braintree') {
+      let braintreeEnvironment = braintree.Environment.Sandbox
+      if (Env.get('BRAINTREE_ENV', 'sandbox') === 'production') {
+        braintreeEnvironment = braintree.Environment.Production
+      }
+      const env: KeyGatewayConfig = {
+        environment: braintreeEnvironment,
+        merchantId: Env.get('BRAINTREE_MERCHANT_ID', ''),
+        privateKey: Env.get('BRAINTREE_PRIVATE_KEY', ''),
+        publicKey: Env.get('BRAINTREE_PUBLIC_KEY', ''),
+      }
+      this.gateway = new braintree.BraintreeGateway(env)
     }
-    const env: KeyGatewayConfig = {
-      environment: braintreeEnvironment,
-      merchantId: Env.get('BRAINTREE_MERCHANT_ID', ''),
-      privateKey: Env.get('BRAINTREE_PRIVATE_KEY', ''),
-      publicKey: Env.get('BRAINTREE_PUBLIC_KEY', ''),
-    }
-    this.gateway = new braintree.BraintreeGateway(env)
   }
 
   public async getCustomer(braintreeId: string) {
@@ -59,23 +58,25 @@ export default class BraintreeService {
   }
 
   public async generateClientToken(braintreeId?: string) {
-    const customer = braintreeId ? await this.getCustomer(braintreeId) : undefined
-    let customerId = customer?.id || undefined
-    let clientToken = ''
-    await this.gateway.clientToken
-      .generate({
-        customerId,
-      })
-      .then((result) => {
-        if (result && result.clientToken) {
-          clientToken = result.clientToken
-        } else {
-          throw new InternalServerException('Something went wrong, empty braintree client token')
-        }
-      })
-      .catch((error) => {
-        throw new InternalServerException(error.message)
-      })
+    let clientToken: string | undefined
+    if (Env.get('PAYMENT_MODE', 'braintree') === 'braintree') {
+      const customer = braintreeId ? await this.getCustomer(braintreeId) : undefined
+      let customerId = customer?.id || undefined
+      await this.gateway.clientToken
+        .generate({
+          customerId,
+        })
+        .then((result) => {
+          if (result && result.clientToken) {
+            clientToken = result.clientToken
+          } else {
+            throw new InternalServerException('Something went wrong, empty braintree client token')
+          }
+        })
+        .catch((error) => {
+          throw new InternalServerException(error.message)
+        })
+    }
     return clientToken
   }
 
@@ -95,34 +96,9 @@ export default class BraintreeService {
   public async createTransaction(
     paymentMethodNonce: string,
     user: User | GuestUserCheckout,
-    braintreeCustomer?: braintree.Customer,
-    guestCartCheck?: GuestCartCheck
+    amount: string,
+    braintreeCustomer?: braintree.Customer
   ) {
-    let cart: Cart | GuestCartCheck | undefined
-    if ((user as User)?.id) {
-      cart = (user as User).cart
-    } else {
-      cart = guestCartCheck
-    }
-
-    if (!user.shipping) {
-      throw new PermissionException(`You don't have an existing shipping address`)
-    }
-    if (!user.billing) {
-      throw new PermissionException(`You don't have an existing billing address`)
-    }
-    if (!cart) {
-      throw new PermissionException(`You don't have an existing cart`)
-    }
-    if (cart.items && cart.items.length <= 0) {
-      throw new PermissionException(`You don't have selected items in your cart`)
-    }
-
-    const { amount } = CartsService.getTotalAmount(cart)
-    if (amount <= 0) {
-      throw new PermissionException(`Your don't have cart amount`)
-    }
-
     const customer = braintreeCustomer
       ? undefined
       : {
@@ -139,7 +115,7 @@ export default class BraintreeService {
     let transactionResponse: braintree.ValidatedResponse<braintree.Transaction>
     try {
       transactionResponse = await this.gateway.transaction.sale({
-        amount: amount.toFixed(2),
+        amount: amount,
         paymentMethodNonce: paymentMethodNonce,
         // deviceData: deviceDataFromTheClient,
         customerId,

@@ -12,10 +12,10 @@ export default class CreateTransactionValidator {
   public schema = schema.create({
     appName: schema.string(),
     appDomain: schema.string(),
-    paymentMethodNonce: schema.string(),
-    remember: schema.boolean(),
     guestUser: guestUserSchema,
     guestCart: guestCartSchema,
+    paymentMethodNonce: schema.string.optional(),
+    remember: schema.boolean.optional(),
   })
 
   public messages: CustomMessages = {}
