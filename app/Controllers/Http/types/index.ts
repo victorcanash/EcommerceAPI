@@ -34,6 +34,7 @@ export type InitAuthResponse = {
   currency: string
   braintreeToken?: string
   paypalClientId?: string
+  paypalClientToken?: string
   guestCart?: GuestCartCheck
 }
 

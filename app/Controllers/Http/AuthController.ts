@@ -71,7 +71,7 @@ export default class AuthController {
     }
 
     const braintreeToken = await new BraintreeService().generateClientToken(user?.braintreeId)
-    const paypalClientId = await PaypalService.generateClientToken(i18n)
+    const paypalClientToken = await PaypalService.generateClientToken(i18n)
 
     const successMsg = `Successfully init user`
     logRouteSuccess(request, successMsg)
@@ -85,7 +85,8 @@ export default class AuthController {
       paymentMode: Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE),
       currency: Env.get('CURRENCY', 'EUR'),
       braintreeToken: braintreeToken,
-      paypalClientId: paypalClientId,
+      paypalClientId: Env.get('PAYPAL_CLIENT_ID'),
+      paypalClientToken: paypalClientToken,
       guestCart: guestCart,
     } as InitAuthResponse)
   }
