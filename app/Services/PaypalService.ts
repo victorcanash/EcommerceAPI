@@ -42,7 +42,7 @@ export default class PaypalService {
         }
       })
       .catch((error) => {
-        throw new InternalServerException(error.message)
+        throw new InternalServerException(`Error generating paypal access token: ${error.message}`)
       })
     return accessToken
   }
@@ -75,7 +75,9 @@ export default class PaypalService {
           }
         })
         .catch((error) => {
-          throw new InternalServerException(error.message)
+          throw new InternalServerException(
+            `Error generating paypal client token: ${error.message}`
+          )
         })
     }
     return clientToken
