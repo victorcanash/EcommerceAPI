@@ -233,7 +233,7 @@ export default class PaymentsController {
       const email = await UsersService.getAuthEmail(auth)
       user = await UsersService.getUserByEmail(email, true)
       cart = (user as User).cart
-    } else if (validConfirmToken) {
+    } else {
       let email: string | undefined
       if (guestUserIdByToken) {
         email = await UsersService.getAuthEmail(auth, 'confirmation')
@@ -249,8 +249,6 @@ export default class PaymentsController {
         guestUserId = await (await UsersService.getGuestUserByEmail(email)).id
       }
       cart = await CartsService.createGuestCartCheck(validatedData.guestCart.items)
-    } else {
-      throw new PermissionException('Invalid token')
     }
 
     return {
