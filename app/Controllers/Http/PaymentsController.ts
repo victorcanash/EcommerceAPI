@@ -225,8 +225,7 @@ export default class PaymentsController {
       const email = await UsersService.getAuthEmail(auth)
       user = await UsersService.getUserByEmail(email, true)
       cart = (user as User).cart
-    } else {
-      const emailGuest = await UsersService.getAuthEmail(auth, 'confirmation')
+    } else if (validConfirmToken) {
       user = validatedData.guestUser
       if (!user) {
         throw new BadRequestException('Missing guestUser')
@@ -234,8 +233,10 @@ export default class PaymentsController {
       if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
         throw new BadRequestException('Missing guestCart')
       }
-      guestUserId = await (await UsersService.getGuestUserByEmail(emailGuest)).id
+      guestUserId = await (await UsersService.getGuestUserByEmail(user.email)).id
       cart = await CartsService.createGuestCartCheck(validatedData.guestCart.items)
+    } else {
+      throw new PermissionException('Invalid token')
     }
 
     return {
