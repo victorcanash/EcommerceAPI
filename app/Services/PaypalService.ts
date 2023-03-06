@@ -41,11 +41,12 @@ export default class PaypalService {
         options
       )
       .then(async (response: AxiosResponse) => {
-        if (response.status === 200 && response.data?.access_token) {
-          accessToken = response.data.access_token
+        accessToken = response.data.access_token
+        /*if (response.status === 200 && response.data?.access_token) {
+
         } else {
           throw new InternalServerException('Something went wrong, empty paypal access token')
-        }
+        }*/
       })
       .catch((error) => {
         throw new InternalServerException(`Error generating paypal access token: ${error.message}`)
