@@ -12,6 +12,7 @@ import { GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class PaypalService {
   private static get baseUrl() {
@@ -41,11 +42,13 @@ export default class PaypalService {
         options
       )
       .then(async (response: AxiosResponse) => {
-        if (response.status === 201 && response.data?.access_token) {
-          accessToken = response.data.access_token
-        } else {
+        //if (response.status === 201 && response.data?.access_token) {
+        Logger.error(response.data)
+        Logger.error(response.status.toString())
+        accessToken = response.data.access_token
+        /*} else {
           throw new InternalServerException('Something went wrong, empty paypal access token')
-        }
+        }*/
       })
       .catch((error) => {
         throw new InternalServerException(`Error generating paypal access token: ${error.message}`)
