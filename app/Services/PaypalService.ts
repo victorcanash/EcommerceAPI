@@ -12,7 +12,6 @@ import { GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class PaypalService {
   private static get baseUrl() {
