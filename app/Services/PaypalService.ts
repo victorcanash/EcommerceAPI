@@ -41,12 +41,11 @@ export default class PaypalService {
         options
       )
       .then(async (response: AxiosResponse) => {
-        accessToken = response.data.access_token
-        /*if (response.status === 200 && response.data?.access_token) {
-
+        if (response.status === 200 && response.data?.access_token) {
+          accessToken = response.data.access_token
         } else {
           throw new InternalServerException('Something went wrong, empty paypal access token')
-        }*/
+        }
       })
       .catch((error) => {
         throw new InternalServerException(`Error generating paypal access token: ${error.message}`)
@@ -75,7 +74,7 @@ export default class PaypalService {
       await axios
         .post(`${this.baseUrl}/v1/identity/generate-token`, undefined, options)
         .then(async (response: AxiosResponse) => {
-          if (response.status === 201 && response.data?.client_token) {
+          if (response.status === 200 && response.data?.client_token) {
             clientToken = response.data.client_token
           } else {
             throw new InternalServerException('Something went wrong, empty paypal client token')
