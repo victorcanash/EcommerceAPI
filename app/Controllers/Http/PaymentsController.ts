@@ -121,7 +121,11 @@ export default class PaymentsController {
       cart,
       paymentMethodNonce,
       remember,
-    } = await this.getCustomerData(request, auth)
+    } = await this.getCustomerData(
+      request,
+      auth,
+      Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.PAYPAL ? false : true
+    )
 
     // Create transaction
     const { braintreeTransactionId, paypalOrderId } = await PaymentsService.createTransaction(
@@ -212,7 +216,11 @@ export default class PaymentsController {
     } as OrderResponse)
   }
 
-  private async getCustomerData(request: RequestContract, auth: AuthContract) {
+  private async getCustomerData(
+    request: RequestContract,
+    auth: AuthContract,
+    guestUserIdByToken = true
+  ) {
     let user: User | GuestUserCheckout | undefined
     let guestUserId: number | undefined
     let cart: Cart | GuestCartCheck | undefined
@@ -226,7 +234,10 @@ export default class PaymentsController {
       user = await UsersService.getUserByEmail(email, true)
       cart = (user as User).cart
     } else if (validConfirmToken) {
-      const email = await UsersService.getAuthEmail(auth, 'confirmation')
+      let email: string | undefined
+      if (guestUserIdByToken) {
+        email = await UsersService.getAuthEmail(auth, 'confirmation')
+      }
       user = validatedData.guestUser
       if (!user) {
         throw new BadRequestException('Missing guestUser')
@@ -234,7 +245,9 @@ export default class PaymentsController {
       if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
         throw new BadRequestException('Missing guestCart')
       }
-      guestUserId = await (await UsersService.getGuestUserByEmail(email)).id
+      if (guestUserIdByToken && email) {
+        guestUserId = await (await UsersService.getGuestUserByEmail(email)).id
+      }
       cart = await CartsService.createGuestCartCheck(validatedData.guestCart.items)
     } else {
       throw new PermissionException('Invalid token')

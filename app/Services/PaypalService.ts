@@ -140,7 +140,6 @@ export default class PaypalService {
   }
 
   public static async createOrder(
-    email: string,
     shipping: GuestUserCheckoutAddress,
     products: PaypalOrderProduct[],
     amount: string
@@ -188,7 +187,6 @@ export default class PaypalService {
             },
             type: 'SHIPPING',
           },
-          custom_id: email,
         },
       ],
     }
