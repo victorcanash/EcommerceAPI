@@ -197,7 +197,7 @@ export default class PaypalService {
         }
       })
       .catch((error) => {
-        throw new InternalServerException(error.message)
+        throw new InternalServerException(`Error creating paypal order: ${error.message}`)
       })
     return orderId
   }
@@ -229,7 +229,7 @@ export default class PaypalService {
         }
       })
       .catch((error) => {
-        throw new InternalServerException(error.message)
+        throw new InternalServerException(`Error capturing paypal order: ${error.message}`)
       })
     return transactionId
   }
