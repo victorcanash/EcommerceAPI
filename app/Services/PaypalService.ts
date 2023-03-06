@@ -2,6 +2,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import { qs } from 'url-parse'
 
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
@@ -22,18 +23,23 @@ export default class PaypalService {
 
   private static async generateAccessToken() {
     let accessToken = ''
-    const auth = `${Env.get('PAYPAL_CLIENT_ID')}:${Env.get('PAYPAL_SECRET_KEY')}`
     const options: AxiosRequestConfig = {
       headers: {
-        'Authorization': `Basic ${auth}`,
+        'Accept': 'application/json',
+        //'Accept-Language': 'en_US',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-    }
-    const body = {
-      grant_type: 'client_credentials',
+      auth: {
+        username: Env.get('PAYPAL_CLIENT_ID'),
+        password: Env.get('PAYPAL_SECRET_KEY'),
+      },
     }
     await axios
-      .post(`${this.baseUrl}/v1/oauth2/token`, body, options)
+      .post(
+        `${this.baseUrl}/v1/oauth2/token`,
+        qs.stringify({ grant_type: 'client_credentials' }),
+        options
+      )
       .then(async (response: AxiosResponse) => {
         if (response.status === 201 && response.data?.access_token) {
           accessToken = response.data.access_token
