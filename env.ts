@@ -14,6 +14,8 @@
 
 import Env from '@ioc:Adonis/Core/Env'
 
+import { PaymentModes } from 'App/Constants/payment'
+
 export default Env.rules({
   HOST: Env.schema.string.optional({ format: 'host' }),
   PORT: Env.schema.number.optional(),
@@ -57,7 +59,7 @@ export default Env.rules({
   SMTP_PASSWORD: Env.schema.string(),
   SMTP_EMAIL: Env.schema.string(),
 
-  PAYMENT_MODE: Env.schema.enum(['paypal', 'braintree'] as const),
+  PAYMENT_MODE: Env.schema.enum(Object.values(PaymentModes)),
   CURRENCY: Env.schema.string(),
   PAYPAL_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   PAYPAL_MERCHANT_ID: Env.schema.string(),

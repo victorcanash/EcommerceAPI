@@ -7,12 +7,13 @@ import { GuestUserCheckout } from 'App/Types/user'
 import PermissionException from 'App/Exceptions/PermissionException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
+import { PaymentModes } from 'App/Constants/payment'
 
 export default class BraintreeService {
   private gateway: BraintreeGateway
 
   constructor() {
-    if (Env.get('PAYMENT_MODE', 'braintree') === 'braintree') {
+    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.BRAINTREE) {
       let braintreeEnvironment = braintree.Environment.Sandbox
       if (Env.get('BRAINTREE_ENV', 'sandbox') === 'production') {
         braintreeEnvironment = braintree.Environment.Production
@@ -59,7 +60,7 @@ export default class BraintreeService {
 
   public async generateClientToken(braintreeId?: string) {
     let clientToken: string | undefined
-    if (Env.get('PAYMENT_MODE', 'braintree') === 'braintree') {
+    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.BRAINTREE) {
       const customer = braintreeId ? await this.getCustomer(braintreeId) : undefined
       let customerId = customer?.id || undefined
       await this.gateway.clientToken

@@ -21,6 +21,7 @@ import {
   OrderResponse,
   PaypalResponse,
 } from 'App/Controllers/Http/types'
+import { PaymentModes } from 'App/Constants/payment'
 import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck } from 'App/Types/cart'
 import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
@@ -177,7 +178,7 @@ export default class PaymentsController {
     auth,
     i18n,
   }: HttpContextContract) {
-    if (Env.get('PAYMENT_MODE', 'braintree') === 'braintree') {
+    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.BRAINTREE) {
       throw new PermissionException('Braintree payment mode is activated')
     }
 

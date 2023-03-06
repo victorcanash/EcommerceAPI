@@ -5,6 +5,7 @@ import Cart from 'App/Models/Cart'
 import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import PaypalService from 'App/Services/PaypalService'
+import { PaymentModes } from 'App/Constants/payment'
 import { GuestUserCheckout } from 'App/Types/user'
 import { GuestCartCheck } from 'App/Types/cart'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -49,7 +50,8 @@ export default class PaymentsService {
     const amount = totalAmount.toFixed(2)
 
     // Braintree Transaction
-    if (Env.get('PAYMENT_MODE', 'braintree') !== 'paypal') {
+    const paymentMode = Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE)
+    if (paymentMode === PaymentModes.BRAINTREE) {
       if (!paymentMethodNonce) {
         throw new BadRequestException('Missing paymentMethodNonce')
       }
@@ -87,7 +89,7 @@ export default class PaymentsService {
       result.braintreeTransactionId = braintreeResult.transaction.id
 
       // Paypal Transaction
-    } else {
+    } else if (paymentMode === PaymentModes.PAYPAL) {
       const { orderProducts } = await PaypalService.createOrderProducts(cart)
       result.paypalOrderId = await PaypalService.createOrder(
         user.email,

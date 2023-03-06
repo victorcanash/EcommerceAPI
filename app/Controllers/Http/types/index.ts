@@ -8,6 +8,7 @@ import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
 import Order from 'App/Models/Order'
+import { PaymentModes } from 'App/Constants/payment'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { GuestUserCheckout } from 'App/Types/user'
 
@@ -20,7 +21,7 @@ export type BasicResponse = {
 }
 
 /**
- * Auth JSON response for Controllers
+ * Init Auth JSON response for Controllers
  */
 export type InitAuthResponse = {
   code: number
@@ -29,6 +30,7 @@ export type InitAuthResponse = {
   products: Product[]
   packs: ProductPack[]
   user?: User
+  paymentMode: PaymentModes
   currency: string
   braintreeToken?: string
   paypalClientId?: string

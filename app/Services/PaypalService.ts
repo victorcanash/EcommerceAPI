@@ -5,6 +5,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
+import { PaymentModes } from 'App/Constants/payment'
 import { PaypalOrderProduct } from 'App/Types/order'
 import { GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
@@ -55,7 +56,7 @@ export default class PaypalService {
 
   public static async generateClientToken(i18n: I18nContract) {
     let clientToken: string | undefined
-    if (Env.get('PAYMENT_MODE', 'braintree') === 'paypal') {
+    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.PAYPAL) {
       const authHeaders = await this.getAuthHeaders()
       const options: AxiosRequestConfig = {
         headers: {

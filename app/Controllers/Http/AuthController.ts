@@ -19,6 +19,7 @@ import {
   IsAdminResponse,
   BraintreeTokenResponse,
 } from 'App/Controllers/Http/types'
+import { PaymentModes } from 'App/Constants/payment'
 import { GuestCartCheck } from 'App/Types/cart'
 import InitValidator from 'App/Validators/Auth/InitValidator'
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
@@ -81,6 +82,7 @@ export default class AuthController {
       products: products,
       packs: packs,
       user: user,
+      paymentMode: Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE),
       currency: Env.get('CURRENCY', 'EUR'),
       braintreeToken: braintreeToken,
       paypalClientId: paypalClientId,
