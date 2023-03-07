@@ -20,7 +20,7 @@ export default class CartsService {
     cart.items.forEach((item) => {
       amount += item.inventory
         ? item.inventory.serialize().realPrice * item.quantity
-        : item.pack?.price || 0
+        : (item.pack?.price || 0) * item.quantity
       quantity += item.quantity
     })
     return {
