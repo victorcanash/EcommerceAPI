@@ -10,6 +10,7 @@ import ProductPack from 'App/Models/ProductPack'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
+import PaypalService from 'App/Services/PaypalService'
 import MailService from 'App/Services/MailService'
 import {
   BasicResponse,
@@ -33,7 +34,7 @@ import ConflictException from 'App/Exceptions/ConflictException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class AuthController {
-  public async init({ request, response, auth }: HttpContextContract) {
+  public async init({ request, response, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(InitValidator)
 
     const categoryIds = validatedData.categoryIds || []
@@ -70,6 +71,7 @@ export default class AuthController {
     }
 
     const braintreeToken = await new BraintreeService().generateClientToken(user?.braintreeId)
+    const paypalToken = await PaypalService.generateClientToken(i18n)
 
     const successMsg = `Successfully init user`
     logRouteSuccess(request, successMsg)
@@ -85,6 +87,7 @@ export default class AuthController {
       braintreeToken: braintreeToken,
       paypalMerchantId: Env.get('PAYPAL_MERCHANT_ID'),
       paypalClientId: Env.get('PAYPAL_CLIENT_ID'),
+      paypalToken: paypalToken,
       guestCart: guestCart,
     } as InitAuthResponse)
   }
