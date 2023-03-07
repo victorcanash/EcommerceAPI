@@ -165,7 +165,7 @@ export default class PaypalService {
           },
           payee: {
             email_address: Env.get('SMTP_EMAIL'),
-            // merchant_id: Env.get('PAYPAL_MERCHANT_ID'),
+            merchant_id: Env.get('PAYPAL_MERCHANT_ID'),
           },
           shipping: {
             address: {

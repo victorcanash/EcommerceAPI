@@ -33,8 +33,8 @@ export type InitAuthResponse = {
   paymentMode: PaymentModes
   currency: string
   braintreeToken?: string
+  paypalMerchantId?: string
   paypalClientId?: string
-  paypalClientToken?: string
   guestCart?: GuestCartCheck
 }
 
