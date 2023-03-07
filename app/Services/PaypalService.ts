@@ -7,11 +7,12 @@ import { qs } from 'url-parse'
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import { PaymentModes } from 'App/Constants/payment'
-import { PaypalOrderProduct } from 'App/Types/order'
+import { OrderPaypalProduct } from 'App/Types/order'
 import { GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
+import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class PaypalService {
   private static get baseUrl() {
@@ -89,9 +90,33 @@ export default class PaypalService {
     return clientToken
   }
 
+  public static async getOrderInfo(paypalTransactionId: string) {
+    let result: any
+    const authHeaders = await this.getAuthHeaders()
+    const options: AxiosRequestConfig = {
+      headers: {
+        ...authHeaders,
+        'Content-Type': 'application/json',
+      },
+    }
+    await axios
+      .get(`${this.baseUrl}/v2/checkout/orders/${paypalTransactionId}`, options)
+      .then(async (response: AxiosResponse) => {
+        if (response.status === 200 && response.data) {
+          result = response.data
+        } else {
+          throw new Error('Something went wrong')
+        }
+      })
+      .catch((error) => {
+        throw new ModelNotFoundException(error.message)
+      })
+    return result
+  }
+
   public static async createOrderProducts(cart: Cart | GuestCartCheck) {
     const cartItemIds = [] as number[]
-    const orderProducts: PaypalOrderProduct[] = []
+    const orderProducts: OrderPaypalProduct[] = []
     const currency = Env.get('CURRENCY', 'EUR')
     cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
       if (item.quantity > 0) {
@@ -109,7 +134,7 @@ export default class PaypalService {
               currency_code: currency,
               value: item.inventory.realPrice.toString(),
             },
-          } as PaypalOrderProduct)
+          } as OrderPaypalProduct)
         } else if (item.pack) {
           if ((item as CartItem)?.id) {
             cartItemIds.push((item as CartItem).id)
@@ -123,7 +148,7 @@ export default class PaypalService {
               currency_code: currency,
               value: item.pack.price.toString(),
             },
-          } as PaypalOrderProduct)
+          } as OrderPaypalProduct)
         }
       }
     })
@@ -135,7 +160,7 @@ export default class PaypalService {
 
   public static async createOrder(
     shipping: GuestUserCheckoutAddress,
-    products: PaypalOrderProduct[],
+    products: OrderPaypalProduct[],
     amount: string
   ) {
     let orderId = ''

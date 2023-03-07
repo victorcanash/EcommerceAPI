@@ -5,15 +5,15 @@ import { v4 as uuidv4 } from 'uuid'
 
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
-import { BigbuyOrderProduct } from 'App/Types/order'
+import { OrderBigbuy, OrderBigbuyProduct } from 'App/Types/order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { GuestUserCheckoutAddress } from 'App/Types/user'
-import { getCountryCode } from 'App/Utils/addresses'
+import { getCountryName, getCountryCode } from 'App/Utils/addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 
 export default class BigbuyService {
-  public static async getProductInfo(sku: string) {
+  /*public static async getProductInfo(sku: string) {
     let result = {
       id: '',
       name: '',
@@ -39,7 +39,7 @@ export default class BigbuyService {
         throw new ModelNotFoundException(error.message)
       })
     return result
-  }
+  }*/
 
   public static async getProductQuantity(bigbuyId: string) {
     let quantity = 0
@@ -127,22 +127,22 @@ export default class BigbuyService {
         email: '',
         companyName: '',
       },
-      products: [] as {
-        id: string
-        reference: string
-        quantity: number
-        name: string
-        internalReference: string
-      }[],
-    }
+      products: [],
+    } as OrderBigbuy
     const options: AxiosRequestConfig = {
       headers: this.getAuthHeaders(),
     }
     await axios
       .get(`${Env.get('BIGBUY_API_URL')}/rest/order/${bigbuyId}.json`, options)
       .then(async (response: AxiosResponse) => {
-        if (response.status === 200) {
-          result = response.data
+        if (response.status === 200 && response.data) {
+          result = {
+            ...response.data,
+            shippingAddress: {
+              ...response.data?.shippingAddress,
+              country: getCountryName(response.data?.shippingAddress.country || ''),
+            },
+          }
         } else {
           throw new Error('Something went wrong')
         }
@@ -155,7 +155,7 @@ export default class BigbuyService {
 
   public static async createOrderProducts(cart: Cart | GuestCartCheck) {
     const cartItemIds = [] as number[]
-    const orderProducts: BigbuyOrderProduct[] = []
+    const orderProducts: OrderBigbuyProduct[] = []
     cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
       if (item.quantity > 0) {
         if (item.inventory) {
@@ -166,7 +166,7 @@ export default class BigbuyService {
             reference: item.inventory.sku,
             quantity: item.quantity,
             internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
-          } as BigbuyOrderProduct)
+          } as OrderBigbuyProduct)
         } else if (item.pack) {
           if ((item as CartItem)?.id) {
             cartItemIds.push((item as CartItem).id)
@@ -176,7 +176,7 @@ export default class BigbuyService {
               reference: itemInventory.sku,
               quantity: item.quantity,
               internalReference: `${item.pack?.id.toString()}-${uuidv4()}`,
-            } as BigbuyOrderProduct)
+            } as OrderBigbuyProduct)
           })
         }
       }
@@ -191,7 +191,7 @@ export default class BigbuyService {
     internalReference: string,
     email: string,
     shipping: GuestUserCheckoutAddress,
-    products: BigbuyOrderProduct[]
+    products: OrderBigbuyProduct[]
   ) {
     let orderId = ''
     const options: AxiosRequestConfig = {

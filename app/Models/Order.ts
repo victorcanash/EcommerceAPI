@@ -2,11 +2,13 @@ import { column, computed } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
+import ProductPack from 'App/Models/ProductPack'
 import BigbuyService from 'App/Services/BigbuyService'
 import BraintreeService from 'App/Services/BraintreeService'
+import PaypalService from 'App/Services/PaypalService'
+import { OrderBigbuy, OrderTransaction } from 'App/Types/order'
 import { GuestCartItem, GuestCartCheckItem } from 'App/Types/cart'
-import { getCountryName } from 'App/Utils/addresses'
-import ProductPack from './ProductPack'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class Order extends AppBaseModel {
   @column()
@@ -41,52 +43,14 @@ export default class Order extends AppBaseModel {
     return this.bigbuyData
   }
 
-  public bigbuyData = {
-    id: '',
-    status: '',
-    shipping: {
-      firstName: '',
-      lastName: '',
-      country: '',
-      postalCode: '',
-      locality: '',
-      addressLine1: '',
-      addressLine2: '',
-      phone: '',
-    },
-    products: [] as {
-      id: string
-      reference: string
-      quantity: number
-      name: string
-      internalReference: string
-    }[],
-  }
+  public bigbuyData: OrderBigbuy | undefined
 
   @computed()
-  public get braintree() {
-    return this.braintreeData
+  public get transaction() {
+    return this.transactionData
   }
 
-  public braintreeData = {
-    amount: '',
-    billing: {
-      firstName: '',
-      lastName: '',
-      country: '',
-      postalCode: '',
-      locality: '',
-      addressLine1: '',
-      addressLine2: '',
-    },
-    creditCard: {
-      cardType: '',
-      last4: '',
-    },
-    paypalAccount: {
-      payerEmail: '',
-    },
-  }
+  public transactionData: OrderTransaction | undefined
 
   public async loadItemsData() {
     if (this.products.length > 0) {
@@ -126,48 +90,58 @@ export default class Order extends AppBaseModel {
   }
 
   public async loadBigbuyData() {
-    if (!this.bigbuyData.id && this.bigbuyId) {
-      const orderInfo = await BigbuyService.getOrderInfo(this.bigbuyId)
-      this.bigbuyData = {
-        id: orderInfo.id,
-        status: orderInfo.status,
-        shipping: {
-          firstName: orderInfo.shippingAddress.firstName,
-          lastName: orderInfo.shippingAddress.lastName,
-          country: getCountryName(orderInfo.shippingAddress.country),
-          postalCode: orderInfo.shippingAddress.postcode,
-          locality: orderInfo.shippingAddress.town,
-          addressLine1: orderInfo.shippingAddress.address,
-          addressLine2: '',
-          phone: orderInfo.shippingAddress.phone,
-        },
-        products: orderInfo.products,
-      }
+    if (this.bigbuyId) {
+      this.bigbuyData = await BigbuyService.getOrderInfo(this.bigbuyId)
     }
   }
 
   public async loadPaymentData() {
-    if (this.braintreeData.amount === '' && this.braintreeTransactionId) {
-      const braintreeService = new BraintreeService()
-      const transactionInfo = await braintreeService.getTransactionInfo(this.braintreeTransactionId)
-      this.braintreeData = {
-        amount: transactionInfo?.amount || '',
-        billing: {
-          firstName: transactionInfo?.billing?.firstName || '',
-          lastName: transactionInfo?.billing?.lastName || '',
-          country: transactionInfo?.billing?.countryName || '',
-          postalCode: transactionInfo?.billing?.postalCode || '',
-          locality: transactionInfo?.billing?.locality || '',
-          addressLine1: transactionInfo?.billing?.streetAddress || '',
-          addressLine2: transactionInfo?.billing?.extendedAddress || '',
-        },
-        creditCard: {
-          cardType: transactionInfo?.creditCard?.cardType || '',
-          last4: transactionInfo?.creditCard?.last4 || '',
-        },
-        paypalAccount: {
-          payerEmail: transactionInfo?.paypalAccount?.payerEmail || '',
-        },
+    if (this.braintreeTransactionId || this.paypalTransactionId) {
+      if (this.braintreeTransactionId) {
+        const transactionInfo = await new BraintreeService().getTransactionInfo(
+          this.braintreeTransactionId
+        )
+        this.transactionData = {
+          amount: transactionInfo?.amount || '',
+          billing: {
+            firstName: transactionInfo?.billing?.firstName || '',
+            lastName: transactionInfo?.billing?.lastName || '',
+            country: transactionInfo?.billing?.countryName || '',
+            postalCode: transactionInfo?.billing?.postalCode || '',
+            locality: transactionInfo?.billing?.locality || '',
+            addressLine1: transactionInfo?.billing?.streetAddress || '',
+            addressLine2: transactionInfo?.billing?.extendedAddress || '',
+          },
+          creditCard: {
+            cardType: transactionInfo?.creditCard?.cardType || '',
+            last4: transactionInfo?.creditCard?.last4 || '',
+          },
+          paypalAccount: {
+            payerEmail: transactionInfo?.paypalAccount?.payerEmail || '',
+          },
+        }
+      } else if (this.paypalTransactionId) {
+        const transactionInfo = await PaypalService.getOrderInfo(this.paypalTransactionId)
+        Logger.error(JSON.stringify(transactionInfo))
+        this.transactionData = {
+          amount: transactionInfo?.purchase_units[0]?.amount?.value || '',
+          billing: {
+            firstName: '',
+            lastName: '',
+            country: '',
+            postalCode: '',
+            locality: '',
+            addressLine1: '',
+            addressLine2: '',
+          },
+          creditCard: {
+            cardType: transactionInfo?.payment_source?.card?.brand || '',
+            last4: transactionInfo?.payment_source?.card?.last_digits || '',
+          },
+          paypalAccount: {
+            payerEmail: transactionInfo?.payment_source?.paypal?.email_address || '',
+          },
+        }
       }
     }
   }
