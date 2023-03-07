@@ -114,19 +114,16 @@ export default class PaypalService {
           if ((item as CartItem)?.id) {
             cartItemIds.push((item as CartItem).id)
           }
-          item.pack.inventories.forEach((itemInventory) => {
-            orderProducts.push({
-              name: itemInventory.product.name.current,
-              description: itemInventory.name.current,
-              category: 'PHYSICAL_GOODS',
-              sku: itemInventory.sku,
-              quantity: item.quantity.toString(),
-              unit_amount: {
-                currency_code: currency,
-                value: itemInventory.realPrice.toString(),
-              },
-            } as PaypalOrderProduct)
-          })
+          orderProducts.push({
+            name: item.pack.name.current,
+            description: item.pack.description.current,
+            category: 'PHYSICAL_GOODS',
+            quantity: item.quantity.toString(),
+            unit_amount: {
+              currency_code: currency,
+              value: item.pack.price.toString(),
+            },
+          } as PaypalOrderProduct)
         }
       }
     })
@@ -138,10 +135,11 @@ export default class PaypalService {
 
   public static async createOrder(
     shipping: GuestUserCheckoutAddress,
-    //products: PaypalOrderProduct[],
+    products: PaypalOrderProduct[],
     amount: string
   ) {
     let orderId = ''
+    const currency = Env.get('CURRENCY', 'EUR')
     const authHeaders = await this.getAuthHeaders()
     const options: AxiosRequestConfig = {
       headers: {
@@ -150,12 +148,11 @@ export default class PaypalService {
         'Prefer': 'return=minimal',
       },
     }
-    const currency = Env.get('CURRENCY', 'EUR')
     const body = {
       intent: 'CAPTURE',
       purchase_units: [
         {
-          //items: products,
+          items: products,
           amount: {
             currency_code: currency,
             value: amount,
@@ -168,7 +165,7 @@ export default class PaypalService {
           },
           payee: {
             email_address: Env.get('SMTP_EMAIL'),
-            merchant_id: Env.get('PAYPAL_MERCHANT_ID'),
+            // merchant_id: Env.get('PAYPAL_MERCHANT_ID'),
           },
           shipping: {
             address: {
