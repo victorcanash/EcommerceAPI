@@ -200,7 +200,7 @@ export default class OrdersController {
       validatedData.appName,
       validatedData.appDomain,
       user.email,
-      (user as User)?.firstName || order.bigbuyData.shipping.firstName,
+      (user as User)?.firstName || order.bigbuyData?.shippingAddress?.firstName || '',
       order
     )
 
