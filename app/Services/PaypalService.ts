@@ -138,7 +138,7 @@ export default class PaypalService {
 
   public static async createOrder(
     shipping: GuestUserCheckoutAddress,
-    products: PaypalOrderProduct[],
+    //products: PaypalOrderProduct[],
     amount: string
   ) {
     let orderId = ''
@@ -155,7 +155,7 @@ export default class PaypalService {
       intent: 'CAPTURE',
       purchase_units: [
         {
-          items: products,
+          //items: products,
           amount: {
             currency_code: currency,
             value: amount,
