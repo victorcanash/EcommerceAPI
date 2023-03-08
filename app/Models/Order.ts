@@ -8,7 +8,6 @@ import BraintreeService from 'App/Services/BraintreeService'
 import PaypalService from 'App/Services/PaypalService'
 import { OrderBigbuy, OrderTransaction } from 'App/Types/order'
 import { GuestCartItem, GuestCartCheckItem } from 'App/Types/cart'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class Order extends AppBaseModel {
   @column()
@@ -122,17 +121,18 @@ export default class Order extends AppBaseModel {
         }
       } else if (this.paypalTransactionId) {
         const transactionInfo = await PaypalService.getOrderInfo(this.paypalTransactionId)
-        Logger.error(JSON.stringify(transactionInfo))
         this.transactionData = {
           amount: transactionInfo?.purchase_units[0]?.amount?.value || '',
           billing: {
-            firstName: '',
+            firstName: transactionInfo?.payment_source?.card?.name || '',
             lastName: '',
-            country: '',
-            postalCode: '',
-            locality: '',
-            addressLine1: '',
-            addressLine2: '',
+            country: transactionInfo?.payment_source?.card?.billing_address?.country_code || '',
+            postalCode: transactionInfo?.payment_source?.card?.billing_address?.postal_code || '',
+            locality: transactionInfo?.payment_source?.card?.billing_address?.admin_area_1 || '',
+            addressLine1:
+              transactionInfo?.payment_source?.card?.billing_address?.address_line_1 || '',
+            addressLine2:
+              transactionInfo?.payment_source?.card?.billing_address?.address_line_2 || '',
           },
           creditCard: {
             cardType: transactionInfo?.payment_source?.card?.brand || '',
