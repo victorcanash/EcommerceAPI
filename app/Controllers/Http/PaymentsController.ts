@@ -17,9 +17,10 @@ import OrdersService from 'App/Services/OrdersService'
 import MailService from 'App/Services/MailService'
 import {
   BasicResponse,
+  PaypalUserTokenResponse,
   GuestUserDataResponse,
+  PaypalCreateOrderResponse,
   OrderResponse,
-  PaypalResponse,
 } from 'App/Controllers/Http/types'
 import { PaymentModes } from 'App/Constants/payment'
 import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
@@ -32,6 +33,21 @@ import InternalServerException from 'App/Exceptions/InternalServerException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PaymentsController {
+  public async getPaypalUserToken({ request, response, auth, i18n }: HttpContextContract) {
+    const email = await UsersService.getAuthEmail(auth)
+    const user = await UsersService.getUserByEmail(email, true)
+
+    const paypalUserToken = await PaypalService.generateUserToken(i18n, user.paypalId)
+
+    const successMsg = `Successfully got paypal user token of ${user.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      paypalUserToken: paypalUserToken,
+    } as PaypalUserTokenResponse)
+  }
+
   public async sendConfirmTransactionEmail({ request, response, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(SendConfirmTransactionEmailValidator)
 
@@ -174,7 +190,7 @@ export default class PaymentsController {
         code: 201,
         message: successMsg,
         paypalOrderId: paypalOrderId,
-      } as PaypalResponse)
+      } as PaypalCreateOrderResponse)
     }
   }
 

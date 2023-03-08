@@ -207,15 +207,6 @@ export type OrdersResponse = {
 }
 
 /**
- * Braintree Token JSON response for Controllers
- */
-export type BraintreeTokenResponse = {
-  code: number
-  message: string
-  braintreeToken?: string
-}
-
-/**
  * Guest User Data JSON response for Controllers
  */
 export type GuestUserDataResponse = {
@@ -227,9 +218,27 @@ export type GuestUserDataResponse = {
 }
 
 /**
- * Paypal JSON response for Controllers
+ * Braintree Token JSON response for Controllers
  */
-export type PaypalResponse = {
+export type BraintreeTokenResponse = {
+  code: number
+  message: string
+  braintreeToken?: string
+}
+
+/**
+ * Paypal User Token JSON response for Controllers
+ */
+export type PaypalUserTokenResponse = {
+  code: number
+  message: string
+  paypalUserToken: string
+}
+
+/**
+ * Paypal Create Order JSON response for Controllers
+ */
+export type PaypalCreateOrderResponse = {
   code: number
   message: string
   paypalOrderId: string

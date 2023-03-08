@@ -119,7 +119,9 @@ Route.group(() => {
     .apiOnly()
 
   // Payment routes
-
+  Route.post('payments/paypal-user-token', 'PaymentsController.getPaypalUserToken').middleware(
+    'auth:api'
+  )
   Route.post('payments/send-email/transaction', 'PaymentsController.sendConfirmTransactionEmail')
   Route.get('payments/guest-user-data', 'PaymentsController.getGuestUserData').middleware(
     'auth:confirmation'
