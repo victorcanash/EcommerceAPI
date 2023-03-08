@@ -7,6 +7,6 @@ export const getCountryCode = (countryName: CountryOptions) => {
 }
 
 export const getCountryName = (countryCode: string) => {
-  const countryName = (CountryOptions[countryCode] as CountryOptions) || ''
-  return countryName
+  const index = Object.keys(CountryOptions).indexOf(countryCode)
+  return index >= 0 ? Object.values(CountryOptions)[index] : Object.values(CountryOptions)[0]
 }

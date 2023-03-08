@@ -8,6 +8,7 @@ import BraintreeService from 'App/Services/BraintreeService'
 import PaypalService from 'App/Services/PaypalService'
 import { OrderBigbuy, OrderTransaction } from 'App/Types/order'
 import { GuestCartItem, GuestCartCheckItem } from 'App/Types/cart'
+import { getCountryName } from 'App/Utils/addresses'
 
 export default class Order extends AppBaseModel {
   @column()
@@ -126,7 +127,9 @@ export default class Order extends AppBaseModel {
           billing: {
             firstName: transactionInfo?.payment_source?.card?.name || '',
             lastName: '',
-            country: transactionInfo?.payment_source?.card?.billing_address?.country_code || '',
+            country: getCountryName(
+              transactionInfo?.payment_source?.card?.billing_address?.country_code || ''
+            ),
             postalCode: transactionInfo?.payment_source?.card?.billing_address?.postal_code || '',
             locality: transactionInfo?.payment_source?.card?.billing_address?.admin_area_1 || '',
             addressLine1:
