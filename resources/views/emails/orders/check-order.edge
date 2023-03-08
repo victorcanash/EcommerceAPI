@@ -64,21 +64,16 @@
                 {{ t('messages.emails.checkOrder.shipping') }}
                 <ul style="list-style-type: disc;">
                   <li>
-                    {{order.bigbuy.shipping.firstName}} {{order.bigbuy.shipping.lastName}}
+                    {{order.bigbuy.shippingAddress.firstName}} {{order.bigbuy.shippingAddress.lastName}}
                   </li>
                   <li>
-                    {{order.bigbuy.shipping.addressLine1}}
-                  </li>
-                  @if(order.bigbuy.shipping.addressLine2 && order.bigbuy.shipping.addressLine2 !== '')
-                    <li>
-                      {{order.bigbuy.shipping.addressLine2}}
-                    </li>
-                  @end
-                  <li>
-                    {{order.bigbuy.shipping.postalCode}} {{order.bigbuy.shipping.locality}}
+                    {{order.bigbuy.shippingAddress.address}}
                   </li>
                   <li>
-                    {{order.bigbuy.shipping.country}}
+                    {{order.bigbuy.shippingAddress.postcode}} {{order.bigbuy.shippingAddress.town}}
+                  </li>
+                  <li>
+                    {{order.bigbuy.shippingAddress.country}}
                   </li>
                 </ul>
               </li>
@@ -140,7 +135,7 @@
                 </ul>
               </li>
               <li>
-                {{ t('messages.emails.checkOrder.totalField', { amount: Number(order.braintree.amount).toFixed(2) }) }} €
+                {{ t('messages.emails.checkOrder.totalField', { amount: Number(order.transaction.amount).toFixed(2) }) }} €
               </li>
             </ul>
           </div>
