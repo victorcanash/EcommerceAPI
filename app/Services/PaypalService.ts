@@ -197,8 +197,7 @@ export default class PaypalService {
     user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
-    remember: boolean,
-    cardName?: string
+    remember: boolean
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
@@ -248,15 +247,6 @@ export default class PaypalService {
       ],
       payment_source: {
         card: {
-          name: cardName,
-          billing_address: {
-            address_line_1: user.billing.addressLine1,
-            address_line_2: user.billing.addressLine1,
-            admin_area_2: user.billing.addressLine1,
-            admin_area_1: user.billing.addressLine1,
-            postal_code: user.billing.postalCode,
-            country_code: getCountryCode(user.billing.country),
-          },
           attributes: remember
             ? {
                 customer: (user as User)?.paypalId
@@ -273,6 +263,11 @@ export default class PaypalService {
         paypal: {
           attributes: remember
             ? {
+                customer: (user as User)?.paypalId
+                  ? {
+                      id: (user as User).paypalId,
+                    }
+                  : undefined,
                 vault: {
                   store_in_vault: 'ON_SUCCESS',
                   usage_type: 'MERCHANT',
@@ -307,7 +302,7 @@ export default class PaypalService {
         ...authHeaders,
         'Accept-Language': i18n.locale,
         'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
+        'Prefer': 'return=representation',
       },
     }
     await axios

@@ -193,15 +193,11 @@ export default class PaymentsController {
     }
 
     const validatedData = await request.validate(CreatePaypalTransactionValidator)
-    const { user, cart, paymentMethodNonce, remember, cardName } = await this.getCustomerData(
-      auth,
-      false,
-      {
-        ...validatedData,
-        guestUser: validatedData.guestUser as GuestUserCheckout,
-        guestCart: validatedData.guestCart as GuestCartCheck,
-      }
-    )
+    const { user, cart, paymentMethodNonce, remember } = await this.getCustomerData(auth, false, {
+      ...validatedData,
+      guestUser: validatedData.guestUser as GuestUserCheckout,
+      guestCart: validatedData.guestCart as GuestCartCheck,
+    })
 
     // Create transaction
     const { paypalOrderId } = await PaymentsService.createTransaction(
@@ -209,8 +205,7 @@ export default class PaymentsController {
       user,
       (cart as Cart)?.id ? undefined : (cart as GuestCartCheck),
       paymentMethodNonce,
-      remember,
-      cardName
+      remember
     )
     if (!paypalOrderId) {
       throw new InternalServerException('Something went wrong, empty paypalOrderId')
@@ -291,7 +286,6 @@ export default class PaymentsController {
       guestUser?: GuestUserCheckout
       guestCart?: GuestCartCheck
       paymentMethodNonce?: string
-      cardName?: string
       remember?: boolean
     }
   ) {
@@ -331,7 +325,6 @@ export default class PaymentsController {
       guestUserId,
       cart,
       paymentMethodNonce: validatedData.paymentMethodNonce,
-      cardName: validatedData.cardName,
       remember: validatedData.remember,
     }
   }

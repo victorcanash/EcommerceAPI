@@ -12,7 +12,6 @@ export default class CreatePaypalTransactionValidator {
   public schema = schema.create({
     guestUser: guestUserWithoutEmailSchema,
     guestCart: guestCartSchema,
-    cardName: schema.string.optional(),
     remember: schema.boolean.optional(),
   })
 

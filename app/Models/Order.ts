@@ -127,9 +127,9 @@ export default class Order extends AppBaseModel {
           billing: {
             firstName: transactionInfo?.payment_source?.card?.name || '',
             lastName: '',
-            country: getCountryName(
-              transactionInfo?.payment_source?.card?.billing_address?.country_code || ''
-            ),
+            country: transactionInfo?.payment_source?.card?.billing_address?.country_code
+              ? getCountryName(transactionInfo?.payment_source?.card?.billing_address?.country_code)
+              : '',
             postalCode: transactionInfo?.payment_source?.card?.billing_address?.postal_code || '',
             locality: transactionInfo?.payment_source?.card?.billing_address?.admin_area_1 || '',
             addressLine1:

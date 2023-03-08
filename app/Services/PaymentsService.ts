@@ -18,8 +18,7 @@ export default class PaymentsService {
     user: User | GuestUserCheckout,
     guestCartCheck?: GuestCartCheck,
     paymentMethodNonce?: string,
-    remember = false,
-    cardName?: string
+    remember = false
   ) {
     const result = {
       braintreeTransactionId: undefined as string | undefined,
@@ -99,8 +98,7 @@ export default class PaymentsService {
         user,
         orderProducts,
         amount,
-        remember,
-        cardName
+        remember
       )
     }
 
