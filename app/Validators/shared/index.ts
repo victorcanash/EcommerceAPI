@@ -28,6 +28,11 @@ export const guestUserSchema = schema.object.optional().members({
   billing: addressSchema,
 })
 
+export const guestUserWithoutEmailSchema = schema.object.optional().members({
+  shipping: addressSchema,
+  billing: addressSchema,
+})
+
 export const guestCartSchema = schema.object.optional().members({
   items: schema.array.optional().members(
     schema.object().members({

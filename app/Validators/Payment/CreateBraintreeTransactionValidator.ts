@@ -4,7 +4,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
 import { guestUserSchema, guestCartSchema } from 'App/Validators/shared'
 
-export default class CreateTransactionValidator {
+export default class CreateBraintreeTransactionValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter
@@ -14,9 +14,8 @@ export default class CreateTransactionValidator {
     appDomain: schema.string(),
     guestUser: guestUserSchema,
     guestCart: guestCartSchema,
-    paymentMethodNonce: schema.string.optional(),
+    paymentMethodNonce: schema.string(),
     remember: schema.boolean.optional(),
-    cardName: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}

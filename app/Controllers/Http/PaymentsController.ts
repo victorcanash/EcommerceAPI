@@ -1,5 +1,4 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { RequestContract } from '@ioc:Adonis/Core/Request'
 import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import Env from '@ioc:Adonis/Core/Env'
 import { DateTime } from 'luxon'
@@ -25,8 +24,10 @@ import {
 import { PaymentModes } from 'App/Constants/payment'
 import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck } from 'App/Types/cart'
-import CreateTransactionValidator from 'App/Validators/Payment/CreateTransactionValidator'
 import SendConfirmTransactionEmailValidator from 'App/Validators/Payment/SendConfirmTransactionEmailValidator'
+import CreatePaypalTransactionValidator from 'App/Validators/Payment/CreatePaypalTransactionValidator'
+import CreateBraintreeTransactionValidator from 'App/Validators/Payment/CreateBraintreeTransactionValidator'
+import CapturePaypalTransactionValidator from 'App/Validators/Payment/CapturePaypalTransactionValidator'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
@@ -127,7 +128,13 @@ export default class PaymentsController {
     } as GuestUserDataResponse)
   }
 
-  public async createTransaction({ request, response, auth, i18n }: HttpContextContract) {
+  public async createBraintreeTransaction({ request, response, auth, i18n }: HttpContextContract) {
+    // Validate
+    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) !== PaymentModes.BRAINTREE) {
+      throw new PermissionException('Paypal payment mode is activated')
+    }
+
+    const validatedData = await request.validate(CreateBraintreeTransactionValidator)
     const {
       appName,
       appDomain,
@@ -137,15 +144,67 @@ export default class PaymentsController {
       cart,
       paymentMethodNonce,
       remember,
-      cardName,
-    } = await this.getCustomerData(
-      request,
+    } = await this.getCustomerData(auth, true, {
+      ...validatedData,
+      guestUser: validatedData.guestUser as GuestUserCheckout,
+      guestCart: validatedData.guestCart as GuestCartCheck,
+    })
+
+    // Create transaction
+    const { braintreeTransactionId } = await PaymentsService.createTransaction(
+      i18n,
+      user,
+      (cart as Cart)?.id ? undefined : (cart as GuestCartCheck),
+      paymentMethodNonce,
+      remember
+    )
+    if (!braintreeTransactionId) {
+      throw new InternalServerException('Something went wrong, empty braintreeTransactionId')
+    }
+
+    // Create order
+    if (validConfirmToken) {
+      await auth.use('confirmation').revoke()
+    }
+    const order = await OrdersService.createOrder(
+      i18n,
+      appName,
+      appDomain,
+      user,
+      guestUserId,
+      cart,
+      braintreeTransactionId,
+      undefined
+    )
+
+    const successMsg = `Successfully created braintree transaction and order with user email ${user.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      order,
+    } as OrderResponse)
+  }
+
+  public async createPaypalTransaction({ request, response, auth, i18n }: HttpContextContract) {
+    // Validate
+    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.BRAINTREE) {
+      throw new PermissionException('Braintree payment mode is activated')
+    }
+
+    const validatedData = await request.validate(CreatePaypalTransactionValidator)
+    const { user, cart, paymentMethodNonce, remember, cardName } = await this.getCustomerData(
       auth,
-      Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.PAYPAL ? false : true
+      false,
+      {
+        ...validatedData,
+        guestUser: validatedData.guestUser as GuestUserCheckout,
+        guestCart: validatedData.guestCart as GuestCartCheck,
+      }
     )
 
     // Create transaction
-    const { braintreeTransactionId, paypalOrderId } = await PaymentsService.createTransaction(
+    const { paypalOrderId } = await PaymentsService.createTransaction(
       i18n,
       user,
       (cart as Cart)?.id ? undefined : (cart as GuestCartCheck),
@@ -153,45 +212,17 @@ export default class PaymentsController {
       remember,
       cardName
     )
-    if (!braintreeTransactionId && !paypalOrderId) {
-      throw new InternalServerException(
-        'Something went wrong, empty braintreeTransactionId and paypalOrderId'
-      )
-
-      // Create order by braintree
-    } else if (braintreeTransactionId) {
-      if (validConfirmToken) {
-        await auth.use('confirmation').revoke()
-      }
-      const order = await OrdersService.createOrder(
-        i18n,
-        appName,
-        appDomain,
-        user,
-        guestUserId,
-        cart,
-        braintreeTransactionId,
-        undefined
-      )
-
-      const successMsg = `Successfully created braintree transaction and order with user email ${user.email}`
-      logRouteSuccess(request, successMsg)
-      return response.created({
-        code: 201,
-        message: successMsg,
-        order,
-      } as OrderResponse)
-
-      // Return order id by paypal
-    } else if (paypalOrderId) {
-      const successMsg = `Successfully created paypal order with user email ${user.email}`
-      logRouteSuccess(request, successMsg)
-      return response.created({
-        code: 201,
-        message: successMsg,
-        paypalOrderId: paypalOrderId,
-      } as PaypalCreateOrderResponse)
+    if (!paypalOrderId) {
+      throw new InternalServerException('Something went wrong, empty paypalOrderId')
     }
+
+    const successMsg = `Successfully created paypal transaction with user email ${user.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      paypalOrderId: paypalOrderId,
+    } as PaypalCreateOrderResponse)
   }
 
   public async capturePaypalTransaction({
@@ -205,8 +236,13 @@ export default class PaymentsController {
       throw new PermissionException('Braintree payment mode is activated')
     }
 
+    const validatedData = await request.validate(CapturePaypalTransactionValidator)
     const { appName, appDomain, validConfirmToken, user, guestUserId, cart, remember } =
-      await this.getCustomerData(request, auth)
+      await this.getCustomerData(auth, true, {
+        ...validatedData,
+        guestUser: validatedData.guestUser as GuestUserCheckout,
+        guestCart: validatedData.guestCart as GuestCartCheck,
+      })
 
     // Capture paypal transaction
     const { transactionId, customerId } = await PaypalService.captureOrder(i18n, id)
@@ -247,15 +283,21 @@ export default class PaymentsController {
   }
 
   private async getCustomerData(
-    request: RequestContract,
     auth: AuthContract,
-    guestUserIdByToken = true
+    getGuestUserId: boolean,
+    validatedData: {
+      appName?: string
+      appDomain?: string
+      guestUser?: GuestUserCheckout
+      guestCart?: GuestCartCheck
+      paymentMethodNonce?: string
+      cardName?: string
+      remember?: boolean
+    }
   ) {
     let user: User | GuestUserCheckout | undefined
     let guestUserId: number | undefined
     let cart: Cart | GuestCartCheck | undefined
-
-    const validatedData = await request.validate(CreateTransactionValidator)
 
     const validApiToken = await auth.use('api').check()
     const validConfirmToken = await auth.use('confirmation').check()
@@ -265,7 +307,7 @@ export default class PaymentsController {
       cart = (user as User).cart
     } else {
       let email: string | undefined
-      if (guestUserIdByToken) {
+      if (getGuestUserId) {
         email = await UsersService.getAuthEmail(auth, 'confirmation')
       }
       user = validatedData.guestUser
@@ -275,22 +317,22 @@ export default class PaymentsController {
       if (!validatedData.guestCart?.items || validatedData.guestCart.items.length <= 0) {
         throw new BadRequestException('Missing guestCart')
       }
-      if (guestUserIdByToken && email) {
+      if (getGuestUserId && email) {
         guestUserId = await (await UsersService.getGuestUserByEmail(email)).id
       }
       cart = await CartsService.createGuestCartCheck(validatedData.guestCart.items)
     }
 
     return {
-      appName: validatedData.appName,
-      appDomain: validatedData.appDomain,
+      appName: validatedData.appName || '',
+      appDomain: validatedData.appDomain || '',
       validConfirmToken,
       user,
       guestUserId,
       cart,
       paymentMethodNonce: validatedData.paymentMethodNonce,
-      remember: validatedData.remember,
       cardName: validatedData.cardName,
+      remember: validatedData.remember,
     }
   }
 }
