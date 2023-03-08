@@ -16,6 +16,7 @@ export default class CreateTransactionValidator {
     guestCart: guestCartSchema,
     paymentMethodNonce: schema.string.optional(),
     remember: schema.boolean.optional(),
+    cardName: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}

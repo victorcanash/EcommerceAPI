@@ -18,7 +18,8 @@ export default class PaymentsService {
     user: User | GuestUserCheckout,
     guestCartCheck?: GuestCartCheck,
     paymentMethodNonce?: string,
-    remember = false
+    remember = false,
+    cardName?: string
   ) {
     const result = {
       braintreeTransactionId: undefined as string | undefined,
@@ -95,9 +96,11 @@ export default class PaymentsService {
       const { orderProducts } = await PaypalService.createOrderProducts(cart)
       result.paypalOrderId = await PaypalService.createOrder(
         i18n,
-        user.shipping,
+        user,
         orderProducts,
-        amount
+        amount,
+        remember,
+        cardName
       )
     }
 

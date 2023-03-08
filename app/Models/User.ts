@@ -52,6 +52,9 @@ export default class User extends AppBaseModel {
   @column()
   public braintreeId: string
 
+  @column()
+  public paypalId: string
+
   @hasOne(() => Cart)
   public cart: HasOne<typeof Cart>
 

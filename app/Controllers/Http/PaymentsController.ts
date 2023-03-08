@@ -121,6 +121,7 @@ export default class PaymentsController {
       cart,
       paymentMethodNonce,
       remember,
+      cardName,
     } = await this.getCustomerData(
       request,
       auth,
@@ -133,7 +134,8 @@ export default class PaymentsController {
       user,
       (cart as Cart)?.id ? undefined : (cart as GuestCartCheck),
       paymentMethodNonce,
-      remember
+      remember,
+      cardName
     )
     if (!braintreeTransactionId && !paypalOrderId) {
       throw new InternalServerException(
@@ -187,13 +189,24 @@ export default class PaymentsController {
       throw new PermissionException('Braintree payment mode is activated')
     }
 
-    const { appName, appDomain, validConfirmToken, user, guestUserId, cart } =
+    const { appName, appDomain, validConfirmToken, user, guestUserId, cart, remember } =
       await this.getCustomerData(request, auth)
 
     // Capture paypal transaction
-    const paypalTransactionId = await PaypalService.captureOrder(i18n, id)
+    const { transactionId, customerId } = await PaypalService.captureOrder(i18n, id)
     if (validConfirmToken) {
       await auth.use('confirmation').revoke()
+    }
+    if ((user as User)?.id && remember) {
+      ;(user as User).merge({
+        paypalId: customerId,
+      })
+      await (user as User).save()
+    } else if ((user as User)?.paypalId) {
+      ;(user as User).merge({
+        paypalId: '',
+      })
+      await (user as User).save()
     }
 
     // Create order by paypal
@@ -205,7 +218,7 @@ export default class PaymentsController {
       guestUserId,
       cart,
       undefined,
-      paypalTransactionId
+      transactionId
     )
 
     const successMsg = `Successfully captured paypal transaction and created order with user email ${user.email}`
@@ -261,6 +274,7 @@ export default class PaymentsController {
       cart,
       paymentMethodNonce: validatedData.paymentMethodNonce,
       remember: validatedData.remember,
+      cardName: validatedData.cardName,
     }
   }
 }

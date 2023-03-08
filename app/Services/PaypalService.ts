@@ -4,11 +4,12 @@ import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { qs } from 'url-parse'
 
+import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import { PaymentModes } from 'App/Constants/payment'
 import { OrderPaypalProduct } from 'App/Types/order'
-import { GuestUserCheckoutAddress } from 'App/Types/user'
+import { GuestUserCheckout } from 'App/Types/user'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
@@ -22,12 +23,12 @@ export default class PaypalService {
     return 'https://api-m.sandbox.paypal.com'
   }
 
-  private static async generateAccessToken() {
+  private static async generateAccessToken(i18n?: I18nContract) {
     let accessToken = ''
     const options: AxiosRequestConfig = {
       headers: {
         'Accept': 'application/json',
-        //'Accept-Language': 'en_US',
+        'Accept-Language': i18n ? i18n.locale : 'es',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       auth: {
@@ -54,8 +55,41 @@ export default class PaypalService {
     return accessToken
   }
 
-  private static async getAuthHeaders() {
-    const accessToken = await this.generateAccessToken()
+  public static async generateUserToken(i18n: I18nContract, paypalId?: string) {
+    let userToken = ''
+    const options: AxiosRequestConfig = {
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Language': i18n.locale,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      auth: {
+        username: Env.get('PAYPAL_CLIENT_ID'),
+        password: Env.get('PAYPAL_SECRET_KEY'),
+      },
+    }
+    const body = qs.stringify({
+      grant_type: 'client_credentials',
+      response_type: 'id_token',
+      target_customer_id: paypalId,
+    })
+    await axios
+      .post(`${this.baseUrl}/v1/oauth2/token`, body, options)
+      .then(async (response: AxiosResponse) => {
+        if (response.status === 200 && response.data?.id_token) {
+          userToken = response.data.id_token
+        } else {
+          throw new InternalServerException('Something went wrong, empty paypal user token')
+        }
+      })
+      .catch((error) => {
+        throw new InternalServerException(`Error generating paypal user token: ${error.message}`)
+      })
+    return userToken
+  }
+
+  private static async getAuthHeaders(i18n?: I18nContract) {
+    const accessToken = await this.generateAccessToken(i18n)
     return {
       Authorization: `Bearer ${accessToken}`,
     }
@@ -64,7 +98,7 @@ export default class PaypalService {
   public static async generateClientToken(i18n: I18nContract) {
     let clientToken: string | undefined
     if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.PAYPAL) {
-      const authHeaders = await this.getAuthHeaders()
+      const authHeaders = await this.getAuthHeaders(i18n)
       const options: AxiosRequestConfig = {
         headers: {
           ...authHeaders,
@@ -160,13 +194,15 @@ export default class PaypalService {
 
   public static async createOrder(
     i18n: I18nContract,
-    shipping: GuestUserCheckoutAddress,
+    user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
-    amount: string
+    amount: string,
+    remember: boolean,
+    cardName?: string
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
-    const authHeaders = await this.getAuthHeaders()
+    const authHeaders = await this.getAuthHeaders(i18n)
     const options: AxiosRequestConfig = {
       headers: {
         ...authHeaders,
@@ -196,20 +232,56 @@ export default class PaypalService {
           },
           shipping: {
             address: {
-              country_code: getCountryCode(shipping.country),
-              address_line_1: shipping.addressLine1,
-              address_line_2: shipping.addressLine2,
-              admin_area_1: shipping.locality,
-              admin_area_2: shipping.locality,
-              postal_code: shipping.postalCode,
+              address_line_1: user.shipping.addressLine1,
+              address_line_2: user.shipping.addressLine2,
+              admin_area_1: user.shipping.locality,
+              admin_area_2: user.shipping.locality,
+              postal_code: user.shipping.postalCode,
+              country_code: getCountryCode(user.shipping.country),
             },
             name: {
-              full_name: `${shipping.firstName} ${shipping.lastName}`,
+              full_name: `${user.shipping.firstName} ${user.shipping.lastName}`,
             },
             type: 'SHIPPING',
           },
         },
       ],
+      payment_source: {
+        card: {
+          name: cardName,
+          billing_address: {
+            address_line_1: user.billing.addressLine1,
+            address_line_2: user.billing.addressLine1,
+            admin_area_2: user.billing.addressLine1,
+            admin_area_1: user.billing.addressLine1,
+            postal_code: user.billing.postalCode,
+            country_code: getCountryCode(user.billing.country),
+          },
+          attributes: remember
+            ? {
+                customer: (user as User)?.paypalId
+                  ? {
+                      id: (user as User).paypalId,
+                    }
+                  : undefined,
+                vault: {
+                  store_in_vault: 'ON_SUCCESS',
+                },
+              }
+            : undefined,
+        },
+        paypal: {
+          attributes: remember
+            ? {
+                vault: {
+                  store_in_vault: 'ON_SUCCESS',
+                  usage_type: 'MERCHANT',
+                  customer_type: 'CONSUMER',
+                },
+              }
+            : undefined,
+        },
+      },
     }
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
@@ -228,7 +300,8 @@ export default class PaypalService {
 
   public static async captureOrder(i18n: I18nContract, orderId: string) {
     let transactionId = ''
-    const authHeaders = await this.getAuthHeaders()
+    let customerId = ''
+    const authHeaders = await this.getAuthHeaders(i18n)
     const options: AxiosRequestConfig = {
       headers: {
         ...authHeaders,
@@ -249,6 +322,10 @@ export default class PaypalService {
             throw new InternalServerException(errorMessage)
           }
           transactionId = response.data.id
+          customerId =
+            response.data.payment_source?.card?.attributes?.vault?.customer?.id ||
+            response.data.payment_source?.paypal?.attributes?.vault?.customer?.id ||
+            ''
         } else {
           throw new InternalServerException('Something went wrong, empty paypal order')
         }
@@ -256,6 +333,9 @@ export default class PaypalService {
       .catch((error) => {
         throw new InternalServerException(`Error capturing paypal order: ${error.message}`)
       })
-    return transactionId
+    return {
+      transactionId,
+      customerId,
+    }
   }
 }
