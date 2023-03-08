@@ -129,6 +129,7 @@ export default class PaymentsController {
 
     // Create transaction
     const { braintreeTransactionId, paypalOrderId } = await PaymentsService.createTransaction(
+      i18n,
       user,
       (cart as Cart)?.id ? undefined : (cart as GuestCartCheck),
       paymentMethodNonce,
@@ -190,7 +191,7 @@ export default class PaymentsController {
       await this.getCustomerData(request, auth)
 
     // Capture paypal transaction
-    const paypalTransactionId = await PaypalService.captureOrder(id)
+    const paypalTransactionId = await PaypalService.captureOrder(i18n, id)
     if (validConfirmToken) {
       await auth.use('confirmation').revoke()
     }

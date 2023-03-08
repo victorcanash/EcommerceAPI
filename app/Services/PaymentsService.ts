@@ -1,4 +1,5 @@
 import Env from '@ioc:Adonis/Core/Env'
+import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
@@ -13,6 +14,7 @@ import BadRequestException from 'App/Exceptions/BadRequestException'
 
 export default class PaymentsService {
   public static async createTransaction(
+    i18n: I18nContract,
     user: User | GuestUserCheckout,
     guestCartCheck?: GuestCartCheck,
     paymentMethodNonce?: string,
@@ -91,7 +93,12 @@ export default class PaymentsService {
       // Paypal Transaction
     } else if (paymentMode === PaymentModes.PAYPAL) {
       const { orderProducts } = await PaypalService.createOrderProducts(cart)
-      result.paypalOrderId = await PaypalService.createOrder(user.shipping, orderProducts, amount)
+      result.paypalOrderId = await PaypalService.createOrder(
+        i18n,
+        user.shipping,
+        orderProducts,
+        amount
+      )
     }
 
     return result

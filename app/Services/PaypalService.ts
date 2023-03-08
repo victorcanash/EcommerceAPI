@@ -159,6 +159,7 @@ export default class PaypalService {
   }
 
   public static async createOrder(
+    i18n: I18nContract,
     shipping: GuestUserCheckoutAddress,
     products: OrderPaypalProduct[],
     amount: string
@@ -169,6 +170,7 @@ export default class PaypalService {
     const options: AxiosRequestConfig = {
       headers: {
         ...authHeaders,
+        'Accept-Language': i18n.locale,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal',
       },
@@ -224,12 +226,13 @@ export default class PaypalService {
     return orderId
   }
 
-  public static async captureOrder(orderId: string) {
+  public static async captureOrder(i18n: I18nContract, orderId: string) {
     let transactionId = ''
     const authHeaders = await this.getAuthHeaders()
     const options: AxiosRequestConfig = {
       headers: {
         ...authHeaders,
+        'Accept-Language': i18n.locale,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal',
       },
