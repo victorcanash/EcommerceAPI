@@ -76,7 +76,7 @@ export default class PaymentsController {
 
     const tokenData = await auth.use('confirmation').generate(guestUser, {
       expiresIn: Env.get('CONFIRMATION_TOKEN_EXPIRY', '30mins'),
-      payment_payload: validatedData.paymentPayload,
+      payment_payload: validatedData.checkoutPayment,
       shipping: shipping,
       billing: billing,
       guest_cart: validatedData.guestCart,
@@ -103,7 +103,7 @@ export default class PaymentsController {
     const email = await UsersService.getAuthEmail(auth, 'confirmation')
     const guestUser = await UsersService.getGuestUserByEmail(email)
 
-    const paymentPayload = auth.use('confirmation').token?.meta?.payment_payload
+    const checkoutPayment = auth.use('confirmation').token?.meta?.payment_payload
     const shipping = auth.use('confirmation').token?.meta?.shipping
     const billing = auth.use('confirmation').token?.meta?.billing
     const guestCart = auth.use('confirmation').token?.meta?.guest_cart
@@ -124,7 +124,7 @@ export default class PaymentsController {
         billing: billing as GuestUserCheckoutAddress,
       },
       guestCart: guestCartCheck,
-      paymentPayload: paymentPayload,
+      checkoutPayment: checkoutPayment,
     } as GuestUserDataResponse)
   }
 

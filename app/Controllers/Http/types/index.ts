@@ -214,7 +214,7 @@ export type GuestUserDataResponse = {
   message: string
   guestUser: GuestUserCheckout
   guestCart: GuestCartCheck
-  paymentPayload: any
+  checkoutPayment: any
 }
 
 /**
