@@ -30,32 +30,32 @@
                 {{ t('messages.emails.checkOrder.dateField', { orderDate: new Date(order.createdAt) }) }}
               </li>
               <li>
-                @if(order.braintree.creditCard.cardType !== '')
-                  {{ t('messages.emails.checkOrder.paidCard', { cardType: order.braintree.creditCard.cardType, last4: order.braintree.creditCard.last4 }) }}
-                @elseif(order.braintree.paypalAccount.payerEmail != '')
-                  {{ t('messages.emails.checkOrder.paidPaypal', { payerEmail: order.braintree.paypalAccount.payerEmail }) }}
+                @if(order.transaction?.creditCard?.cardType && order.transaction?.creditCard?.last4)
+                  {{ t('messages.emails.checkOrder.paidCard', { cardType: order.transaction.creditCard.cardType, last4: order.transaction.creditCard.last4 }) }}
+                @elseif(order.transaction?.paypalAccount?.payerEmail)
+                  {{ t('messages.emails.checkOrder.paidPaypal', { payerEmail: order.transaction.paypalAccount.payerEmail }) }}
                 @end
               </li>
-              @if(order.braintree.billing.addressLine1 && order.braintree.billing.addressLine1 !== '')
+              @if(order.transaction?.billing?.addressLine1)
                 <li>
                   {{ t('messages.emails.checkOrder.billing') }}
                   <ul style="list-style-type: disc;">
                     <li>
-                      {{order.braintree.billing.firstName}} {{order.braintree.billing.lastName}}
+                      {{order.transaction.billing.firstName}} {{order.transaction.billing.lastName}}
                     </li>
                     <li>
-                      {{order.braintree.billing.addressLine1}}
+                      {{order.transaction.billing.addressLine1}}
                     </li>
-                    @if(order.braintree.billing.addressLine2 && order.braintree.billing.addressLine2 !== '')
+                    @if(order.transaction.billing.addressLine2 && order.transaction.billing.addressLine2 !== '')
                       <li>
-                        {{order.braintree.billing.addressLine2}}
+                        {{order.transaction.billing.addressLine2}}
                       </li>
                     @end
                     <li>
-                      {{order.braintree.billing.postalCode}} {{order.braintree.billing.locality}}
+                      {{order.transaction.billing.postalCode}} {{order.transaction.billing.locality}}
                     </li>
                     <li>
-                      {{order.braintree.billing.country}}
+                      {{order.transaction.billing.country}}
                     </li>
                   </ul>
                 </li>
