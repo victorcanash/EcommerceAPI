@@ -61,14 +61,17 @@ export default Env.rules({
 
   PAYMENT_MODE: Env.schema.enum(Object.values(PaymentModes)),
   CURRENCY: Env.schema.string(),
+
   PAYPAL_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   PAYPAL_MERCHANT_ID: Env.schema.string(),
   PAYPAL_CLIENT_ID: Env.schema.string(),
   PAYPAL_SECRET_KEY: Env.schema.string(),
+
   BRAINTREE_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   BRAINTREE_MERCHANT_ID: Env.schema.string(),
   BRAINTREE_PUBLIC_KEY: Env.schema.string(),
   BRAINTREE_PRIVATE_KEY: Env.schema.string(),
+
+  BIGBUY_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   BIGBUY_API_KEY: Env.schema.string(),
-  BIGBUY_API_URL: Env.schema.string(),
 })

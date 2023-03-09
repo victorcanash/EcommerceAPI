@@ -13,6 +13,19 @@ import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 
 export default class BigbuyService {
+  private static get baseUrl() {
+    if (Env.get('BIGBUY_ENV', 'sandbox') === 'production') {
+      return 'https://api.bigbuy.eu'
+    }
+    return 'https://api.sandbox.bigbuy.eu'
+  }
+
+  private static getAuthHeaders() {
+    return {
+      Authorization: `Bearer ${Env.get('BIGBUY_API_KEY')}`,
+    }
+  }
+
   /*public static async getProductInfo(sku: string) {
     let result = {
       id: '',
@@ -47,7 +60,7 @@ export default class BigbuyService {
       headers: this.getAuthHeaders(),
     }
     await axios
-      .get(`${Env.get('BIGBUY_API_URL')}/rest/catalog/productstock/${bigbuyId}.json`, options)
+      .get(`${this.baseUrl}/rest/catalog/productstock/${bigbuyId}.json`, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 200) {
           if (response.data.stocks && response.data.stocks.length > 0) {
@@ -72,7 +85,7 @@ export default class BigbuyService {
     }
     await axios
       .post(
-        `${Env.get('BIGBUY_API_URL')}/rest/catalog/productsstockbyreference.json`,
+        `${this.baseUrl}/rest/catalog/productsstockbyreference.json`,
         {
           product_stock_request: {
             products: skus.map((sku) => {
@@ -133,7 +146,7 @@ export default class BigbuyService {
       headers: this.getAuthHeaders(),
     }
     await axios
-      .get(`${Env.get('BIGBUY_API_URL')}/rest/order/${bigbuyId}.json`, options)
+      .get(`${this.baseUrl}/rest/order/${bigbuyId}.json`, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 200 && response.data) {
           result = {
@@ -199,7 +212,7 @@ export default class BigbuyService {
     }
     await axios
       .post(
-        `${Env.get('BIGBUY_API_URL')}/rest/order/create.json`,
+        `${this.baseUrl}/rest/order/create.json`,
         {
           order: {
             internalReference: `${internalReference}-${uuidv4()}`,
@@ -260,11 +273,5 @@ export default class BigbuyService {
         throw new InternalServerException(error.message)
       })
     return orderId
-  }
-
-  private static getAuthHeaders() {
-    return {
-      Authorization: `Bearer ${Env.get('BIGBUY_API_KEY')}`,
-    }
   }
 }
