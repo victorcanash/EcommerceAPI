@@ -140,10 +140,10 @@ Route.group(() => {
     .except(['update', 'destroy'])
     .middleware({
       index: ['auth:api'],
-      store: ['auth:api, admin'],
     })
     .apiOnly()
-  Route.post('orders/:id/send-email/check', 'OrdersController.sendCheckEmail').middleware([
+  Route.post('orders/admin', 'OrdersController.storeAdmin').middleware(['auth:api', 'admin'])
+  Route.post('orders/send-email/check/:id', 'OrdersController.sendCheckEmail').middleware([
     'auth:api',
     'admin',
   ])

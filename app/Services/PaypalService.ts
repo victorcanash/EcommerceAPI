@@ -149,15 +149,11 @@ export default class PaypalService {
   }
 
   public static async createOrderProducts(cart: Cart | GuestCartCheck) {
-    const cartItemIds = [] as number[]
     const orderProducts: OrderPaypalProduct[] = []
     const currency = Env.get('CURRENCY', 'EUR')
     cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
       if (item.quantity > 0) {
         if (item.inventory) {
-          if ((item as CartItem)?.id) {
-            cartItemIds.push((item as CartItem).id)
-          }
           orderProducts.push({
             name: item.inventory.product.name.current,
             description: item.inventory.name.current,
@@ -170,9 +166,6 @@ export default class PaypalService {
             },
           } as OrderPaypalProduct)
         } else if (item.pack) {
-          if ((item as CartItem)?.id) {
-            cartItemIds.push((item as CartItem).id)
-          }
           orderProducts.push({
             name: item.pack.name.current,
             description: item.pack.description.current,
@@ -186,10 +179,7 @@ export default class PaypalService {
         }
       }
     })
-    return {
-      cartItemIds,
-      orderProducts,
-    }
+    return orderProducts
   }
 
   public static async createOrder(
@@ -197,7 +187,7 @@ export default class PaypalService {
     user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
-    remember: boolean
+    remember?: boolean
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')

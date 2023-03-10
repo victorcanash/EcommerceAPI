@@ -64,8 +64,12 @@ export default class CartsService {
   }
 
   public static async onBuyItems(cart: Cart | GuestCartCheck) {
+    const cartItemIds: number[] = []
     const inventoryIds: number[] = []
     cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
+      if ((item as CartItem)?.id) {
+        cartItemIds.push((item as CartItem).id)
+      }
       if (item.inventory) {
         inventoryIds.push(item.inventory.id)
       } else if (item.pack) {
@@ -75,6 +79,12 @@ export default class CartsService {
       }
     })
 
+    // Delete cart items
+    if ((cart as Cart)?.id) {
+      await CartsService.deleteItemsByIds(cartItemIds)
+    }
+
+    // Update inventory quantity
     const inventories = await ProductInventory.query().whereIn('id', inventoryIds)
     for (let i = 0; i < inventories.length; i++) {
       let buyQuantity = 0

@@ -2,9 +2,9 @@ import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
-import { guestUserSchema, guestCartSchema } from 'App/Validators/shared'
+import { addressSchema, guestCartSchema } from 'App/Validators/shared'
 
-export default class CreateOrderValidator {
+export default class CreateAdminOrderValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter
@@ -12,8 +12,13 @@ export default class CreateOrderValidator {
   public schema = schema.create({
     appName: schema.string(),
     appDomain: schema.string(),
-    guestUser: guestUserSchema,
-    guestCart: guestCartSchema,
+    locale: schema.string(),
+    userId: schema.number.optional([rules.exists({ table: 'users', column: 'id' })]),
+    guestUserEmail: schema.string.optional([
+      rules.exists({ table: 'guest_users', column: 'email' }),
+    ]),
+    shipping: addressSchema,
+    cart: guestCartSchema,
     braintreeTransactionId: schema.string.optional({}, [
       rules.unique({ table: 'orders', column: 'braintree_transaction_id' }),
     ]),

@@ -10,8 +10,6 @@ export default class CreateBraintreeTransactionValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    appName: schema.string(),
-    appDomain: schema.string(),
     guestUser: guestUserSchema,
     guestCart: guestCartSchema,
     paymentMethodNonce: schema.string(),

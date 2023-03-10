@@ -154,6 +154,9 @@ export default class BraintreeService {
     if (!transactionResponse.success) {
       throw new PermissionException(transactionResponse.message)
     }
-    return transactionResponse
+    return {
+      transactionId: transactionResponse.transaction.id,
+      customerId: transactionResponse.transaction.customer.id,
+    }
   }
 }

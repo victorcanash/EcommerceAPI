@@ -167,23 +167,16 @@ export default class BigbuyService {
   }
 
   public static async createOrderProducts(cart: Cart | GuestCartCheck) {
-    const cartItemIds = [] as number[]
     const orderProducts: OrderBigbuyProduct[] = []
     cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
       if (item.quantity > 0) {
         if (item.inventory) {
-          if ((item as CartItem)?.id) {
-            cartItemIds.push((item as CartItem).id)
-          }
           orderProducts.push({
             reference: item.inventory.sku,
             quantity: item.quantity,
             internalReference: `${item.inventory.id.toString()}-${uuidv4()}`,
           } as OrderBigbuyProduct)
         } else if (item.pack) {
-          if ((item as CartItem)?.id) {
-            cartItemIds.push((item as CartItem).id)
-          }
           item.pack.inventories.forEach((itemInventory) => {
             orderProducts.push({
               reference: itemInventory.sku,
@@ -194,10 +187,7 @@ export default class BigbuyService {
         }
       }
     })
-    return {
-      cartItemIds,
-      orderProducts,
-    }
+    return orderProducts
   }
 
   public static async createOrder(
