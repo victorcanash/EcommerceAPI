@@ -120,6 +120,17 @@ export default class OrdersService {
       await order.loadItemsData()
     } catch (error) {
       await order.delete()
+      await MailService.sendErrorCreateOrderEmail(
+        i18n,
+        appName,
+        appDomain,
+        user.email,
+        user.shipping,
+        error.message,
+        braintreeTransactionId,
+        paypalTransactionId,
+        cart
+      )
       throw new InternalServerException(`Get payment data error: ${error.message}`)
     }
 
