@@ -14,6 +14,7 @@ import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class PaypalService {
   private static get baseUrl() {
@@ -200,7 +201,7 @@ export default class PaypalService {
         ...authHeaders,
         'Accept-Language': i18n.locale,
         'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
+        'Prefer': 'return=representation',
       },
     }
     const body = {
@@ -238,7 +239,7 @@ export default class PaypalService {
           },
         },
       ],
-      payment_source: {
+      /*payment_source: {
         card: {
           attributes: remember
             ? {
@@ -270,12 +271,14 @@ export default class PaypalService {
             : undefined,
         },
       },
+      */
     }
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 201 && response.data?.id) {
           const cardAuth = response.data.payment_source?.card?.authentication_result
+          Logger.error(response.data)
           if (
             cardAuth?.liability_shift === 'UNKNOWN' ||
             (cardAuth?.liability_shift === 'NO' &&
