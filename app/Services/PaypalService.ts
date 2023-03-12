@@ -189,7 +189,7 @@ export default class PaypalService {
     user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
-    _remember?: boolean
+    remember?: boolean
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
@@ -237,20 +237,24 @@ export default class PaypalService {
           },
         },
       ],
-      /*payment_source: {
+      payment_source: {
         card: {
-          attributes: remember
-            ? {
-                customer: (user as User)?.paypalId
-                  ? {
-                      id: (user as User).paypalId,
-                    }
-                  : undefined,
-                vault: {
+          attributes: {
+            verification: {
+              method: 'SCA_WHEN_REQUIRED',
+            },
+            customer:
+              remember && (user as User)?.paypalId
+                ? {
+                    id: (user as User).paypalId,
+                  }
+                : undefined,
+            vault: remember
+              ? {
                   store_in_vault: 'ON_SUCCESS',
-                },
-              }
-            : undefined,
+                }
+              : undefined,
+          },
         },
         paypal: {
           attributes: remember
@@ -269,7 +273,6 @@ export default class PaypalService {
             : undefined,
         },
       },
-      */
     }
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
