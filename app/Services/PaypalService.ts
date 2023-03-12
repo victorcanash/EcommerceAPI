@@ -189,7 +189,10 @@ export default class PaypalService {
     amount: string,
     remember?: boolean
   ) {
-    let orderId = ''
+    const result = {
+      orderId: '',
+      paypalEmail: undefined as string | undefined,
+    }
     const currency = Env.get('CURRENCY', 'EUR')
     const authHeaders = await this.getAuthHeaders(i18n)
     const options: AxiosRequestConfig = {
@@ -272,7 +275,18 @@ export default class PaypalService {
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 201 && response.data?.id) {
-          orderId = response.data.id
+          const cardAuth = response.data.payment_source?.card?.authentication_result
+          if (
+            cardAuth?.liability_shift === 'UNKNOWN' ||
+            (cardAuth?.liability_shift === 'NO' &&
+              cardAuth?.three_d_secure?.enrollment_status === 'Y')
+          ) {
+            throw new InternalServerException(
+              '3dSecure error, the card authentication system is not available'
+            )
+          }
+          result.orderId = response.data.id
+          result.paypalEmail = response.data.payment_source?.paypal?.email_address
         } else {
           throw new InternalServerException('Something went wrong, empty paypal order id')
         }
@@ -280,7 +294,7 @@ export default class PaypalService {
       .catch((error) => {
         throw new InternalServerException(`Error creating paypal order: ${error.message}`)
       })
-    return orderId
+    return result
   }
 
   public static async captureOrder(i18n: I18nContract, orderId: string) {

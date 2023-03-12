@@ -150,7 +150,7 @@ export default class PaymentsController {
 
     const validatedData = await request.validate(CreatePaypalTransactionValidator)
 
-    const transactionId = await PaymentsService.createPaypalTransaction(
+    const { transactionId, paypalEmail } = await PaymentsService.createPaypalTransaction(
       i18n,
       auth,
       validatedData.guestUser as GuestUserCheckout,
@@ -164,6 +164,7 @@ export default class PaymentsController {
       code: 201,
       message: successMsg,
       paypalTransactionId: transactionId,
+      paypalEmail: paypalEmail,
     } as PaypalTransactionResponse)
   }
 
