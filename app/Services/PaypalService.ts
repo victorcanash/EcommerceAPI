@@ -316,6 +316,7 @@ export default class PaypalService {
       .post(`${this.baseUrl}/v2/checkout/orders/${orderId}/capture`, undefined, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 201 && response.data) {
+          Logger.error(response.data)
           const errorDetail = Array.isArray(response.data.details) && response.data.details[0]
           if (errorDetail) {
             let errorMessage = 'Sorry, your transaction could not be processed.'
