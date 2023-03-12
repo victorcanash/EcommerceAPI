@@ -239,21 +239,23 @@ export default class PaypalService {
       ],
       payment_source: {
         card: {
-          attributes: {
-            verification: {
-              method: 'SCA_WHEN_REQUIRED',
-            },
-            customer:
-              remember && (user as User)?.paypalId
-                ? {
-                    id: (user as User).paypalId,
-                  }
-                : undefined,
-            vault: remember
-              ? {
+          attributes: remember
+            ? {
+                customer: (user as User)?.paypalId
+                  ? {
+                      id: (user as User).paypalId,
+                    }
+                  : undefined,
+                vault: {
                   store_in_vault: 'ON_SUCCESS',
-                }
-              : undefined,
+                },
+              }
+            : undefined,
+          stored_credential: {
+            payment_initiator: 'CUSTOMER',
+            payment_type: 'RECURRING',
+            usage: 'DERIVED',
+            //previous_transaction_reference: '53963906K75832009',
           },
         },
         paypal: {
