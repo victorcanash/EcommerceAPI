@@ -138,6 +138,7 @@ export default class PaypalService {
       .get(`${this.baseUrl}/v2/checkout/orders/${paypalTransactionId}`, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 200 && response.data) {
+          Logger.error(response.data)
           result = response.data
         } else {
           throw new Error('Something went wrong')
