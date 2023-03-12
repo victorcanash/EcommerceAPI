@@ -251,12 +251,12 @@ export default class PaypalService {
                 },
               }
             : undefined,*/
-          stored_credential: {
+          /*stored_credential: {
             payment_initiator: 'CUSTOMER',
             payment_type: 'RECURRING',
             usage: 'DERIVED',
             //previous_transaction_reference: '53963906K75832009',
-          },
+          },*/
         },
         /*paypal: {
           attributes: remember
