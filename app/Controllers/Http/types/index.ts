@@ -251,5 +251,4 @@ export type PaypalTransactionResponse = {
   code: number
   message: string
   paypalTransactionId: string
-  paypalEmail?: string
 }

@@ -207,7 +207,7 @@ export default class PaymentsService {
     )
 
     const orderProducts = await PaypalService.createOrderProducts(cart)
-    const { orderId, paypalEmail } = await PaypalService.createOrder(
+    const transactionId = await PaypalService.createOrder(
       i18n,
       user,
       orderProducts,
@@ -215,7 +215,7 @@ export default class PaymentsService {
       remember
     )
 
-    return { transactionId: orderId, paypalEmail }
+    return transactionId
   }
 
   public static async capturePaypalTransaction(

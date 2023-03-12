@@ -189,12 +189,9 @@ export default class PaypalService {
     user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
-    _remember?: boolean
+    remember?: boolean
   ) {
-    const result = {
-      orderId: '',
-      paypalEmail: undefined as string | undefined,
-    }
+    let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
     const authHeaders = await this.getAuthHeaders(i18n)
     const options: AxiosRequestConfig = {
@@ -240,7 +237,7 @@ export default class PaypalService {
           },
         },
       ],
-      /*payment_source: {
+      payment_source: {
         card: {
           attributes: remember
             ? {
@@ -272,25 +269,13 @@ export default class PaypalService {
             : undefined,
         },
       },
-      */
     }
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 201 && response.data?.id) {
-          const cardAuth = response.data.payment_source?.card?.authentication_result
           Logger.error(response.data)
-          if (
-            cardAuth?.liability_shift === 'UNKNOWN' ||
-            (cardAuth?.liability_shift === 'NO' &&
-              cardAuth?.three_d_secure?.enrollment_status === 'Y')
-          ) {
-            throw new InternalServerException(
-              '3dSecure error, the card authentication system is not available'
-            )
-          }
-          result.orderId = response.data.id
-          result.paypalEmail = response.data.payment_source?.paypal?.email_address
+          orderId = response.data.id
         } else {
           throw new InternalServerException('Something went wrong, empty paypal order id')
         }
@@ -298,7 +283,7 @@ export default class PaypalService {
       .catch((error) => {
         throw new InternalServerException(`Error creating paypal order: ${error.message}`)
       })
-    return result
+    return orderId
   }
 
   public static async captureOrder(i18n: I18nContract, orderId: string) {
@@ -316,22 +301,29 @@ export default class PaypalService {
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders/${orderId}/capture`, undefined, options)
       .then(async (response: AxiosResponse) => {
-        if (response.status === 201 && response.data) {
-          Logger.error(response.data)
-          const errorDetail = Array.isArray(response.data.details) && response.data.details[0]
-          if (errorDetail) {
-            let errorMessage = 'Sorry, your transaction could not be processed.'
-            if (errorDetail.description) errorMessage += '\n\n' + errorDetail.description
-            if (response.data.debug_id) errorMessage += ' (' + response.data.debug_id + ')'
-            throw new InternalServerException(errorMessage)
+        if (
+          response.status === 201 &&
+          response.data?.id &&
+          response.data.purchase_units &&
+          response.data.purchase_units.length > 0 &&
+          response.data.purchase_units[0].payments?.captures &&
+          response.data.purchase_units[0].payments.captures.length > 0
+        ) {
+          const cardStatus = response.data.purchase_units[0].payments.captures[0].status
+          const cardResponseCode =
+            response.data.purchase_units[0].payments.captures[0].processor_response?.response_code
+          if (cardStatus !== 'COMPLETED' || (cardResponseCode && cardResponseCode !== '0000')) {
+            throw new InternalServerException('This card transaction cannot be processed')
           }
+          Logger.error(response.data)
+
           transactionId = response.data.id
           customerId =
             response.data.payment_source?.card?.attributes?.vault?.customer?.id ||
             response.data.payment_source?.paypal?.attributes?.vault?.customer?.id ||
             ''
         } else {
-          throw new InternalServerException('Something went wrong, empty paypal order')
+          throw new InternalServerException('Something went wrong, empty paypal order id')
         }
       })
       .catch((error) => {
