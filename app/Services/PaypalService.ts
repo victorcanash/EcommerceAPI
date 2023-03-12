@@ -188,7 +188,7 @@ export default class PaypalService {
     user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
-    remember?: boolean
+    _remember?: boolean
   ) {
     const result = {
       orderId: '',
