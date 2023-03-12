@@ -237,9 +237,9 @@ export default class PaypalService {
           },
         },
       ],
-      payment_source: {
+      /*payment_source: {
         card: {
-          /*attributes: remember
+          attributes: remember
             ? {
                 customer: (user as User)?.paypalId
                   ? {
@@ -250,15 +250,15 @@ export default class PaypalService {
                   store_in_vault: 'ON_SUCCESS',
                 },
               }
-            : undefined,*/
-          /*stored_credential: {
+            : undefined,
+          stored_credential: {
             payment_initiator: 'CUSTOMER',
             payment_type: 'RECURRING',
             usage: 'DERIVED',
             //previous_transaction_reference: '53963906K75832009',
-          },*/
+          },
         },
-        /*paypal: {
+        paypal: {
           attributes: remember
             ? {
                 customer: (user as User)?.paypalId
@@ -273,8 +273,8 @@ export default class PaypalService {
                 },
               }
             : undefined,
-        },*/
-      },
+        },
+      },*/
     }
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
