@@ -189,7 +189,7 @@ export default class PaypalService {
     user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
-    remember?: boolean
+    _remember?: boolean
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
@@ -239,7 +239,7 @@ export default class PaypalService {
       ],
       payment_source: {
         card: {
-          attributes: remember
+          /*attributes: remember
             ? {
                 customer: (user as User)?.paypalId
                   ? {
@@ -250,7 +250,7 @@ export default class PaypalService {
                   store_in_vault: 'ON_SUCCESS',
                 },
               }
-            : undefined,
+            : undefined,*/
           stored_credential: {
             payment_initiator: 'CUSTOMER',
             payment_type: 'RECURRING',
@@ -258,7 +258,7 @@ export default class PaypalService {
             //previous_transaction_reference: '53963906K75832009',
           },
         },
-        paypal: {
+        /*paypal: {
           attributes: remember
             ? {
                 customer: (user as User)?.paypalId
@@ -273,7 +273,7 @@ export default class PaypalService {
                 },
               }
             : undefined,
-        },
+        },*/
       },
     }
     await axios
