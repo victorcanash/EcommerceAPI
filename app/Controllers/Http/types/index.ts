@@ -252,3 +252,12 @@ export type PaypalTransactionResponse = {
   message: string
   paypalTransactionId: string
 }
+
+/**
+ * Google API Indexer JSON response for Controllers
+ */
+export type GoogleAPIIndexerResponse = {
+  code: number
+  message: string
+  result: any
+}
