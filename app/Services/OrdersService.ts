@@ -73,7 +73,6 @@ export default class OrdersService {
       })
       orderProducts = await BigbuyService.createOrderProducts(cart)
       await order.loadItemsData()
-      Logger.error('End creating order')
     } catch (error) {
       const errorMsg = `Create order error: ${error.message}`
       await order?.delete()
