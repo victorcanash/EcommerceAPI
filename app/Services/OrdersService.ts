@@ -1,11 +1,13 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { AuthContract } from '@ioc:Adonis/Addons/Auth'
+// import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import I18n, { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import Order from 'App/Models/Order'
 import User from 'App/Models/User'
+import Cart from 'App/Models/Cart'
+import { OrderBigbuyProduct } from 'App/Types/order'
 import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
-import { GuestCart } from 'App/Types/cart'
+import { GuestCart, GuestCartCheck } from 'App/Types/cart'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import PaymentsService from 'App/Services/PaymentsService'
@@ -15,6 +17,7 @@ import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class OrdersService {
   private static async getOrderByField(
@@ -38,6 +41,131 @@ export default class OrdersService {
     if (paymentData) {
       await order.loadPaymentData()
     }
+    return order
+  }
+
+  private static async createOrder(
+    i18n: I18nContract,
+    appName: string,
+    appDomain: string,
+    user: GuestUserCheckout | User | undefined,
+    guestUserId: number | undefined,
+    guestUserEmail: string | undefined,
+    shipping: GuestUserCheckoutAddress | undefined,
+    cart: Cart | GuestCartCheck,
+    braintreeTransactionId: string | undefined,
+    paypalTransactionId: string | undefined,
+    sendCreateOrderEmail: boolean
+  ) {
+    let order: Order | undefined
+    let orderProducts: OrderBigbuyProduct[] = []
+
+    // Create order
+    try {
+      Logger.error('Start creating order')
+      const guestCartItems = await CartsService.convertToGuestCartItems(cart)
+      order = await Order.create({
+        userId: (user as User)?.id || undefined,
+        guestUserId: guestUserId,
+        braintreeTransactionId: braintreeTransactionId,
+        paypalTransactionId: paypalTransactionId,
+        products: guestCartItems,
+      })
+      orderProducts = await BigbuyService.createOrderProducts(cart)
+      await order.loadItemsData()
+      Logger.error('End creating order')
+    } catch (error) {
+      const errorMsg = `Create order error: ${error.message}`
+      await order?.delete()
+      if (sendCreateOrderEmail) {
+        await MailService.sendErrorCreateOrderEmail(
+          i18n,
+          appName,
+          appDomain,
+          user?.email || '',
+          user?.shipping || ({} as GuestUserCheckoutAddress),
+          errorMsg,
+          braintreeTransactionId,
+          paypalTransactionId,
+          cart
+        )
+      }
+      throw new InternalServerException(errorMsg)
+    }
+
+    // Load payment data
+    try {
+      Logger.error('Start getting order payment data')
+      await order.loadPaymentData()
+    } catch (error) {
+      const errorMsg = `Get payment data error: ${error.message}`
+      await order?.delete()
+      if (sendCreateOrderEmail) {
+        await MailService.sendErrorCreateOrderEmail(
+          i18n,
+          appName,
+          appDomain,
+          user?.email || '',
+          user?.shipping || ({} as GuestUserCheckoutAddress),
+          errorMsg,
+          braintreeTransactionId,
+          paypalTransactionId,
+          cart
+        )
+      }
+      throw new InternalServerException(errorMsg)
+    }
+
+    // Create Bigbuy order
+    try {
+      Logger.error('Start creating bigbuy order')
+      const bigbuyId = await BigbuyService.createOrder(
+        order.id.toString(),
+        user?.email || guestUserEmail || '',
+        user?.shipping || shipping || ({} as GuestUserCheckoutAddress),
+        orderProducts
+      )
+      order.merge({ bigbuyId })
+      await order.save()
+    } catch (error) {
+      const errorMsg = `Create bigbuy order error: ${error.message}`
+      await order.delete()
+      if (sendCreateOrderEmail) {
+        await MailService.sendErrorCreateOrderEmail(
+          i18n,
+          appName,
+          appDomain,
+          user?.email || '',
+          user?.shipping || ({} as GuestUserCheckoutAddress),
+          errorMsg,
+          braintreeTransactionId,
+          paypalTransactionId,
+          cart
+        )
+      }
+      throw new InternalServerException(errorMsg)
+    }
+
+    // Send check order email
+    try {
+      Logger.error('Start sending check order email')
+      await order.loadBigbuyData()
+      await MailService.sendCheckOrderEmail(
+        i18n,
+        appName,
+        appDomain,
+        user?.email || guestUserEmail || '',
+        (user as User)?.firstName
+          ? (user as User).firstName
+          : user?.shipping.firstName || shipping?.firstName || '',
+        order
+      )
+    } catch (error) {
+      const errorMsg = `Send check order email error: ${error.message}`
+      await MailService.sendErrorGetOrderEmail(i18n, appName, appDomain, errorMsg, order)
+      throw new InternalServerException(errorMsg)
+    }
+
     return order
   }
 
@@ -83,7 +211,33 @@ export default class OrdersService {
     return order
   }
 
-  public static async createOrder(
+  public static async createOrderByPayment(
+    i18n: I18nContract,
+    appName: string,
+    appDomain: string,
+    user: GuestUserCheckout | User | undefined,
+    guestUserId: number | undefined,
+    cart: Cart | GuestCartCheck,
+    braintreeTransactionId: string | undefined,
+    paypalTransactionId: string | undefined
+  ) {
+    const order = await this.createOrder(
+      i18n,
+      appName,
+      appDomain,
+      user,
+      guestUserId,
+      undefined,
+      undefined,
+      cart,
+      braintreeTransactionId,
+      paypalTransactionId,
+      true
+    )
+    return order
+  }
+
+  /*public static async createOrderByRoute(
     i18n: I18nContract,
     auth: AuthContract,
     appName: string,
@@ -104,80 +258,23 @@ export default class OrdersService {
         paypal: paypalTransactionId,
       }
     )
-
-    const guestCartItems = await CartsService.convertToGuestCartItems(cart)
-    const order = await Order.create({
-      userId: (user as User)?.id || undefined,
-      guestUserId: guestUserId,
-      braintreeTransactionId: braintreeTransactionId,
-      paypalTransactionId: paypalTransactionId,
-      products: guestCartItems,
-    })
-    const orderProducts = await BigbuyService.createOrderProducts(cart)
-
-    try {
-      await order.loadPaymentData()
-      await order.loadItemsData()
-    } catch (error) {
-      await order.delete()
-      await MailService.sendErrorCreateOrderEmail(
-        i18n,
-        appName,
-        appDomain,
-        user.email,
-        user.shipping,
-        error.message,
-        braintreeTransactionId,
-        paypalTransactionId,
-        cart
-      )
-      throw new InternalServerException(`Get payment data error: ${error.message}`)
-    }
-
-    try {
-      const bigbuyId = await BigbuyService.createOrder(
-        order.id.toString(),
-        user.email,
-        user.shipping,
-        orderProducts
-      )
-      order.merge({ bigbuyId })
-      await order.save()
-    } catch (error) {
-      await order.delete()
-      await MailService.sendErrorCreateOrderEmail(
-        i18n,
-        appName,
-        appDomain,
-        user.email,
-        user.shipping,
-        error.message,
-        braintreeTransactionId,
-        paypalTransactionId,
-        cart
-      )
-      throw new InternalServerException(`Create bigbuy order error: ${error.message}`)
-    }
-
-    try {
-      await order.loadBigbuyData()
-      await MailService.sendCheckOrderEmail(
-        i18n,
-        appName,
-        appDomain,
-        user.email,
-        (user as User)?.firstName ? (user as User).firstName : user.shipping.firstName,
-        order
-      )
-    } catch (error) {
-      await MailService.sendErrorGetOrderEmail(i18n, appName, appDomain, error.message, order)
-      throw new InternalServerException(`Send check order email error: ${error.message}`)
-    }
-
+    const order = await this.createOrder(
+      i18n,
+      appName,
+      appDomain,
+      user,
+      guestUserId,
+      undefined,
+      undefined,
+      cart,
+      braintreeTransactionId,
+      paypalTransactionId,
+      false
+    )
     return order
-  }
+  }*/
 
-  public static async createAdminOrder(
+  public static async createOrderByAdminRoute(
     locale: string,
     appName: string,
     appDomain: string,
@@ -197,59 +294,19 @@ export default class OrdersService {
         paypal: paypalTransactionId,
       }
     )
-
-    const order = await Order.create({
-      userId: user?.id,
-      guestUserId: guestUserId,
-      braintreeTransactionId: braintreeTransactionId,
-      paypalTransactionId: paypalTransactionId,
-      products: cart.items,
-    })
-    const orderProducts = await BigbuyService.createOrderProducts(cartCheck)
-
-    try {
-      await order.loadPaymentData()
-      await order.loadItemsData()
-    } catch (error) {
-      await order.delete()
-      throw new InternalServerException(`Get payment data error: ${error.message}`)
-    }
-
-    try {
-      const bigbuyId = await BigbuyService.createOrder(
-        order.id.toString(),
-        user?.email || guestUserEmail || '',
-        shipping,
-        orderProducts
-      )
-      order.merge({ bigbuyId })
-      await order.save()
-    } catch (error) {
-      await order.delete()
-      throw new InternalServerException(`Create bigbuy order error: ${error.message}`)
-    }
-
-    try {
-      await order.loadBigbuyData()
-      await MailService.sendCheckOrderEmail(
-        I18n.locale(locale),
-        appName,
-        appDomain,
-        user?.email || guestUserEmail || '',
-        user?.firstName || shipping.firstName,
-        order
-      )
-    } catch (error) {
-      await MailService.sendErrorGetOrderEmail(
-        I18n.locale(locale),
-        appName,
-        appDomain,
-        error.message,
-        order
-      )
-      throw new InternalServerException(`Send check order email error: ${error.message}`)
-    }
-
+    const order = await this.createOrder(
+      I18n.locale(locale),
+      appName,
+      appDomain,
+      user,
+      guestUserId,
+      guestUserEmail,
+      shipping,
+      cartCheck,
+      braintreeTransactionId,
+      paypalTransactionId,
+      false
+    )
     return order
   }
 }

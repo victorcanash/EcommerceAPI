@@ -10,6 +10,8 @@ export default class CapturePaypalTransactionValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    appName: schema.string(),
+    appDomain: schema.string(),
     guestUser: guestUserSchema,
     guestCart: guestCartSchema,
     remember: schema.boolean.optional(),

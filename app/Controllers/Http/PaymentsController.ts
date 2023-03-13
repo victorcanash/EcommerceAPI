@@ -123,13 +123,16 @@ export default class PaymentsController {
     } as GuestUserDataResponse)
   }
 
-  public async createBraintreeTransaction({ request, response, auth }: HttpContextContract) {
+  public async createBraintreeTransaction({ request, response, auth, i18n }: HttpContextContract) {
     PaymentsService.checkPaymentMode(PaymentModes.BRAINTREE)
 
     const validatedData = await request.validate(CreateBraintreeTransactionValidator)
 
     const transactionId = await PaymentsService.createBraintreeTransaction(
+      i18n,
       auth,
+      validatedData.appName,
+      validatedData.appDomain,
       validatedData.paymentMethodNonce,
       validatedData.guestUser,
       validatedData.guestCart as GuestCart,
@@ -182,6 +185,8 @@ export default class PaymentsController {
       id,
       i18n,
       auth,
+      validatedData.appName,
+      validatedData.appDomain,
       validatedData.guestUser,
       validatedData.guestCart as GuestCart,
       validatedData.remember

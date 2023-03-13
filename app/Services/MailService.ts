@@ -11,6 +11,7 @@ import Order from 'App/Models/Order'
 import Cart from 'App/Models/Cart'
 import { GuestUserCheckoutAddress } from 'App/Types/user'
 import { GuestCartCheck } from 'App/Types/cart'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class MailService {
   public static async sendConfirmationEmail(
@@ -185,6 +186,7 @@ export default class MailService {
           order,
         })
     })
+    Logger.error('Sent email check order')
   }
 
   public static async sendErrorCreateOrderEmail(
@@ -219,6 +221,7 @@ export default class MailService {
           cart,
         })
     })
+    Logger.error('Sent email create order error')
   }
 
   public static async sendErrorGetOrderEmail(
@@ -245,5 +248,6 @@ export default class MailService {
           order,
         })
     })
+    Logger.error('Sent email get order error')
   }
 }

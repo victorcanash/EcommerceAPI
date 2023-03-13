@@ -14,7 +14,7 @@ import { getSupportedLocale } from 'App/Utils/localization'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
-import CreateOrderValidator from 'App/Validators/Order/CreateOrderValidator'
+// import CreateOrderValidator from 'App/Validators/Order/CreateOrderValidator'
 import CreateAdminOrderValidator from 'App/Validators/Order/CreateAdminOrderValidator'
 import SendOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -88,10 +88,10 @@ export default class OrdersController {
     } as OrderResponse)
   }
 
-  public async store({ request, response, auth, i18n }: HttpContextContract) {
+  /*public async store({ request, response, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(CreateOrderValidator)
 
-    const order = await OrdersService.createOrder(
+    const order = await OrdersService.createOrderByRoute(
       i18n,
       auth,
       validatedData.appName,
@@ -109,7 +109,7 @@ export default class OrdersController {
       message: successMsg,
       order: order,
     } as OrderResponse)
-  }
+  }*/
 
   public async storeAdmin({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateAdminOrderValidator)
@@ -118,7 +118,7 @@ export default class OrdersController {
     }
     const locale = getSupportedLocale(validatedData.locale)
 
-    const order = await OrdersService.createAdminOrder(
+    const order = await OrdersService.createOrderByAdminRoute(
       locale,
       validatedData.appName,
       validatedData.appDomain,

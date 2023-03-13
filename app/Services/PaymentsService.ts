@@ -2,17 +2,18 @@ import Env from '@ioc:Adonis/Core/Env'
 import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
+import { PaymentModes } from 'App/Constants/payment'
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
-import BraintreeService from 'App/Services/BraintreeService'
-import PaypalService from 'App/Services/PaypalService'
 import { GuestUserCheckout } from 'App/Types/user'
 import { GuestCart, GuestCartCheck } from 'App/Types/cart'
+import BraintreeService from 'App/Services/BraintreeService'
+import PaypalService from 'App/Services/PaypalService'
+import UsersService from 'App/Services/UsersService'
+import CartsService from 'App/Services/CartsService'
+import OrdersService from 'App/Services/OrdersService'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
-import CartsService from './CartsService'
-import UsersService from './UsersService'
-import { PaymentModes } from 'App/Constants/payment'
 
 export default class PaymentsService {
   private static checkPaymentData(
@@ -156,13 +157,21 @@ export default class PaymentsService {
   }
 
   public static async createBraintreeTransaction(
+    i18n: I18nContract,
     auth: AuthContract,
+    appName: string,
+    appDomain: string,
     paymentMethodNonce: string,
     guestUser?: GuestUserCheckout,
     guestCart?: GuestCart,
     remember?: boolean
   ) {
-    const { user, cart, amount } = await this.checkUserPaymentData(auth, true, guestUser, guestCart)
+    const { user, guestUserId, cart, amount } = await this.checkUserPaymentData(
+      auth,
+      true,
+      guestUser,
+      guestCart
+    )
 
     const braintreeService = new BraintreeService()
     const braintreeCustomer = (user as User)?.id
@@ -188,6 +197,17 @@ export default class PaymentsService {
     await this.updateUser(user, remember, customerId, undefined)
 
     await CartsService.onBuyItems(cart)
+
+    OrdersService.createOrderByPayment(
+      i18n,
+      appName,
+      appDomain,
+      user,
+      guestUserId,
+      cart,
+      transactionId,
+      undefined
+    )
 
     return transactionId
   }
@@ -222,17 +242,35 @@ export default class PaymentsService {
     id: string,
     i18n: I18nContract,
     auth: AuthContract,
+    appName: string,
+    appDomain: string,
     guestUser?: GuestUserCheckout,
     guestCart?: GuestCart,
     remember?: boolean
   ) {
-    const { user, cart } = await this.checkUserPaymentData(auth, true, guestUser, guestCart)
+    const { user, guestUserId, cart } = await this.checkUserPaymentData(
+      auth,
+      true,
+      guestUser,
+      guestCart
+    )
 
     const { transactionId, customerId } = await PaypalService.captureOrder(i18n, id)
 
     await this.updateUser(user, remember, undefined, customerId)
 
     await CartsService.onBuyItems(cart)
+
+    OrdersService.createOrderByPayment(
+      i18n,
+      appName,
+      appDomain,
+      user,
+      guestUserId,
+      cart,
+      undefined,
+      transactionId
+    )
 
     return transactionId
   }
