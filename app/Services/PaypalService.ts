@@ -315,14 +315,13 @@ export default class PaypalService {
           response.data.purchase_units[0].payments?.captures &&
           response.data.purchase_units[0].payments.captures.length > 0
         ) {
+          Logger.error(response.data)
           const cardStatus = response.data.purchase_units[0].payments.captures[0].status
           const cardResponseCode =
             response.data.purchase_units[0].payments.captures[0].processor_response?.response_code
           if (cardStatus !== 'COMPLETED' || (cardResponseCode && cardResponseCode !== '0000')) {
             throw new InternalServerException('This card transaction cannot be processed')
           }
-          Logger.error(response.data)
-
           transactionId = response.data.id
           customerId =
             response.data.payment_source?.card?.attributes?.vault?.customer?.id ||
