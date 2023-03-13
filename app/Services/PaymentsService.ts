@@ -104,8 +104,7 @@ export default class PaymentsService {
       }
       user = guestUser
       if (requiredConfirmToken) {
-        const email = await UsersService.getAuthEmail(auth, 'confirmation')
-        guestUserId = await (await UsersService.getGuestUserByEmail(email)).id
+        guestUserId = await (await UsersService.getGuestUserByEmail(guestUser.email)).id
         if (revokeConfirmToken) {
           await auth.use('confirmation').revoke()
         }
