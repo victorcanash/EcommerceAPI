@@ -237,6 +237,13 @@ export default class PaypalService {
           },
         },
       ],
+      payment_source: {
+        paypal: {
+          experience_context: {
+            shipping_preference: 'SET_PROVIDED_ADDRESS',
+          },
+        },
+      },
       /*payment_source: {
         card: {
           attributes: remember
