@@ -73,7 +73,7 @@ export default class BigbuyService {
         }
       })
       .catch((error) => {
-        throw new ModelNotFoundException(error.message)
+        throw new ModelNotFoundException(`Error getting bigbuy product quantity: ${error.message}`)
       })
     return quantity
   }
@@ -120,7 +120,7 @@ export default class BigbuyService {
         }
       })
       .catch((error) => {
-        throw new ModelNotFoundException(error.message)
+        throw new ModelNotFoundException(`Error getting bigbuy product stocks: ${error.message}`)
       })
     return stocks
   }
@@ -161,7 +161,7 @@ export default class BigbuyService {
         }
       })
       .catch((error) => {
-        throw new ModelNotFoundException(error.message)
+        throw new ModelNotFoundException(`Error getting bigbuy order info: ${error.message}`)
       })
     return result
   }
@@ -260,7 +260,7 @@ export default class BigbuyService {
         }
       })
       .catch((error) => {
-        throw new InternalServerException(error.message)
+        throw new InternalServerException(`Error creating bigbuy order: ${error.message}`)
       })
     return orderId
   }
