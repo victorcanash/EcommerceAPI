@@ -104,10 +104,14 @@ export default class PaymentsService {
       }
       user = guestUser
       if (requiredConfirmToken) {
-        guestUserId = await (await UsersService.getGuestUserByEmail(guestUser.email)).id
-        if (revokeConfirmToken) {
-          await auth.use('confirmation').revoke()
+        const validConfirmToken = await auth.use('confirmation').check()
+        if (!validConfirmToken) {
+          throw new PermissionException('Invalid confirmation token')
         }
+        guestUserId = await (await UsersService.getGuestUserByEmail(guestUser.email)).id
+      }
+      if (revokeConfirmToken) {
+        await auth.use('confirmation').revoke()
       }
       cart = await CartsService.createGuestCartCheck(guestCart?.items)
     }
@@ -169,7 +173,8 @@ export default class PaymentsService {
       auth,
       true,
       guestUser,
-      guestCart
+      guestCart,
+      true
     )
 
     const braintreeService = new BraintreeService()
@@ -251,7 +256,8 @@ export default class PaymentsService {
       auth,
       true,
       guestUser,
-      guestCart
+      guestCart,
+      true
     )
 
     const { transactionId, customerId } = await PaypalService.captureOrder(i18n, id)
