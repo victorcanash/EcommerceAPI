@@ -82,13 +82,18 @@ export default class AuthController {
       products: products,
       packs: packs,
       user: user,
+      guestCart: guestCart,
       paymentMode: Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE),
       currency: Env.get('CURRENCY', 'EUR'),
+      confirmTokenExpiry: Env.get('CONFIRMATION_TOKEN_EXPIRY', '30mins'),
       braintreeToken: braintreeToken,
-      paypalMerchantId: Env.get('PAYPAL_MERCHANT_ID'),
-      paypalClientId: Env.get('PAYPAL_CLIENT_ID'),
-      paypalToken: paypalToken,
-      guestCart: guestCart,
+      paypal: {
+        merchantId: Env.get('PAYPAL_MERCHANT_ID'),
+        clientId: Env.get('PAYPAL_CLIENT_ID'),
+        token: paypalToken,
+        advancedCards: Env.get('PAYPAL_ADVANCED_CARDS') === 'enabled' ? true : false,
+      },
+      googleOAuthId: Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
     } as InitAuthResponse)
   }
 

@@ -30,13 +30,18 @@ export type InitAuthResponse = {
   products: Product[]
   packs: ProductPack[]
   user?: User
+  guestCart?: GuestCartCheck
   paymentMode: PaymentModes
   currency: string
+  confirmTokenExpiry: string
   braintreeToken?: string
-  paypalMerchantId?: string
-  paypalClientId?: string
-  paypalToken?: string
-  guestCart?: GuestCartCheck
+  paypal?: {
+    merchantId?: string
+    clientId?: string
+    token?: string
+    advancedCards?: boolean
+  }
+  googleOAuthId: string
 }
 
 /**

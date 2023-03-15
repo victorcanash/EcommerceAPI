@@ -66,6 +66,7 @@ export default Env.rules({
   PAYPAL_MERCHANT_ID: Env.schema.string(),
   PAYPAL_CLIENT_ID: Env.schema.string(),
   PAYPAL_SECRET_KEY: Env.schema.string(),
+  PAYPAL_ADVANCED_CARDS: Env.schema.string(),
 
   BRAINTREE_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   BRAINTREE_MERCHANT_ID: Env.schema.string(),
