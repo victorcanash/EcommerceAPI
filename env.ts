@@ -74,7 +74,4 @@ export default Env.rules({
 
   BIGBUY_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   BIGBUY_API_KEY: Env.schema.string(),
-
-  GOOGLE_API_CLIENT_EMAIL: Env.schema.string.optional(),
-  GOOGLE_API_PRIVATE_KEY: Env.schema.string.optional(),
 })
