@@ -1,6 +1,7 @@
 import { schema } from '@ioc:Adonis/Core/Validator'
 
 import { CountryOptions } from 'App/Constants/addresses'
+import { GoogleIndexerActions } from 'App/Constants/google'
 
 export const reqLocalizedTextSchema = schema.object().members({
   en: schema.string(),
@@ -41,4 +42,9 @@ export const guestCartSchema = schema.object.optional().members({
       quantity: schema.number(),
     })
   ),
+})
+
+export const googleIndexerUrlSchema = schema.object().members({
+  value: schema.string(),
+  action: schema.enum(Object.values(GoogleIndexerActions)),
 })

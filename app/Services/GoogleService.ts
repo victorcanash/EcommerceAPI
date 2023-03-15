@@ -4,9 +4,11 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { google } from 'googleapis'
 import { JWT } from 'google-auth-library'
 
+import { GoogleIndexerUrl } from 'App/Types/google'
 import InternalServerException from 'App/Exceptions/InternalServerException'
+import { GoogleIndexerActions } from 'App/Constants/google'
 
-export default class GoogleAPIService {
+export default class GoogleService {
   private jwtClient: JWT
 
   constructor() {
@@ -54,15 +56,15 @@ export default class GoogleAPIService {
     return options
   }
 
-  public async updateIndexerUrl(url: string) {
+  private async updateIndexerUrl(url: GoogleIndexerUrl) {
     let result
     const options = await this.getAxiosOptions()
     await axios
       .post(
         'https://indexing.googleapis.com/v3/urlNotifications:publish',
         {
-          url: url,
-          type: 'URL_UPDATED',
+          url: url.value,
+          type: url.action === GoogleIndexerActions.UPDATE ? 'URL_UPDATED' : 'URL_DELETED',
         },
         options
       )
@@ -76,6 +78,18 @@ export default class GoogleAPIService {
       .catch((error) => {
         throw new InternalServerException(`Error updating Google API Indexer: ${error.message}`)
       })
+    return result
+  }
+
+  private async fetchIndexerUrls(_urls: GoogleIndexerUrl[]) {}
+
+  public async updateIndexer(urls: GoogleIndexerUrl[]) {
+    let result
+    if (urls.length === 1) {
+      result = await this.updateIndexerUrl(urls[0])
+    } else if (urls.length >= 2) {
+      result = await this.fetchIndexerUrls(urls)
+    }
     return result
   }
 }

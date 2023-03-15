@@ -127,8 +127,5 @@ Route.group(() => {
 
   // Google API routes
 
-  Route.post('googleAPI/indexer', 'GoogleAPIController.storeIndexer').middleware([
-    'auth:api',
-    'admin',
-  ])
+  Route.post('google/indexer', 'GoogleController.updateIndexer').middleware(['auth:api', 'admin'])
 }).prefix('api')
