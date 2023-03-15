@@ -1,18 +1,19 @@
+import Env from '@ioc:Adonis/Core/Env'
+
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { google } from 'googleapis'
 import { JWT } from 'google-auth-library'
 
 import InternalServerException from 'App/Exceptions/InternalServerException'
-import service_account from '../../service_account.json'
 
 export default class GoogleAPIService {
   private jwtClient: JWT
 
   constructor() {
     this.jwtClient = new google.auth.JWT(
-      service_account.client_email,
+      Env.get('GOOGLE_AUTH_CLIENT_EMAIL', ''),
       undefined,
-      service_account.private_key,
+      Env.get('GOOGLE_AUTH_PRIVATE_KEY', ''),
       ['https://www.googleapis.com/auth/indexing'],
       undefined
     )
