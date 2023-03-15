@@ -4,7 +4,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
 import { googleIndexerUrlSchema } from 'App/Validators/shared'
 
-export default class StoreGoogleIndexerValidator {
+export default class UpdateGoogleIndexerValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter

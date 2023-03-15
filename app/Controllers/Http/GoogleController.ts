@@ -2,14 +2,14 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import GoogleService from 'App/Services/GoogleService'
 import { GoogleAPIIndexerResponse } from 'App/Controllers/Http/types'
-import StoreGoogleIndexerValidator from 'App/Validators/Google/StoreGoogleIndexerValidator'
+import UpdateGoogleIndexerValidator from 'App/Validators/Google/UpdateGoogleIndexerValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class GoogleController {
-  public async updateIndexer({ request, response }: HttpContextContract) {
-    const validatedData = await request.validate(StoreGoogleIndexerValidator)
+  public async updateGoogleIndexer({ request, response }: HttpContextContract) {
+    const validatedData = await request.validate(UpdateGoogleIndexerValidator)
 
-    const result = await new GoogleService().updateIndexer(validatedData.urls)
+    const result = await new GoogleService().updateGoogleIndexer(validatedData.urls)
 
     const successMsg = 'Successfully updated urls for Google API Indexer'
     logRouteSuccess(request, successMsg)

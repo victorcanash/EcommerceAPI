@@ -1,6 +1,6 @@
 import Env from '@ioc:Adonis/Core/Env'
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { google } from 'googleapis'
 import { JWT } from 'google-auth-library'
 
@@ -35,7 +35,7 @@ export default class GoogleService {
     })
   }
 
-  private async getAxiosOptions() {
+  private async getAuthHeaders() {
     let accessToken = ''
     await this.getAccessToken()
       .then((response: { googleAccessToken: string }) => {
@@ -46,50 +46,40 @@ export default class GoogleService {
           `Error getting Google API access token: ${error?.message}`
         )
       })
-    const options: AxiosRequestConfig = {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-      },
+    return {
+      Authorization: `Bearer ${accessToken}`,
     }
-    return options
   }
 
-  private async updateIndexerUrl(url: GoogleIndexerUrl) {
+  public async updateGoogleIndexer(urls: GoogleIndexerUrl[]) {
     let result
-    const options = await this.getAxiosOptions()
-    await axios
-      .post(
+    const authHeaders = await this.getAuthHeaders()
+    const requests = urls.map((item) => {
+      return axios.post(
         'https://indexing.googleapis.com/v3/urlNotifications:publish',
         {
-          url: url.value,
-          type: url.action === GoogleIndexerActions.UPDATE ? 'URL_UPDATED' : 'URL_DELETED',
+          url: item.value,
+          type: item.action === GoogleIndexerActions.UPDATE ? 'URL_UPDATED' : 'URL_DELETED',
         },
-        options
-      )
-      .then(async (response: AxiosResponse) => {
-        if (response.status === 200) {
-          result = response.data
-        } else {
-          throw new InternalServerException('Something went wrong')
+        {
+          headers: {
+            ...authHeaders,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
         }
+      )
+    })
+    await axios
+      .all(requests)
+      .then((response: AxiosResponse[]) => {
+        result = response.map((item) => {
+          return item.data
+        })
       })
       .catch((error) => {
         throw new InternalServerException(`Error updating Google API Indexer: ${error.message}`)
       })
-    return result
-  }
-
-  private async fetchIndexerUrls(_urls: GoogleIndexerUrl[]) {}
-
-  public async updateIndexer(urls: GoogleIndexerUrl[]) {
-    let result
-    if (urls.length === 1) {
-      result = await this.updateIndexerUrl(urls[0])
-    } else if (urls.length >= 2) {
-      result = await this.fetchIndexerUrls(urls)
-    }
     return result
   }
 }
