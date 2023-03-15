@@ -3,7 +3,7 @@ import { google } from 'googleapis'
 import { JWT } from 'google-auth-library'
 
 import InternalServerException from 'App/Exceptions/InternalServerException'
-import service_account from 'service_account.json'
+import service_account from '../../service_account.json'
 
 export default class GoogleAPIService {
   private jwtClient: JWT
@@ -33,9 +33,16 @@ export default class GoogleAPIService {
   }
 
   private async getAxiosOptions() {
-    let accessToken = await this.getAccessToken().catch((error) => {
-      throw new InternalServerException(`Error getting Google API access token: ${error?.message}`)
-    })
+    let accessToken = ''
+    await this.getAccessToken()
+      .then((response: { googleAccessToken: string }) => {
+        accessToken = response.googleAccessToken
+      })
+      .catch((error) => {
+        throw new InternalServerException(
+          `Error getting Google API access token: ${error?.message}`
+        )
+      })
     const options: AxiosRequestConfig = {
       headers: {
         'Accept': 'application/json',
