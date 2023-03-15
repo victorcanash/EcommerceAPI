@@ -237,13 +237,6 @@ export default class PaypalService {
           },
         },
       ],
-      payment_source: {
-        paypal: {
-          experience_context: {
-            shipping_preference: 'NO_SHIPPING',
-          },
-        },
-      },
       /*payment_source: {
         card: {
           attributes: remember
