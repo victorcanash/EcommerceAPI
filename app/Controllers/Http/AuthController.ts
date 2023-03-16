@@ -157,6 +157,15 @@ export default class AuthController {
     } as AuthResponse)
   }
 
+  public async loginGoogle({ params, request, response }: HttpContextContract): Promise<void> {
+    const successMsg = `Successfully logged in user with Google email ${params}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+    } as AuthResponse)
+  }
+
   public async logout({ request, response, auth }: HttpContextContract) {
     const email = await UsersService.getAuthEmail(auth)
 
