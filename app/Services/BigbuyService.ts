@@ -210,10 +210,10 @@ export default class BigbuyService {
             paymentMethod: 'moneybox',
             carriers: [
               {
-                name: 'correos',
-              },
-              {
                 name: 'chrono',
+              },
+              /*{
+                name: 'correos',
               },
               {
                 name: 'gls',
@@ -232,7 +232,7 @@ export default class BigbuyService {
               },
               {
                 name: 'correos international',
-              },
+              },*/
             ],
             shippingAddress: {
               firstName: shipping.firstName,
