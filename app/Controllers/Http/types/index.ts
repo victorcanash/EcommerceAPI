@@ -41,7 +41,10 @@ export type InitAuthResponse = {
     token?: string
     advancedCards?: boolean
   }
-  googleOAuthId: string
+  google: {
+    oauthId: string
+    oauthRedirect: string
+  }
 }
 
 /**

@@ -93,7 +93,10 @@ export default class AuthController {
         token: paypalToken,
         advancedCards: Env.get('PAYPAL_ADVANCED_CARDS') === 'enabled' ? true : false,
       },
-      googleOAuthId: Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
+      google: {
+        oauthId: Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
+        oauthRedirect: `${Env.get('APP_URL', 'http://localhost:3333')}/api/auth/login/google`,
+      },
     } as InitAuthResponse)
   }
 
