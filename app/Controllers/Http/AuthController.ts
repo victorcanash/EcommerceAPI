@@ -2,8 +2,10 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Env from '@ioc:Adonis/Core/Env'
 import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
+import { v4 as uuidv4 } from 'uuid'
 
 import User from 'App/Models/User'
+import Cart from 'App/Models/Cart'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductPack from 'App/Models/ProductPack'
@@ -34,6 +36,7 @@ import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import ConflictException from 'App/Exceptions/ConflictException'
 import { logRouteSuccess } from 'App/Utils/logger'
+import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class AuthController {
   public async init({ request, response, auth, i18n }: HttpContextContract) {
@@ -161,17 +164,51 @@ export default class AuthController {
     } as AuthResponse)
   }
 
-  public async loginGoogle({ request, response }: HttpContextContract): Promise<void> {
+  public async loginGoogle({ request, response, auth }: HttpContextContract): Promise<void> {
     const validatedData = await request.validate(LoginGoogleValidator)
     const result = await new GoogleService().getOAuthClientUserInfo(validatedData.code)
+    Logger.error(JSON.stringify(result))
 
-    const successMsg = `Successfully logged in user with Google email `
-    logRouteSuccess(request, successMsg)
-    return response.ok({
-      code: 200,
-      message: successMsg,
-      result: result,
+    let user = await UsersService.getOptionalUserByEmail(result.email, true)
+    if (!user) {
+      const newUser = await User.create({
+        email: result.email,
+        password: `google-${uuidv4()}`,
+        firstName: result.firstName,
+        lastName: result.lastName,
+        birthday: undefined,
+        getEmails: true,
+        emailVerifiedAt: DateTime.local(),
+        isActivated: true,
+      })
+      await Cart.create({ userId: newUser.id })
+      user = await UsersService.getUserByEmail(newUser.email, true)
+    } else {
+      user.emailVerifiedAt = DateTime.local()
+      user.isActivated = true
+      await user.save()
+    }
+    if (user.lockedOut) {
+      throw new PermissionException(`User with email ${result.email} is locked out`)
+    }
+
+    const tokenData = await auth.use('api').generate(user, {
+      expiresIn: Env.get('API_TOKEN_EXPIRY', '7days'),
     })
+
+    user = await UsersService.addGuestCart(user, validatedData.guestCart?.items)
+
+    const braintreeToken = await new BraintreeService().generateClientToken(user.braintreeId)
+
+    const successMsg = `Successfully logged in user with Google email ${user.email}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      token: tokenData.token,
+      user: user,
+      braintreeToken: braintreeToken,
+    } as AuthResponse)
   }
 
   public async logout({ request, response, auth }: HttpContextContract) {

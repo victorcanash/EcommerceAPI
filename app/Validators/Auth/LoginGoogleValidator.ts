@@ -2,6 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
+import { guestCartSchema } from 'App/Validators/shared'
 
 export default class LoginGoogleValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -10,6 +11,7 @@ export default class LoginGoogleValidator {
 
   public schema = schema.create({
     code: schema.string(),
+    guestCart: guestCartSchema,
   })
 
   public messages: CustomMessages = {}

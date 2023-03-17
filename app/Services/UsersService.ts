@@ -18,6 +18,10 @@ export default class UsersService {
     return this.getUserByField('email', email, allData)
   }
 
+  public static async getOptionalUserByEmail(email: string, allData: boolean) {
+    return this.getOptionalUserByField('email', email, allData)
+  }
+
   public static async getGuestUserById(id: number) {
     return this.getGuestUserByField('id', id)
   }
@@ -108,6 +112,24 @@ export default class UsersService {
     if (!user) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting user`)
     }
+
+    return user
+  }
+
+  private static async getOptionalUserByField(
+    field: string,
+    value: string | number,
+    allData: boolean
+  ) {
+    let user: User | null = null
+    user = await User.query()
+      .where(field, value)
+      .apply((scopes) => {
+        if (allData) {
+          scopes.getAllData()
+        }
+      })
+      .first()
 
     return user
   }
