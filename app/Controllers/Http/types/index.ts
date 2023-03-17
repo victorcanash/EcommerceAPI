@@ -43,7 +43,6 @@ export type InitAuthResponse = {
   }
   google: {
     oauthId: string
-    oauthRedirect: string
   }
 }
 

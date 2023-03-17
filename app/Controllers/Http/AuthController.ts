@@ -24,6 +24,7 @@ import { PaymentModes } from 'App/Constants/payment'
 import { GuestCartCheck } from 'App/Types/cart'
 import InitValidator from 'App/Validators/Auth/InitValidator'
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
+import LoginGoogleValidator from 'App/Validators/Auth/LoginGoogleValidator'
 import UpdateAuthValidator from 'App/Validators/Auth/UpdateAuthValidator'
 import SendActivationEmailValidator from 'App/Validators/Auth/SendActivationEmailValidator'
 import SendResetPswEmailValidator from 'App/Validators/Auth/SendResetPswEmailValidator'
@@ -96,7 +97,6 @@ export default class AuthController {
       },
       google: {
         oauthId: Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
-        oauthRedirect: `${Env.get('APP_URL', 'http://localhost:3333/api')}/auth/login/google`,
       },
     } as InitAuthResponse)
   }
@@ -161,16 +161,9 @@ export default class AuthController {
     } as AuthResponse)
   }
 
-  public async loginGoogle({
-    // params: { error, state, code, scope, authuser, hd, prompt },
-    params: { error, code },
-    request,
-    response,
-  }: HttpContextContract): Promise<void> {
-    if (error) {
-      throw new PermissionException('Access denied to login with google')
-    }
-    const result = await new GoogleService().getOAuthClientUserInfo(code)
+  public async loginGoogle({ request, response }: HttpContextContract): Promise<void> {
+    const validatedData = await request.validate(LoginGoogleValidator)
+    const result = await new GoogleService().getOAuthClientUserInfo(validatedData.code)
 
     const successMsg = `Successfully logged in user with Google email `
     logRouteSuccess(request, successMsg)
