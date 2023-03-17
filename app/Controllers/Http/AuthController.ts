@@ -12,6 +12,7 @@ import CartsService from 'App/Services/CartsService'
 import BraintreeService from 'App/Services/BraintreeService'
 import PaypalService from 'App/Services/PaypalService'
 import MailService from 'App/Services/MailService'
+import GoogleService from 'App/Services/GoogleService'
 import {
   BasicResponse,
   InitAuthResponse,
@@ -160,13 +161,24 @@ export default class AuthController {
     } as AuthResponse)
   }
 
-  public async loginGoogle({ params, request, response }: HttpContextContract): Promise<void> {
-    const successMsg = `Successfully logged in user with Google email ${params}`
+  public async loginGoogle({
+    // params: { error, state, code, scope, authuser, hd, prompt },
+    params: { error, code },
+    request,
+    response,
+  }: HttpContextContract): Promise<void> {
+    if (error) {
+      throw new PermissionException('Access denied to login with google')
+    }
+    const result = await new GoogleService().getOAuthClientUserInfo(code)
+
+    const successMsg = `Successfully logged in user with Google email `
     logRouteSuccess(request, successMsg)
-    return response.created({
-      code: 201,
+    return response.ok({
+      code: 200,
       message: successMsg,
-    } as AuthResponse)
+      result: result,
+    })
   }
 
   public async logout({ request, response, auth }: HttpContextContract) {
