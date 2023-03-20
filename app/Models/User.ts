@@ -34,7 +34,7 @@ export default class User extends AppBaseModel {
   @column({ serializeAs: null })
   public role: Roles
 
-  @column({ serializeAs: null })
+  @column()
   public authProvider?: Providers
 
   @column()
