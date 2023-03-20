@@ -2,7 +2,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
-import { PaymentModes } from 'App/Constants/payment'
+import { firstBuyDiscount, PaymentModes } from 'App/Constants/payment'
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
 import { GuestUserCheckout } from 'App/Types/user'
@@ -12,11 +12,13 @@ import PaypalService from 'App/Services/PaypalService'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import OrdersService from 'App/Services/OrdersService'
+import { roundTwoDecimals } from 'App/Utils/numbers'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class PaymentsService {
   private static checkPaymentData(
+    user: User | GuestUserCheckout | undefined,
     cart?: Cart | GuestCartCheck,
     transactionIds?: {
       braintree?: string
@@ -27,7 +29,7 @@ export default class PaymentsService {
       throw new PermissionException(`You don't have selected items in your cart`)
     }
 
-    const totalAmount = CartsService.getTotalAmount(cart).amount
+    let totalAmount = CartsService.getTotalAmount(cart).amount
     if (totalAmount <= 0) {
       throw new PermissionException(`Your don't have cart amount`)
     }
@@ -35,6 +37,11 @@ export default class PaymentsService {
 
     if (transactionIds && !transactionIds.braintree && !transactionIds.paypal) {
       throw new BadRequestException('Missing transaction id')
+    }
+
+    if ((user as User)?.id && !(user as User).firstOrder) {
+      const discount = (firstBuyDiscount / 100) * totalAmount
+      totalAmount = roundTwoDecimals(totalAmount - discount)
     }
 
     return {
@@ -121,7 +128,7 @@ export default class PaymentsService {
     if (!user.billing) {
       throw new PermissionException(`You don't have an existing billing address`)
     }
-    const { amount } = this.checkPaymentData(cart, transactionIds)
+    const { amount } = this.checkPaymentData(user, cart, transactionIds)
 
     return {
       user,
@@ -149,7 +156,7 @@ export default class PaymentsService {
       guestUserId = await (await UsersService.getGuestUserByEmail(guestUserEmail)).id
     }
     const cartCheck = await CartsService.createGuestCartCheck(cart?.items)
-    const { amount } = this.checkPaymentData(cart, transactionIds)
+    const { amount } = this.checkPaymentData(user, cart, transactionIds)
 
     return {
       user,

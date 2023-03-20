@@ -6,6 +6,7 @@ import GuestUser from 'App/Models/GuestUser'
 import CartItem from 'App/Models/CartItem'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
+import Order from 'App/Models/Order'
 import { GuestCartItem } from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
@@ -112,6 +113,7 @@ export default class UsersService {
     if (!user) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting user`)
     }
+    user.firstOrder = (await Order.findBy('userId', user.id)) || undefined
 
     return user
   }
@@ -130,6 +132,9 @@ export default class UsersService {
         }
       })
       .first()
+    if (user) {
+      user.firstOrder = (await Order.findBy('userId', user.id)) || undefined
+    }
 
     return user
   }

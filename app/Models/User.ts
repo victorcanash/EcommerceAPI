@@ -1,6 +1,7 @@
 import Hash from '@ioc:Adonis/Core/Hash'
 import {
   column,
+  computed,
   beforeSave,
   hasOne,
   HasOne,
@@ -14,6 +15,7 @@ import { AddressTypes } from 'App/Constants/addresses'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
+import Order from 'App/Models/Order'
 
 export default class User extends AppBaseModel {
   @column()
@@ -60,6 +62,13 @@ export default class User extends AppBaseModel {
 
   @hasOne(() => Cart)
   public cart: HasOne<typeof Cart>
+
+  @computed()
+  public get orderExists() {
+    return this.firstOrder ? true : false
+  }
+
+  public firstOrder: Order | undefined
 
   @hasOne(() => UserAddress, {
     onQuery: (query) => {
