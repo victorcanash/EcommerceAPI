@@ -11,6 +11,7 @@ export default class LoginGoogleValidator {
 
   public schema = schema.create({
     code: schema.string(),
+    redirectUrl: schema.string(),
     guestCart: guestCartSchema,
   })
 
