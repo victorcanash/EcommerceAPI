@@ -10,7 +10,7 @@ export default class extends BaseSchema {
       table.unique(['email'])
       table.string('paypal_id', 255).defaultTo('')
       table.setNullable('birthday')
-      table.enu('auth_provider', Object.values(Providers)).defaultTo(Providers.GOOGLE).nullable()
+      table.enu('auth_provider', Object.values(Providers)).defaultTo(null).nullable()
     })
   }
 
