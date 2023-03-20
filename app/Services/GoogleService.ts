@@ -12,7 +12,7 @@ export default class GoogleService {
   private jwtClient: JWT
   private oauth2Client: OAuth2Client
 
-  constructor(oauth2RedirectUrl = '') {
+  constructor(/*oauth2RedirectUrl = ''*/) {
     this.jwtClient = new google.auth.JWT(
       Env.get('GOOGLE_AUTH_CLIENT_EMAIL', ''),
       undefined,
@@ -23,7 +23,8 @@ export default class GoogleService {
     this.oauth2Client = new google.auth.OAuth2(
       Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
       Env.get('GOOGLE_OAUTH_CLIENT_SECRET', ''),
-      oauth2RedirectUrl
+      'http://localhost:3000/login'
+      //oauth2RedirectUrl
     )
   }
 
