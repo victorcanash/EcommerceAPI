@@ -11,7 +11,7 @@ import { PaymentModes } from 'App/Constants/payment'
 import { OrderPaypalProduct } from 'App/Types/order'
 import { GuestUserCheckout } from 'App/Types/user'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
-//import { getCountryCode } from 'App/Utils/addresses'
+import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import Logger from '@ioc:Adonis/Core/Logger'
@@ -186,7 +186,7 @@ export default class PaypalService {
 
   public static async createOrder(
     i18n: I18nContract,
-    _user: User | GuestUserCheckout,
+    user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
     _remember?: boolean
@@ -217,7 +217,7 @@ export default class PaypalService {
               },
             },
           },
-          /*payee: {
+          payee: {
             email_address: Env.get('SMTP_EMAIL'),
             merchant_id: Env.get('PAYPAL_MERCHANT_ID'),
           },
@@ -234,7 +234,7 @@ export default class PaypalService {
               full_name: `${user.shipping.firstName} ${user.shipping.lastName}`,
             },
             type: 'SHIPPING',
-          },*/
+          },
         },
       ],
     }
