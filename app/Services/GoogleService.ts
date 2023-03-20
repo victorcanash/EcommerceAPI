@@ -23,7 +23,7 @@ export default class GoogleService {
     this.oauth2Client = new google.auth.OAuth2(
       Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
       Env.get('GOOGLE_OAUTH_CLIENT_SECRET', ''),
-      'http://localhost:3000/login'
+      'https://ecommerce-vc-api-eqhxa.ondigitalocean.app/api/auth/login/google'
       //oauth2RedirectUrl
     )
   }
