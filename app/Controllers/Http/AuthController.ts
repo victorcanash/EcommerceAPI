@@ -190,10 +190,10 @@ export default class AuthController {
       await Cart.create({ userId: newUser.id })
       user = await UsersService.getUserByEmail(newUser.email, true)
     } else {
-      if (!user.isActivated) {
-        user.emailVerifiedAt = DateTime.local()
-        user.isActivated = true
-        await user.save()
+      if (user.authProvider !== Providers.GOOGLE) {
+        throw new PermissionException(
+          `User with email ${result.email} was created with another provider`
+        )
       }
     }
     if (user.lockedOut) {
