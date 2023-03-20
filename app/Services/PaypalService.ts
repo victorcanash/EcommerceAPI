@@ -237,45 +237,8 @@ export default class PaypalService {
           },
         },
       ],
-      /*payment_source: {
-        card: {
-          attributes: remember
-            ? {
-                customer: (user as User)?.paypalId
-                  ? {
-                      id: (user as User).paypalId,
-                    }
-                  : undefined,
-                vault: {
-                  store_in_vault: 'ON_SUCCESS',
-                },
-              }
-            : undefined,
-          stored_credential: {
-            payment_initiator: 'CUSTOMER',
-            payment_type: 'RECURRING',
-            usage: 'DERIVED',
-            //previous_transaction_reference: '53963906K75832009',
-          },
-        },
-        paypal: {
-          attributes: remember
-            ? {
-                customer: (user as User)?.paypalId
-                  ? {
-                      id: (user as User).paypalId,
-                    }
-                  : undefined,
-                vault: {
-                  store_in_vault: 'ON_SUCCESS',
-                  usage_type: 'MERCHANT',
-                  customer_type: 'CONSUMER',
-                },
-              }
-            : undefined,
-        },
-      },*/
     }
+    Logger.error(JSON.stringify(body))
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
       .then(async (response: AxiosResponse) => {
