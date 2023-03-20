@@ -10,8 +10,7 @@ export default class LoginGoogleValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    code: schema.string(),
-    redirectUrl: schema.string(),
+    accessToken: schema.string(),
     guestCart: guestCartSchema,
   })
 

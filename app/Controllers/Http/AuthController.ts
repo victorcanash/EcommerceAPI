@@ -166,9 +166,7 @@ export default class AuthController {
 
   public async loginGoogle({ request, response, auth }: HttpContextContract): Promise<void> {
     const validatedData = await request.validate(LoginGoogleValidator)
-    const result = await new GoogleService(validatedData.redirectUrl).getOAuthClientUserInfo(
-      validatedData.code
-    )
+    const result = await GoogleService.getOAuthClientUserInfo(validatedData.accessToken)
     Logger.error(JSON.stringify(result))
 
     let user = await UsersService.getOptionalUserByEmail(result.email, true)
