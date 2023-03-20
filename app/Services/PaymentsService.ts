@@ -33,15 +33,14 @@ export default class PaymentsService {
     if (totalAmount <= 0) {
       throw new PermissionException(`Your don't have cart amount`)
     }
+    if ((user as User)?.firstName && !(user as User).firstOrder) {
+      const discount = (firstBuyDiscount / 100) * totalAmount
+      totalAmount = roundTwoDecimals(totalAmount - discount)
+    }
     const amount = totalAmount.toFixed(2)
 
     if (transactionIds && !transactionIds.braintree && !transactionIds.paypal) {
       throw new BadRequestException('Missing transaction id')
-    }
-
-    if ((user as User)?.id && !(user as User).firstOrder) {
-      const discount = (firstBuyDiscount / 100) * totalAmount
-      totalAmount = roundTwoDecimals(totalAmount - discount)
     }
 
     return {
