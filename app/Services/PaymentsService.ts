@@ -12,7 +12,6 @@ import PaypalService from 'App/Services/PaypalService'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import OrdersService from 'App/Services/OrdersService'
-import { roundTwoDecimals } from 'App/Utils/numbers'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 
@@ -33,9 +32,9 @@ export default class PaymentsService {
     if (totalAmount <= 0) {
       throw new PermissionException(`Your don't have cart amount`)
     }
+    let discount: number | undefined
     if ((user as User)?.firstName && !(user as User).firstOrder) {
-      const discount = (firstBuyDiscount / 100) * totalAmount
-      totalAmount = roundTwoDecimals(totalAmount - discount)
+      discount = parseFloat(((firstBuyDiscount / 100) * totalAmount).toFixed(2))
     }
     const amount = totalAmount.toFixed(2)
 
@@ -45,6 +44,7 @@ export default class PaymentsService {
 
     return {
       amount,
+      discount,
     }
   }
 
@@ -127,13 +127,14 @@ export default class PaymentsService {
     if (!user.billing) {
       throw new PermissionException(`You don't have an existing billing address`)
     }
-    const { amount } = this.checkPaymentData(user, cart, transactionIds)
+    const { amount, discount } = this.checkPaymentData(user, cart, transactionIds)
 
     return {
       user,
       guestUserId,
       cart,
       amount,
+      discount,
     }
   }
 
@@ -229,7 +230,7 @@ export default class PaymentsService {
     guestCart?: GuestCart,
     remember?: boolean
   ) {
-    const { user, cart, amount } = await this.checkUserPaymentData(
+    const { user, cart, amount, discount } = await this.checkUserPaymentData(
       auth,
       false,
       guestUser,
@@ -242,7 +243,8 @@ export default class PaymentsService {
       user,
       orderProducts,
       amount,
-      remember
+      remember,
+      discount
     )
 
     return transactionId

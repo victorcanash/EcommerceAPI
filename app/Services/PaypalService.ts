@@ -12,9 +12,9 @@ import { OrderPaypalProduct } from 'App/Types/order'
 import { GuestUserCheckout } from 'App/Types/user'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
+import { roundTwoDecimals } from 'App/Utils/numbers'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class PaypalService {
   private static get baseUrl() {
@@ -138,7 +138,6 @@ export default class PaypalService {
       .get(`${this.baseUrl}/v2/checkout/orders/${paypalTransactionId}`, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 200 && response.data) {
-          Logger.error(response.data)
           result = response.data
         } else {
           throw new Error('Something went wrong')
@@ -189,7 +188,8 @@ export default class PaypalService {
     user: User | GuestUserCheckout,
     products: OrderPaypalProduct[],
     amount: string,
-    _remember?: boolean
+    _remember?: boolean,
+    discount?: number
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
@@ -209,12 +209,18 @@ export default class PaypalService {
           items: products,
           amount: {
             currency_code: currency,
-            value: amount,
+            value: discount ? roundTwoDecimals(parseFloat(amount) - discount).toString() : amount,
             breakdown: {
               item_total: {
                 currency_code: currency,
                 value: amount,
               },
+              discount: discount
+                ? {
+                    currency_code: currency,
+                    value: discount.toString(),
+                  }
+                : undefined,
             },
           },
           payee: {
@@ -238,12 +244,11 @@ export default class PaypalService {
         },
       ],
     }
-    Logger.error(JSON.stringify(body))
+
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
       .then(async (response: AxiosResponse) => {
         if (response.status === 201 && response.data?.id) {
-          Logger.error(response.data)
           orderId = response.data.id
         } else {
           throw new InternalServerException('Something went wrong, empty paypal order id')
@@ -278,7 +283,6 @@ export default class PaypalService {
           response.data.purchase_units[0].payments?.captures &&
           response.data.purchase_units[0].payments.captures.length > 0
         ) {
-          Logger.error(response.data)
           const cardStatus = response.data.purchase_units[0].payments.captures[0].status
           const cardResponseCode =
             response.data.purchase_units[0].payments.captures[0].processor_response?.response_code

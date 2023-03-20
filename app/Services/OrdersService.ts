@@ -17,7 +17,6 @@ import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class OrdersService {
   private static async getOrderByField(
@@ -62,7 +61,6 @@ export default class OrdersService {
 
     // Create order
     try {
-      Logger.error('Start creating order')
       const guestCartItems = await CartsService.convertToGuestCartItems(cart)
       order = await Order.create({
         userId: (user as User)?.id || undefined,
@@ -94,7 +92,6 @@ export default class OrdersService {
 
     // Load payment data
     try {
-      Logger.error('Start getting order payment data')
       await order.loadPaymentData()
     } catch (error) {
       const errorMsg = `Get payment data error: ${error.message}`
@@ -117,7 +114,6 @@ export default class OrdersService {
 
     // Create Bigbuy order
     try {
-      Logger.error('Start creating bigbuy order')
       const bigbuyId = await BigbuyService.createOrder(
         order.id.toString(),
         user?.email || guestUserEmail || '',
@@ -147,7 +143,6 @@ export default class OrdersService {
 
     // Send check order email
     try {
-      Logger.error('Start sending check order email')
       await order.loadBigbuyData()
       await MailService.sendCheckOrderEmail(
         i18n,
@@ -235,43 +230,6 @@ export default class OrdersService {
     )
     return order
   }
-
-  /*public static async createOrderByRoute(
-    i18n: I18nContract,
-    auth: AuthContract,
-    appName: string,
-    appDomain: string,
-    braintreeTransactionId: string | undefined,
-    paypalTransactionId: string | undefined,
-    guestUser?: GuestUserCheckout,
-    guestCart?: GuestCart
-  ) {
-    const { user, guestUserId, cart } = await PaymentsService.checkUserPaymentData(
-      auth,
-      true,
-      guestUser,
-      guestCart,
-      true,
-      {
-        braintree: braintreeTransactionId,
-        paypal: paypalTransactionId,
-      }
-    )
-    const order = await this.createOrder(
-      i18n,
-      appName,
-      appDomain,
-      user,
-      guestUserId,
-      undefined,
-      undefined,
-      cart,
-      braintreeTransactionId,
-      paypalTransactionId,
-      false
-    )
-    return order
-  }*/
 
   public static async createOrderByAdminRoute(
     locale: string,
