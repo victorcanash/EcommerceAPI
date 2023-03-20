@@ -7,6 +7,7 @@ export default class extends BaseSchema {
     this.schema.alterTable(this.tableName, (table) => {
       table.unique(['email'])
       table.string('paypal_id', 255).defaultTo('')
+      table.setNullable('birthday')
     })
   }
 
@@ -14,6 +15,7 @@ export default class extends BaseSchema {
     this.schema.table(this.tableName, (table) => {
       table.dropUnique(['email'])
       table.dropColumn('paypal_id')
+      table.dropNullable('birthday')
     })
   }
 }

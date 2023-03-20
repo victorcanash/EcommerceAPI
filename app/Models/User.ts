@@ -41,7 +41,7 @@ export default class User extends AppBaseModel {
   public lastName: string
 
   @column()
-  public birthday: DateTime
+  public birthday?: DateTime
 
   @column()
   public getEmails: boolean

@@ -36,7 +36,6 @@ import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import ConflictException from 'App/Exceptions/ConflictException'
 import { logRouteSuccess } from 'App/Utils/logger'
-import Logger from '@ioc:Adonis/Core/Logger'
 
 export default class AuthController {
   public async init({ request, response, auth, i18n }: HttpContextContract) {
@@ -166,16 +165,16 @@ export default class AuthController {
 
   public async loginGoogle({ request, response, auth }: HttpContextContract): Promise<void> {
     const validatedData = await request.validate(LoginGoogleValidator)
+
     const result = await GoogleService.getOAuthClientUserInfo(validatedData.accessToken)
-    Logger.error(JSON.stringify(result))
 
     let user = await UsersService.getOptionalUserByEmail(result.email, true)
     if (!user) {
       const newUser = await User.create({
         email: result.email,
         password: `google-${uuidv4()}`,
-        firstName: result.firstName,
-        lastName: result.lastName,
+        firstName: result.given_name,
+        lastName: result.family_name,
         birthday: undefined,
         getEmails: true,
         emailVerifiedAt: DateTime.local(),
@@ -200,7 +199,7 @@ export default class AuthController {
 
     const braintreeToken = await new BraintreeService().generateClientToken(user.braintreeId)
 
-    const successMsg = `Successfully logged in user with Google email ${user.email}`
+    const successMsg = `Successfully logged in user with Google email ${result.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
