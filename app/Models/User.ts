@@ -9,7 +9,7 @@ import {
 } from '@ioc:Adonis/Lucid/Orm'
 import { DateTime } from 'luxon'
 
-import { Roles } from 'App/Constants/auth'
+import { Roles, Providers } from 'App/Constants/auth'
 import { AddressTypes } from 'App/Constants/addresses'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import UserAddress from 'App/Models/UserAddress'
@@ -33,6 +33,9 @@ export default class User extends AppBaseModel {
 
   @column({ serializeAs: null })
   public role: Roles
+
+  @column({ serializeAs: null })
+  public authProvider?: Providers
 
   @column()
   public firstName: string

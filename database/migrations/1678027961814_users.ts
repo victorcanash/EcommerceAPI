@@ -1,5 +1,7 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
+import { Providers } from 'App/Constants/auth'
+
 export default class extends BaseSchema {
   protected tableName = 'users'
 
@@ -8,6 +10,7 @@ export default class extends BaseSchema {
       table.unique(['email'])
       table.string('paypal_id', 255).defaultTo('')
       table.setNullable('birthday')
+      table.enu('auth_provider', Object.values(Providers)).defaultTo(Providers.GOOGLE).nullable()
     })
   }
 
@@ -16,6 +19,7 @@ export default class extends BaseSchema {
       table.dropUnique(['email'])
       table.dropColumn('paypal_id')
       table.dropNullable('birthday')
+      table.dropColumn('auth_provider')
     })
   }
 }

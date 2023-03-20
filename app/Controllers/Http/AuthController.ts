@@ -4,6 +4,7 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
 import { v4 as uuidv4 } from 'uuid'
 
+import { Providers } from 'App/Constants/auth'
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
 import Product from 'App/Models/Product'
@@ -132,6 +133,11 @@ export default class AuthController {
     const validatedData = await request.validate(LoginValidator)
 
     let user = await UsersService.getUserByEmail(validatedData.email, true)
+    if (user.authProvider) {
+      throw new PermissionException(
+        `User with email ${validatedData.email} was created with another provider`
+      )
+    }
     if (!user.isActivated) {
       throw new ConflictException(`User with email ${validatedData.email} is not activated yet`)
     }
@@ -179,13 +185,16 @@ export default class AuthController {
         getEmails: true,
         emailVerifiedAt: DateTime.local(),
         isActivated: true,
+        authProvider: Providers.GOOGLE,
       })
       await Cart.create({ userId: newUser.id })
       user = await UsersService.getUserByEmail(newUser.email, true)
     } else {
-      user.emailVerifiedAt = DateTime.local()
-      user.isActivated = true
-      await user.save()
+      if (!user.isActivated) {
+        user.emailVerifiedAt = DateTime.local()
+        user.isActivated = true
+        await user.save()
+      }
     }
     if (user.lockedOut) {
       throw new PermissionException(`User with email ${result.email} is locked out`)
