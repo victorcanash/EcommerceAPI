@@ -138,9 +138,9 @@ export default class AuthController {
         `User with email ${validatedData.email} was created with another provider`
       )
     }
-    if (!user.isActivated) {
+    /*if (!user.isActivated) {
       throw new ConflictException(`User with email ${validatedData.email} is not activated yet`)
-    }
+    }*/
     if (user.lockedOut) {
       throw new PermissionException(`User with email ${validatedData.email} is locked out`)
     }
