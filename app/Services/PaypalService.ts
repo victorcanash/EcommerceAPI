@@ -3,6 +3,7 @@ import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { qs } from 'url-parse'
+import { v4 as uuidv4 } from 'uuid'
 
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
@@ -200,6 +201,7 @@ export default class PaypalService {
         'Accept-Language': i18n.locale,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation',
+        'Paypal-Request-Id': uuidv4(),
       },
     }
     const body = {
@@ -236,6 +238,7 @@ export default class PaypalService {
               postal_code: user.shipping.postalCode,
               country_code: getCountryCode(user.shipping.country),
             },
+            email_address: user.email,
             name: {
               full_name: `${user.shipping.firstName} ${user.shipping.lastName}`,
             },
@@ -243,12 +246,30 @@ export default class PaypalService {
           },
         },
       ],
+      payment_source: {
+        paypal: {
+          address: {
+            address_line_1: user.billing.addressLine1,
+            address_line_2: user.billing.addressLine2,
+            admin_area_1: user.billing.locality,
+            admin_area_2: user.billing.locality,
+            postal_code: user.billing.postalCode,
+            country_code: getCountryCode(user.billing.country),
+          },
+          email_address: user.email,
+          name: {
+            given_name: user.billing.firstName,
+            surname: user.billing.lastName,
+          },
+          //birth_date: (user as User)?.birthday,
+        },
+      },
     }
 
     await axios
       .post(`${this.baseUrl}/v2/checkout/orders`, body, options)
       .then(async (response: AxiosResponse) => {
-        if (response.status === 201 && response.data?.id) {
+        if ((response.status === 200 || response.status === 201) && response.data?.id) {
           orderId = response.data.id
         } else {
           throw new InternalServerException('Something went wrong, empty paypal order id')
@@ -270,6 +291,7 @@ export default class PaypalService {
         'Accept-Language': i18n.locale,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation',
+        'Paypal-Request-Id': uuidv4(),
       },
     }
     await axios
