@@ -2,9 +2,12 @@ import Env from '@ioc:Adonis/Core/Env'
 import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
+import { v4 as uuidv4 } from 'uuid'
+
 import { firstBuyDiscount, PaymentModes } from 'App/Constants/payment'
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
+import GuestUser from 'App/Models/GuestUser'
 import { GuestUserCheckout } from 'App/Types/user'
 import { GuestCart, GuestCartCheck } from 'App/Types/cart'
 import BraintreeService from 'App/Services/BraintreeService'
@@ -110,14 +113,28 @@ export default class PaymentsService {
       }
       user = guestUser
       if (requiredConfirmToken) {
-        const validConfirmToken = await auth.use('confirmation').check()
+        /*const validConfirmToken = await auth.use('confirmation').check()
         if (!validConfirmToken) {
           throw new PermissionException('Invalid confirmation token')
         }
-        guestUserId = await (await UsersService.getGuestUserByEmail(guestUser.email)).id
+        guestUserId = await (await UsersService.getGuestUserByEmail(guestUser.email)).id*/
+        let loggedUser = await User.query().where('email', guestUser.email).first()
+        if (loggedUser) {
+          throw new BadRequestException('The email entered belongs to a registered user')
+        }
+        let existingGuestUser = await GuestUser.query().where('email', guestUser.email).first()
+        if (!existingGuestUser) {
+          let newGuestUser = await GuestUser.create({
+            email: guestUser.email,
+            password: `${guestUser.email}-${uuidv4()}`,
+          })
+          guestUserId = newGuestUser.id
+        } else {
+          guestUserId = existingGuestUser.id
+        }
       }
       if (revokeConfirmToken) {
-        await auth.use('confirmation').revoke()
+        //await auth.use('confirmation').revoke()
       }
       cart = await CartsService.createGuestCartCheck(guestCart?.items)
     }
