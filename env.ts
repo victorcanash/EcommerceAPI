@@ -14,8 +14,6 @@
 
 import Env from '@ioc:Adonis/Core/Env'
 
-import { PaymentModes } from 'App/Constants/payment'
-
 export default Env.rules({
   HOST: Env.schema.string.optional({ format: 'host' }),
   PORT: Env.schema.number.optional(),
@@ -34,7 +32,6 @@ export default Env.rules({
   PG_DB_NAME: Env.schema.string.optional(),
 
   API_TOKEN_EXPIRY: Env.schema.string(),
-  CONFIRMATION_TOKEN_EXPIRY: Env.schema.string(),
   ACTIVATION_TOKEN_EXPIRY: Env.schema.string(),
   UPDATE_TOKEN_EXPIRY: Env.schema.string(),
 
@@ -59,7 +56,6 @@ export default Env.rules({
   SMTP_PASSWORD: Env.schema.string(),
   SMTP_EMAIL: Env.schema.string(),
 
-  PAYMENT_MODE: Env.schema.enum(Object.values(PaymentModes)),
   CURRENCY: Env.schema.string(),
 
   PAYPAL_ENV: Env.schema.enum(['sandbox', 'production'] as const),
@@ -67,11 +63,6 @@ export default Env.rules({
   PAYPAL_CLIENT_ID: Env.schema.string(),
   PAYPAL_SECRET_KEY: Env.schema.string(),
   PAYPAL_ADVANCED_CARDS: Env.schema.string(),
-
-  BRAINTREE_ENV: Env.schema.enum(['sandbox', 'production'] as const),
-  BRAINTREE_MERCHANT_ID: Env.schema.string(),
-  BRAINTREE_PUBLIC_KEY: Env.schema.string(),
-  BRAINTREE_PRIVATE_KEY: Env.schema.string(),
 
   BIGBUY_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   BIGBUY_API_KEY: Env.schema.string(),

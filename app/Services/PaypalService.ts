@@ -5,12 +5,10 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { qs } from 'url-parse'
 import { v4 as uuidv4 } from 'uuid'
 
-import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
-import { PaymentModes } from 'App/Constants/payment'
 import { OrderPaypalProduct } from 'App/Types/order'
-import { GuestUserCheckout } from 'App/Types/user'
+import { CheckoutData } from 'App/Types/checkout'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
 import { roundTwoDecimals } from 'App/Utils/numbers'
@@ -99,30 +97,26 @@ export default class PaypalService {
 
   public static async generateClientToken(i18n: I18nContract) {
     let clientToken: string | undefined
-    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) === PaymentModes.PAYPAL) {
-      const authHeaders = await this.getAuthHeaders(i18n)
-      const options: AxiosRequestConfig = {
-        headers: {
-          ...authHeaders,
-          'Accept-Language': i18n.locale,
-          'Content-Type': 'application/json',
-        },
-      }
-      await axios
-        .post(`${this.baseUrl}/v1/identity/generate-token`, undefined, options)
-        .then(async (response: AxiosResponse) => {
-          if (response.status === 200 && response.data?.client_token) {
-            clientToken = response.data.client_token
-          } else {
-            throw new InternalServerException('Something went wrong, empty paypal client token')
-          }
-        })
-        .catch((error) => {
-          throw new InternalServerException(
-            `Error generating paypal client token: ${error.message}`
-          )
-        })
+    const authHeaders = await this.getAuthHeaders(i18n)
+    const options: AxiosRequestConfig = {
+      headers: {
+        ...authHeaders,
+        'Accept-Language': i18n.locale,
+        'Content-Type': 'application/json',
+      },
     }
+    await axios
+      .post(`${this.baseUrl}/v1/identity/generate-token`, undefined, options)
+      .then(async (response: AxiosResponse) => {
+        if (response.status === 200 && response.data?.client_token) {
+          clientToken = response.data.client_token
+        } else {
+          throw new InternalServerException('Something went wrong, empty paypal client token')
+        }
+      })
+      .catch((error) => {
+        throw new InternalServerException(`Error generating paypal client token: ${error.message}`)
+      })
     return clientToken
   }
 
@@ -186,10 +180,9 @@ export default class PaypalService {
 
   public static async createOrder(
     i18n: I18nContract,
-    user: User | GuestUserCheckout,
+    checkoutData: CheckoutData,
     products: OrderPaypalProduct[],
     amount: string,
-    _remember?: boolean,
     discount?: number
   ) {
     let orderId = ''
@@ -231,16 +224,16 @@ export default class PaypalService {
           },
           shipping: {
             address: {
-              address_line_1: user.shipping.addressLine1,
-              address_line_2: user.shipping.addressLine2,
-              admin_area_1: user.shipping.locality,
-              admin_area_2: user.shipping.locality,
-              postal_code: user.shipping.postalCode,
-              country_code: getCountryCode(user.shipping.country),
+              address_line_1: checkoutData.shipping.addressLine1,
+              address_line_2: checkoutData.shipping.addressLine2,
+              admin_area_1: checkoutData.shipping.locality,
+              admin_area_2: checkoutData.shipping.locality,
+              postal_code: checkoutData.shipping.postalCode,
+              country_code: getCountryCode(checkoutData.shipping.country),
             },
-            email_address: user.email,
+            email_address: checkoutData.email,
             name: {
-              full_name: `${user.shipping.firstName} ${user.shipping.lastName}`,
+              full_name: `${checkoutData.shipping.firstName} ${checkoutData.shipping.lastName}`,
             },
             type: 'SHIPPING',
           },
@@ -249,17 +242,17 @@ export default class PaypalService {
       payment_source: {
         paypal: {
           address: {
-            address_line_1: user.billing.addressLine1,
-            address_line_2: user.billing.addressLine2,
-            admin_area_1: user.billing.locality,
-            admin_area_2: user.billing.locality,
-            postal_code: user.billing.postalCode,
-            country_code: getCountryCode(user.billing.country),
+            address_line_1: checkoutData.billing.addressLine1,
+            address_line_2: checkoutData.billing.addressLine2,
+            admin_area_1: checkoutData.billing.locality,
+            admin_area_2: checkoutData.billing.locality,
+            postal_code: checkoutData.billing.postalCode,
+            country_code: getCountryCode(checkoutData.billing.country),
           },
-          email_address: user.email,
+          email_address: checkoutData.email,
           name: {
-            given_name: user.billing.firstName,
-            surname: user.billing.lastName,
+            given_name: checkoutData.billing.firstName,
+            surname: checkoutData.billing.lastName,
           },
           //birth_date: (user as User)?.birthday,
         },

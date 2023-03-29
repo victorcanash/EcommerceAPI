@@ -3,11 +3,10 @@ import { column, computed } from '@ioc:Adonis/Lucid/Orm'
 import AppBaseModel from 'App/Models/AppBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
-import BigbuyService from 'App/Services/BigbuyService'
-import BraintreeService from 'App/Services/BraintreeService'
-import PaypalService from 'App/Services/PaypalService'
 import { OrderBigbuy, OrderTransaction } from 'App/Types/order'
 import { GuestCartItem, GuestCartCheckItem } from 'App/Types/cart'
+import BigbuyService from 'App/Services/BigbuyService'
+import PaypalService from 'App/Services/PaypalService'
 import { getCountryName } from 'App/Utils/addresses'
 
 export default class Order extends AppBaseModel {
@@ -16,9 +15,6 @@ export default class Order extends AppBaseModel {
 
   @column()
   public guestUserId?: number
-
-  @column()
-  public braintreeTransactionId?: string
 
   @column()
   public paypalTransactionId?: string
@@ -30,6 +26,9 @@ export default class Order extends AppBaseModel {
     prepare: (value: GuestCartItem[]) => JSON.stringify(value),
   })
   public products: GuestCartItem[]
+
+  @column()
+  public notes: string
 
   @computed()
   public get items() {
@@ -96,55 +95,30 @@ export default class Order extends AppBaseModel {
   }
 
   public async loadPaymentData() {
-    if (this.braintreeTransactionId || this.paypalTransactionId) {
-      if (this.braintreeTransactionId) {
-        const transactionInfo = await new BraintreeService().getTransactionInfo(
-          this.braintreeTransactionId
-        )
-        this.transactionData = {
-          amount: transactionInfo?.amount || '',
-          billing: {
-            firstName: transactionInfo?.billing?.firstName || '',
-            lastName: transactionInfo?.billing?.lastName || '',
-            country: transactionInfo?.billing?.countryName || '',
-            postalCode: transactionInfo?.billing?.postalCode || '',
-            locality: transactionInfo?.billing?.locality || '',
-            addressLine1: transactionInfo?.billing?.streetAddress || '',
-            addressLine2: transactionInfo?.billing?.extendedAddress || '',
-          },
-          creditCard: {
-            cardType: transactionInfo?.creditCard?.cardType || '',
-            last4: transactionInfo?.creditCard?.last4 || '',
-          },
-          paypalAccount: {
-            payerEmail: transactionInfo?.paypalAccount?.payerEmail || '',
-          },
-        }
-      } else if (this.paypalTransactionId) {
-        const transactionInfo = await PaypalService.getOrderInfo(this.paypalTransactionId)
-        this.transactionData = {
-          amount: transactionInfo?.purchase_units[0]?.amount?.value || '',
-          billing: {
-            firstName: transactionInfo?.payment_source?.card?.name || '',
-            lastName: '',
-            country: transactionInfo?.payment_source?.card?.billing_address?.country_code
-              ? getCountryName(transactionInfo?.payment_source?.card?.billing_address?.country_code)
-              : '',
-            postalCode: transactionInfo?.payment_source?.card?.billing_address?.postal_code || '',
-            locality: transactionInfo?.payment_source?.card?.billing_address?.admin_area_1 || '',
-            addressLine1:
-              transactionInfo?.payment_source?.card?.billing_address?.address_line_1 || '',
-            addressLine2:
-              transactionInfo?.payment_source?.card?.billing_address?.address_line_2 || '',
-          },
-          creditCard: {
-            cardType: transactionInfo?.payment_source?.card?.brand || '',
-            last4: transactionInfo?.payment_source?.card?.last_digits || '',
-          },
-          paypalAccount: {
-            payerEmail: transactionInfo?.payment_source?.paypal?.email_address || '',
-          },
-        }
+    if (this.paypalTransactionId) {
+      const transactionInfo = await PaypalService.getOrderInfo(this.paypalTransactionId)
+      this.transactionData = {
+        amount: transactionInfo?.purchase_units[0]?.amount?.value || '',
+        billing: {
+          firstName: transactionInfo?.payment_source?.card?.name || '',
+          lastName: '',
+          country: transactionInfo?.payment_source?.card?.billing_address?.country_code
+            ? getCountryName(transactionInfo?.payment_source?.card?.billing_address?.country_code)
+            : '',
+          postalCode: transactionInfo?.payment_source?.card?.billing_address?.postal_code || '',
+          locality: transactionInfo?.payment_source?.card?.billing_address?.admin_area_1 || '',
+          addressLine1:
+            transactionInfo?.payment_source?.card?.billing_address?.address_line_1 || '',
+          addressLine2:
+            transactionInfo?.payment_source?.card?.billing_address?.address_line_2 || '',
+        },
+        creditCard: {
+          cardType: transactionInfo?.payment_source?.card?.brand || '',
+          last4: transactionInfo?.payment_source?.card?.last_digits || '',
+        },
+        paypalAccount: {
+          payerEmail: transactionInfo?.payment_source?.paypal?.email_address || '',
+        },
       }
     }
   }

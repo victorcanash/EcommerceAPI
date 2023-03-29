@@ -35,10 +35,6 @@ declare module '@ioc:Adonis/Addons/Auth' {
       implementation: DatabaseProviderContract<DatabaseProviderRow>
       config: DatabaseProviderConfig
     }
-    guest_user: {
-      implementation: DatabaseProviderContract<DatabaseProviderRow>
-      config: DatabaseProviderConfig
-    }
   }
 
   /*
@@ -69,10 +65,6 @@ declare module '@ioc:Adonis/Addons/Auth' {
     api: {
       implementation: OATGuardContract<'user', 'api'>
       config: OATGuardConfig<'user'>
-    }
-    confirmation: {
-      implementation: OATGuardContract<'guest_user', 'confirmation'>
-      config: OATGuardConfig<'guest_user'>
     }
     activation: {
       implementation: OATGuardContract<'user', 'activation'>

@@ -2,7 +2,7 @@ import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
-import { guestUserSchema, guestCartSchema } from 'App/Validators/shared'
+import { checkoutDataSchema, guestCartSchema } from 'App/Validators/shared'
 
 export default class CapturePaypalTransactionValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -12,9 +12,8 @@ export default class CapturePaypalTransactionValidator {
   public schema = schema.create({
     appName: schema.string(),
     appDomain: schema.string(),
-    guestUser: guestUserSchema,
+    checkoutData: checkoutDataSchema,
     guestCart: guestCartSchema,
-    remember: schema.boolean.optional(),
   })
 
   public messages: CustomMessages = {}

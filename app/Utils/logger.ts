@@ -5,7 +5,7 @@ import type { RequestContract } from '@ioc:Adonis/Core/Request'
   Logger.info(message)
 }*/
 
-const logSuccess = (message: string) => {
+export const logSuccess = (message: string) => {
   Logger.info(message)
 }
 

@@ -1,12 +1,12 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-// import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import I18n, { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import Order from 'App/Models/Order'
 import User from 'App/Models/User'
+import GuestUser from 'App/Models/GuestUser'
 import Cart from 'App/Models/Cart'
 import { OrderBigbuyProduct } from 'App/Types/order'
-import { GuestUserCheckout, GuestUserCheckoutAddress } from 'App/Types/user'
+import { CheckoutData } from 'App/Types/checkout'
 import { GuestCart, GuestCartCheck } from 'App/Types/cart'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
@@ -47,13 +47,11 @@ export default class OrdersService {
     i18n: I18nContract,
     appName: string,
     appDomain: string,
-    user: GuestUserCheckout | User | undefined,
-    guestUserId: number | undefined,
-    guestUserEmail: string | undefined,
-    shipping: GuestUserCheckoutAddress | undefined,
+    checkoutData: CheckoutData,
+    user: User | undefined,
+    guestUser: GuestUser | undefined,
     cart: Cart | GuestCartCheck,
-    braintreeTransactionId: string | undefined,
-    paypalTransactionId: string | undefined,
+    paypalTransactionId: string,
     sendCreateOrderEmail: boolean
   ) {
     let order: Order | undefined
@@ -63,11 +61,11 @@ export default class OrdersService {
     try {
       const guestCartItems = await CartsService.convertToGuestCartItems(cart)
       order = await Order.create({
-        userId: (user as User)?.id || undefined,
-        guestUserId: guestUserId,
-        braintreeTransactionId: braintreeTransactionId,
+        userId: user?.id || undefined,
+        guestUserId: guestUser?.id || undefined,
         paypalTransactionId: paypalTransactionId,
         products: guestCartItems,
+        notes: checkoutData.notes,
       })
       orderProducts = await BigbuyService.createOrderProducts(cart)
       await order.loadItemsData()
@@ -79,10 +77,8 @@ export default class OrdersService {
           i18n,
           appName,
           appDomain,
-          user?.email || '',
-          user?.shipping || ({} as GuestUserCheckoutAddress),
           errorMsg,
-          braintreeTransactionId,
+          checkoutData,
           paypalTransactionId,
           cart
         )
@@ -101,10 +97,8 @@ export default class OrdersService {
           i18n,
           appName,
           appDomain,
-          user?.email || '',
-          user?.shipping || ({} as GuestUserCheckoutAddress),
           errorMsg,
-          braintreeTransactionId,
+          checkoutData,
           paypalTransactionId,
           cart
         )
@@ -116,8 +110,8 @@ export default class OrdersService {
     try {
       const bigbuyId = await BigbuyService.createOrder(
         order.id.toString(),
-        user?.email || guestUserEmail || '',
-        user?.shipping || shipping || ({} as GuestUserCheckoutAddress),
+        checkoutData.email,
+        checkoutData.shipping,
         orderProducts
       )
       order.merge({ bigbuyId })
@@ -130,10 +124,8 @@ export default class OrdersService {
           i18n,
           appName,
           appDomain,
-          user?.email || '',
-          user?.shipping || ({} as GuestUserCheckoutAddress),
           errorMsg,
-          braintreeTransactionId,
+          checkoutData,
           paypalTransactionId,
           cart
         )
@@ -148,10 +140,8 @@ export default class OrdersService {
         i18n,
         appName,
         appDomain,
-        user?.email || guestUserEmail || '',
-        (user as User)?.firstName
-          ? (user as User).firstName
-          : user?.shipping.firstName || shipping?.firstName || '',
+        checkoutData.email,
+        user?.firstName || checkoutData.shipping.firstName,
         order
       )
     } catch (error) {
@@ -209,22 +199,20 @@ export default class OrdersService {
     i18n: I18nContract,
     appName: string,
     appDomain: string,
-    user: GuestUserCheckout | User | undefined,
-    guestUserId: number | undefined,
+    checkoutData: CheckoutData,
+    user: User | undefined,
+    guestUser: GuestUser | undefined,
     cart: Cart | GuestCartCheck,
-    braintreeTransactionId: string | undefined,
-    paypalTransactionId: string | undefined
+    paypalTransactionId: string
   ) {
     const order = await this.createOrder(
       i18n,
       appName,
       appDomain,
+      checkoutData,
       user,
-      guestUserId,
-      undefined,
-      undefined,
+      guestUser,
       cart,
-      braintreeTransactionId,
       paypalTransactionId,
       true
     )
@@ -235,32 +223,22 @@ export default class OrdersService {
     locale: string,
     appName: string,
     appDomain: string,
-    braintreeTransactionId: string | undefined,
-    paypalTransactionId: string | undefined,
-    userId: number | undefined,
-    guestUserEmail: string | undefined,
-    shipping: GuestUserCheckoutAddress,
-    cart: GuestCart
+    checkoutData: CheckoutData,
+    cart: GuestCart,
+    paypalTransactionId: string
   ) {
-    const { user, guestUserId, cartCheck } = await PaymentsService.checkAdminPaymentData(
-      userId,
-      guestUserEmail,
-      cart,
-      {
-        braintree: braintreeTransactionId,
-        paypal: paypalTransactionId,
-      }
+    const { user, guestUser, cartCheck } = await PaymentsService.checkAdminPaymentData(
+      checkoutData,
+      cart
     )
     const order = await this.createOrder(
       I18n.locale(locale),
       appName,
       appDomain,
+      checkoutData,
       user,
-      guestUserId,
-      guestUserEmail,
-      shipping,
+      guestUser,
       cartCheck,
-      braintreeTransactionId,
       paypalTransactionId,
       false
     )

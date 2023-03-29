@@ -1,12 +1,14 @@
 import { CountryOptions } from 'App/Constants/addresses'
 
-export type GuestUserCheckout = {
+export type CheckoutData = {
   email: string
-  shipping: GuestUserCheckoutAddress
-  billing: GuestUserCheckoutAddress
+  shipping: CheckoutAddress
+  billing: CheckoutAddress
+  remember?: boolean
+  notes?: string
 }
 
-export type GuestUserCheckoutAddress = {
+export type CheckoutAddress = {
   firstName: string
   lastName: string
   addressLine1: string

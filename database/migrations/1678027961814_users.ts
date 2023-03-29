@@ -11,6 +11,7 @@ export default class extends BaseSchema {
       table.string('paypal_id', 255).defaultTo('')
       table.setNullable('birthday')
       table.enu('auth_provider', Object.values(Providers)).defaultTo(null).nullable()
+      table.dropColumn('braintree_id')
     })
   }
 
@@ -20,6 +21,7 @@ export default class extends BaseSchema {
       table.dropColumn('paypal_id')
       table.dropNullable('birthday')
       table.dropColumn('auth_provider')
+      table.string('braintree_id', 255).defaultTo('')
     })
   }
 }

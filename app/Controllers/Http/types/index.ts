@@ -1,5 +1,4 @@
 import User from 'App/Models/User'
-import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import Product from 'App/Models/Product'
@@ -8,9 +7,7 @@ import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
 import Order from 'App/Models/Order'
-import { PaymentModes } from 'App/Constants/payment'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
-import { GuestUserCheckout } from 'App/Types/user'
 
 /**
  * Basic JSON response for Controllers
@@ -31,10 +28,7 @@ export type InitAuthResponse = {
   packs: ProductPack[]
   user?: User
   guestCart?: GuestCartCheck
-  paymentMode: PaymentModes
   currency: string
-  confirmTokenExpiry: string
-  braintreeToken?: string
   paypal?: {
     merchantId?: string
     clientId?: string
@@ -54,7 +48,6 @@ export type AuthResponse = {
   message: string
   token: string
   user: User
-  braintreeToken?: string
 }
 
 /**
@@ -73,7 +66,6 @@ export type UserResponse = {
   code: number
   message: string
   user: User
-  braintreeToken?: string
 }
 
 /**
@@ -88,17 +80,7 @@ export type UsersResponse = {
 }
 
 /**
- * User addresses JSON response for Controllers
- */
-export type UAddressesResponse = {
-  code: number
-  message: string
-  shipping: UserAddress
-  billing: UserAddress
-}
-
-/**
- * User addresses JSON response for Controllers
+ * Check Cart JSON response for Controllers
  */
 export type CheckCartResponse = {
   code: number
@@ -214,41 +196,12 @@ export type OrdersResponse = {
 }
 
 /**
- * Braintree Token JSON response for Controllers
- */
-export type BraintreeTokenResponse = {
-  code: number
-  message: string
-  braintreeToken?: string
-}
-
-/**
  * Paypal User Token JSON response for Controllers
  */
 export type PaypalUserTokenResponse = {
   code: number
   message: string
   paypalUserToken: string
-}
-
-/**
- * Guest User Data JSON response for Controllers
- */
-export type GuestUserDataResponse = {
-  code: number
-  message: string
-  guestUser: GuestUserCheckout
-  guestCart: GuestCartCheck
-  checkoutPayment: any
-}
-
-/**
- * Paypal Create Order JSON response for Controllers
- */
-export type BraintreeTransactionResponse = {
-  code: number
-  message: string
-  braintreeTransactionId: string
 }
 
 /**

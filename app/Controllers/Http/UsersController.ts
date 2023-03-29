@@ -3,27 +3,17 @@ import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser'
 import Drive from '@ioc:Adonis/Core/Drive'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
-import { AddressTypes } from 'App/Constants/addresses'
 import { ContactTypes } from 'App/Constants/contact'
 import User from 'App/Models/User'
-import UserAddress from 'App/Models/UserAddress'
 import Cart from 'App/Models/Cart'
 import UsersService from 'App/Services/UsersService'
 import OrdersService from 'App/Services/OrdersService'
 import MailService from 'App/Services/MailService'
-import BraintreeService from 'App/Services/BraintreeService'
-import {
-  BasicResponse,
-  UsersResponse,
-  UserResponse,
-  UAddressesResponse,
-  BraintreeTokenResponse,
-} from 'App/Controllers/Http/types'
+import { BasicResponse, UsersResponse, UserResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import CreateUserValidator from 'App/Validators/User/CreateUserValidator'
 import UpdateUserValidator from 'App/Validators/User/UpdateUserValidator'
-import UpdateUAddressesValidator from 'App/Validators/User/UpdateUAddressesValidator'
 import SendContactEmailValidator from 'App/Validators/User/SendContactEmailValidator'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -107,53 +97,6 @@ export default class UsersController {
     } as UserResponse)
   }
 
-  public async updateAddresses({
-    params: { id },
-    request,
-    response,
-    bouncer,
-  }: HttpContextContract) {
-    const user = await UsersService.getUserById(id, false)
-
-    await bouncer.with('UserPolicy').authorize('update', user)
-
-    const validatedData = await request.validate(UpdateUAddressesValidator)
-
-    await user.load('shipping')
-    await user.load('billing')
-    let shipping: UserAddress
-    if (user.shipping) {
-      user.shipping.merge(validatedData.shipping)
-      shipping = await user.shipping.save()
-    } else {
-      shipping = await UserAddress.create({
-        ...validatedData.shipping,
-        userId: user.id,
-        type: AddressTypes.SHIPPING,
-      })
-    }
-    let billing: UserAddress
-    if (user.billing) {
-      user.billing.merge(validatedData.billing)
-      billing = await user.billing.save()
-    } else {
-      billing = await UserAddress.create({
-        ...validatedData.billing,
-        userId: user.id,
-        type: AddressTypes.BILLING,
-      })
-    }
-
-    const successMsg = `Successfully updated user addresses by id ${id}`
-    logRouteSuccess(request, successMsg)
-    return response.created({
-      code: 201,
-      message: successMsg,
-      shipping: shipping,
-      billing: billing,
-    } as UAddressesResponse)
-  }
-
   public async destroy({ params: { id }, request, response, bouncer }: HttpContextContract) {
     const user = await UsersService.getUserById(id, false)
 
@@ -161,15 +104,12 @@ export default class UsersController {
 
     await user.delete()
 
-    const braintreeToken = await new BraintreeService().generateClientToken()
-
     const successMsg = `Successfully deleted user by id ${id}`
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
-      braintreeToken: braintreeToken,
-    } as BraintreeTokenResponse)
+    } as BasicResponse)
   }
 
   public async sendContactEmail({ response, request, i18n, auth, bouncer }: HttpContextContract) {

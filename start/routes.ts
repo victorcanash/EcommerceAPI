@@ -1,11 +1,13 @@
 import Route from '@ioc:Adonis/Core/Route'
 
+const welcomeResponse = { hello: 'Welcome to Ecommerce API made by Victor Canas' }
+
 Route.get('', async () => {
-  return { hello: 'Welcome to Ecommerce API made by Victor Canas' }
+  return welcomeResponse
 })
 Route.group(() => {
   Route.get('', async () => {
-    return { hello: 'Welcome to Ecommerce API made by Victor Canas' }
+    return welcomeResponse
   })
 
   // User routes
@@ -31,16 +33,7 @@ Route.group(() => {
       'show': ['admin'],
     })
     .apiOnly()
-  Route.put('users/:id/addresses', 'UsersController.updateAddresses').middleware('auth:api')
   Route.post('users/send-email/contact', 'UsersController.sendContactEmail')
-
-  /*
-  Route.resource('user-addresses', 'UAddressesController')
-    .middleware({
-      '*': ['auth:api', 'admin'],
-    })
-    .apiOnly()
-  */
 
   // Cart routes
 
@@ -104,11 +97,6 @@ Route.group(() => {
   Route.post('payments/paypal-user-token', 'PaymentsController.getPaypalUserToken').middleware(
     'auth:api'
   )
-  Route.post('payments/send-email/transaction', 'PaymentsController.sendConfirmTransactionEmail')
-  Route.get('payments/guest-user-data', 'PaymentsController.getGuestUserData').middleware(
-    'auth:confirmation'
-  )
-  Route.post('payments/braintree-transaction', 'PaymentsController.createBraintreeTransaction')
   Route.post('payments/paypal-transaction', 'PaymentsController.createPaypalTransaction')
   Route.post('payments/paypal-transaction/:id', 'PaymentsController.capturePaypalTransaction')
 

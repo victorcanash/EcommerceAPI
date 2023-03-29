@@ -10,21 +10,18 @@ import Cart from 'App/Models/Cart'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductPack from 'App/Models/ProductPack'
-import UsersService from 'App/Services/UsersService'
-import CartsService from 'App/Services/CartsService'
-import BraintreeService from 'App/Services/BraintreeService'
-import PaypalService from 'App/Services/PaypalService'
-import MailService from 'App/Services/MailService'
-import GoogleService from 'App/Services/GoogleService'
+import { GuestCartCheck } from 'App/Types/cart'
 import {
   BasicResponse,
   InitAuthResponse,
   AuthResponse,
   IsAdminResponse,
-  BraintreeTokenResponse,
 } from 'App/Controllers/Http/types'
-import { PaymentModes } from 'App/Constants/payment'
-import { GuestCartCheck } from 'App/Types/cart'
+import UsersService from 'App/Services/UsersService'
+import CartsService from 'App/Services/CartsService'
+import PaypalService from 'App/Services/PaypalService'
+import MailService from 'App/Services/MailService'
+import GoogleService from 'App/Services/GoogleService'
 import InitValidator from 'App/Validators/Auth/InitValidator'
 import LoginValidator from 'App/Validators/Auth/LoginValidator'
 import LoginGoogleValidator from 'App/Validators/Auth/LoginGoogleValidator'
@@ -75,7 +72,6 @@ export default class AuthController {
       guestCart = await CartsService.createGuestCartCheck(validatedData.guestCart?.items)
     }
 
-    const braintreeToken = await new BraintreeService().generateClientToken(user?.braintreeId)
     const paypalToken = await PaypalService.generateClientToken(i18n)
 
     const successMsg = `Successfully init user`
@@ -88,10 +84,7 @@ export default class AuthController {
       packs: packs,
       user: user,
       guestCart: guestCart,
-      paymentMode: Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE),
       currency: Env.get('CURRENCY', 'EUR'),
-      confirmTokenExpiry: Env.get('CONFIRMATION_TOKEN_EXPIRY', '30mins'),
-      braintreeToken: braintreeToken,
       paypal: {
         merchantId: Env.get('PAYPAL_MERCHANT_ID'),
         clientId: Env.get('PAYPAL_CLIENT_ID'),
@@ -156,8 +149,6 @@ export default class AuthController {
 
     user = await UsersService.addGuestCart(user, validatedData.guestCart?.items)
 
-    const braintreeToken = await new BraintreeService().generateClientToken(user.braintreeId)
-
     const successMsg = `Successfully logged in user with email ${user.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
@@ -165,7 +156,6 @@ export default class AuthController {
       message: successMsg,
       token: tokenData.token,
       user: user,
-      braintreeToken: braintreeToken,
     } as AuthResponse)
   }
 
@@ -206,8 +196,6 @@ export default class AuthController {
 
     user = await UsersService.addGuestCart(user, validatedData.guestCart?.items)
 
-    const braintreeToken = await new BraintreeService().generateClientToken(user.braintreeId)
-
     const successMsg = `Successfully logged in user with Google email ${result.email}`
     logRouteSuccess(request, successMsg)
     return response.created({
@@ -215,7 +203,6 @@ export default class AuthController {
       message: successMsg,
       token: tokenData.token,
       user: user,
-      braintreeToken: braintreeToken,
     } as AuthResponse)
   }
 
@@ -224,15 +211,12 @@ export default class AuthController {
 
     await auth.use('api').revoke()
 
-    const braintreeToken = await new BraintreeService().generateClientToken()
-
     const successMsg = `Successfully logged out user with email ${email}`
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
       message: successMsg,
-      braintreeToken: braintreeToken,
-    } as BraintreeTokenResponse)
+    } as BasicResponse)
   }
 
   public async update({ params: { id }, request, response, auth }: HttpContextContract) {

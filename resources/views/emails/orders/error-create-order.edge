@@ -29,39 +29,39 @@
                 Locale: {{locale}}
               </li>
               <li>
-                User email: {{userEmail}}
-              </li>
-              <li>
-                Braintree transaction ID: {{braintreeTransactionId}}
-              </li>
-              <li>
                 Paypal transaction ID: {{paypalTransactionId}}
+              </li>
+              <li>
+                Email: {{checkoutData.email}}
+              </li>
+              <li>
+                Notes: {{checkoutData.notes}}
               </li>
               <li>
                 Shipping:
                 <ul style="list-style-type: disc;">
                   <li>
-                    First name: {{shipping.firstName}}
+                    First name: {{checkoutData.shipping.firstName}}
                   </li>
                   <li>
-                    Last name: {{shipping.lastName}}
+                    Last name: {{checkoutData.shipping.lastName}}
                   </li>
                   <li>
-                    Address line 1: {{shipping.addressLine1}}
+                    Address line 1: {{checkoutData.shipping.addressLine1}}
                   </li>
-                  @if(shipping.addressLine2 && shipping.addressLine2 !== '')
+                  @if(checkoutData.shipping.addressLine2 && checkoutData.shipping.addressLine2 !== '')
                     <li>
-                      Address line 2: {{shipping.addressLine2}}
+                      Address line 2: {{checkoutData.shipping.addressLine2}}
                     </li>
                   @end
                   <li>
-                    Postal code: {{shipping.postalCode}}
+                    Postal code: {{checkoutData.shipping.postalCode}}
                   </li>
                   <li>
-                    Locality: {{shipping.locality}}
+                    Locality: {{checkoutData.shipping.locality}}
                   </li>
                   <li>
-                    Country: {{shipping.country}}
+                    Country: {{checkoutData.shipping.country}}
                   </li>
                 </ul>
               </li>

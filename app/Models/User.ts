@@ -55,9 +55,6 @@ export default class User extends AppBaseModel {
   public lockedOut: boolean
 
   @column()
-  public braintreeId: string
-
-  @column()
   public paypalId: string
 
   @hasOne(() => Cart)

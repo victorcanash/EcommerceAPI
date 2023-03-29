@@ -1,16 +1,16 @@
-import Env from '@ioc:Adonis/Core/Env'
 import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { firstBuyDiscount, PaymentModes } from 'App/Constants/payment'
+import { firstBuyDiscount } from 'App/Constants/payment'
+import { AddressTypes } from 'App/Constants/addresses'
 import User from 'App/Models/User'
-import Cart from 'App/Models/Cart'
 import GuestUser from 'App/Models/GuestUser'
-import { GuestUserCheckout } from 'App/Types/user'
+import Cart from 'App/Models/Cart'
+import UserAddress from 'App/Models/UserAddress'
+import { CheckoutData } from 'App/Types/checkout'
 import { GuestCart, GuestCartCheck } from 'App/Types/cart'
-import BraintreeService from 'App/Services/BraintreeService'
 import PaypalService from 'App/Services/PaypalService'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
@@ -19,14 +19,49 @@ import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class PaymentsService {
-  private static checkPaymentData(
-    user: User | GuestUserCheckout | undefined,
-    cart?: Cart | GuestCartCheck,
-    transactionIds?: {
-      braintree?: string
-      paypal?: string
-    }
+  private static async updateUser(
+    user: User,
+    paypalCustomerId: string,
+    checkoutData: CheckoutData
   ) {
+    if (checkoutData.remember) {
+      user.merge({
+        paypalId: paypalCustomerId,
+      })
+      await user.save()
+      await user.load('shipping')
+      await user.load('billing')
+      if (user.shipping) {
+        user.shipping.merge(checkoutData.shipping)
+        await user.shipping.save()
+      } else {
+        await UserAddress.create({
+          ...checkoutData.shipping,
+          userId: user.id,
+          type: AddressTypes.SHIPPING,
+        })
+      }
+      if (user.billing) {
+        user.billing.merge(checkoutData.billing)
+        await user.billing.save()
+      } else {
+        await UserAddress.create({
+          ...checkoutData.billing,
+          userId: user.id,
+          type: AddressTypes.BILLING,
+        })
+      }
+    } else {
+      if (user.paypalId) {
+        user.merge({
+          paypalId: '',
+        })
+      }
+      await user.save()
+    }
+  }
+
+  private static checkPaymentData(user: User | undefined, cart: Cart | GuestCartCheck) {
     if (!cart?.items || cart.items.length <= 0) {
       throw new PermissionException(`You don't have selected items in your cart`)
     }
@@ -36,231 +71,102 @@ export default class PaymentsService {
       throw new PermissionException(`Your don't have cart amount`)
     }
     let discount: number | undefined
-    if ((user as User)?.firstName && !(user as User).firstOrder) {
+    if (user && !user.firstOrder) {
       discount = parseFloat(((firstBuyDiscount / 100) * totalAmount).toFixed(2))
     }
     const amount = totalAmount.toFixed(2)
 
-    if (transactionIds && !transactionIds.braintree && !transactionIds.paypal) {
-      throw new BadRequestException('Missing transaction id')
-    }
-
     return {
       amount,
       discount,
-    }
-  }
-
-  private static async updateUser(
-    user: User | GuestUserCheckout,
-    remember?: boolean,
-    braintreeId?: string,
-    paypalId?: string
-  ) {
-    if ((user as User)?.id && remember) {
-      if (braintreeId) {
-        ;(user as User).merge({
-          braintreeId: braintreeId,
-        })
-      } else if (paypalId) {
-        ;(user as User).merge({
-          paypalId: paypalId,
-        })
-      }
-      await (user as User).save()
-    } else if ((user as User)?.paypalId || (user as User)?.braintreeId) {
-      if ((user as User)?.paypalId) {
-        ;(user as User).merge({
-          paypalId: '',
-        })
-      } else if ((user as User)?.braintreeId) {
-        ;(user as User).merge({
-          braintreeId: '',
-        })
-      }
-      await (user as User).save()
-    }
-  }
-
-  public static checkPaymentMode(paymentMode: PaymentModes) {
-    if (Env.get('PAYMENT_MODE', PaymentModes.BRAINTREE) !== paymentMode) {
-      throw new PermissionException('This payment mode is disabled')
     }
   }
 
   public static async checkUserPaymentData(
     auth: AuthContract,
-    requiredConfirmToken: boolean,
-    guestUser?: GuestUserCheckout,
+    checkoutData: CheckoutData,
     guestCart?: GuestCart,
-    revokeConfirmToken?: boolean,
-    transactionIds?: {
-      braintree?: string
-      paypal?: string
-    }
+    createGuestUser?: boolean
   ) {
-    let user: User | GuestUserCheckout
-    let guestUserId: number | undefined
+    let user: User | undefined
+    let guestUser: GuestUser | undefined
     let cart: Cart | GuestCartCheck
     const validApiToken = await auth.use('api').check()
     if (validApiToken) {
       const email = await UsersService.getAuthEmail(auth)
       user = await UsersService.getUserByEmail(email, true)
-      cart = (user as User).cart
+      if (checkoutData.email !== user.email) {
+        throw new BadRequestException('The checkout email does not match the user email')
+      }
+      cart = user.cart
     } else {
-      if (!guestUser) {
-        throw new BadRequestException('Missing guestUser')
+      let loggedUser = await User.query().where('email', checkoutData.email).first()
+      if (loggedUser) {
+        throw new BadRequestException('The email entered belongs to a registered user')
       }
-      user = guestUser
-      if (requiredConfirmToken) {
-        /*const validConfirmToken = await auth.use('confirmation').check()
-        if (!validConfirmToken) {
-          throw new PermissionException('Invalid confirmation token')
-        }
-        guestUserId = await (await UsersService.getGuestUserByEmail(guestUser.email)).id*/
-        let loggedUser = await User.query().where('email', guestUser.email).first()
-        if (loggedUser) {
-          throw new BadRequestException('The email entered belongs to a registered user')
-        }
-        let existingGuestUser = await GuestUser.query().where('email', guestUser.email).first()
-        if (!existingGuestUser) {
-          let newGuestUser = await GuestUser.create({
-            email: guestUser.email,
-            password: `${guestUser.email}-${uuidv4()}`,
+      if (createGuestUser) {
+        guestUser =
+          (await GuestUser.query().where('email', checkoutData.email).first()) || undefined
+        if (!guestUser) {
+          guestUser = await GuestUser.create({
+            email: checkoutData.email,
+            password: `${checkoutData.email}-${uuidv4()}`,
           })
-          guestUserId = newGuestUser.id
-        } else {
-          guestUserId = existingGuestUser.id
         }
-      }
-      if (revokeConfirmToken) {
-        //await auth.use('confirmation').revoke()
       }
       cart = await CartsService.createGuestCartCheck(guestCart?.items)
     }
-    if (!user.shipping) {
-      throw new PermissionException(`You don't have an existing shipping address`)
-    }
-    if (!user.billing) {
-      throw new PermissionException(`You don't have an existing billing address`)
-    }
-    const { amount, discount } = this.checkPaymentData(user, cart, transactionIds)
+    const { amount, discount } = this.checkPaymentData(user, cart)
 
     return {
       user,
-      guestUserId,
+      guestUser,
       cart,
       amount,
       discount,
     }
   }
 
-  public static async checkAdminPaymentData(
-    userId: number | undefined,
-    guestUserEmail: string | undefined,
-    cart: GuestCart,
-    transactionIds?: {
-      braintree?: string
-      paypal?: string
-    }
-  ) {
-    const user = userId ? await UsersService.getUserById(userId, false) : undefined
-    let guestUserId: number | undefined
+  public static async checkAdminPaymentData(checkoutData: CheckoutData, cart: GuestCart) {
+    let user: User | undefined
+    let guestUser: GuestUser | undefined
+    user = (await User.query().where('email', checkoutData.email).first()) || undefined
     if (!user) {
-      if (!guestUserEmail) {
-        throw new BadRequestException('Missing user email')
+      guestUser = (await GuestUser.query().where('email', checkoutData.email).first()) || undefined
+      if (!guestUser) {
+        throw new BadRequestException('Cannot find user/guestuser by checkout email')
       }
-      guestUserId = await (await UsersService.getGuestUserByEmail(guestUserEmail)).id
     }
     const cartCheck = await CartsService.createGuestCartCheck(cart?.items)
-    const { amount } = this.checkPaymentData(user, cart, transactionIds)
+    const { amount, discount } = this.checkPaymentData(user, cartCheck)
 
     return {
       user,
-      guestUserId: guestUserId || -1,
+      guestUser,
       cartCheck,
       amount,
+      discount,
     }
-  }
-
-  public static async createBraintreeTransaction(
-    i18n: I18nContract,
-    auth: AuthContract,
-    appName: string,
-    appDomain: string,
-    paymentMethodNonce: string,
-    guestUser?: GuestUserCheckout,
-    guestCart?: GuestCart,
-    remember?: boolean
-  ) {
-    const { user, guestUserId, cart, amount } = await this.checkUserPaymentData(
-      auth,
-      true,
-      guestUser,
-      guestCart,
-      true
-    )
-
-    const braintreeService = new BraintreeService()
-    const braintreeCustomer = (user as User)?.id
-      ? await braintreeService.getCustomer((user as User).braintreeId)
-      : undefined
-    if (
-      (user as User)?.id &&
-      braintreeCustomer &&
-      (braintreeCustomer.firstName !== (user as User).firstName ||
-        braintreeCustomer.lastName !== (user as User).lastName ||
-        braintreeCustomer.email !== user.email)
-    ) {
-      await braintreeService.updateCustomer(braintreeCustomer.id, user as User)
-    }
-
-    const { transactionId, customerId } = await braintreeService.createTransaction(
-      paymentMethodNonce,
-      user,
-      amount,
-      braintreeCustomer
-    )
-
-    await this.updateUser(user, remember, customerId, undefined)
-
-    await CartsService.onBuyItems(cart)
-
-    OrdersService.createOrderByPayment(
-      i18n,
-      appName,
-      appDomain,
-      user,
-      guestUserId,
-      cart,
-      transactionId,
-      undefined
-    )
-
-    return transactionId
   }
 
   public static async createPaypalTransaction(
     i18n: I18nContract,
     auth: AuthContract,
-    guestUser?: GuestUserCheckout,
-    guestCart?: GuestCart,
-    remember?: boolean
+    checkoutData: CheckoutData,
+    guestCart?: GuestCart
   ) {
-    const { user, cart, amount, discount } = await this.checkUserPaymentData(
+    const { cart, amount, discount } = await this.checkUserPaymentData(
       auth,
-      false,
-      guestUser,
+      checkoutData,
       guestCart
     )
 
     const orderProducts = await PaypalService.createOrderProducts(cart)
     const transactionId = await PaypalService.createOrder(
       i18n,
-      user,
+      checkoutData,
       orderProducts,
       amount,
-      remember,
       discount
     )
 
@@ -273,21 +179,21 @@ export default class PaymentsService {
     auth: AuthContract,
     appName: string,
     appDomain: string,
-    guestUser?: GuestUserCheckout,
-    guestCart?: GuestCart,
-    remember?: boolean
+    checkoutData: CheckoutData,
+    guestCart?: GuestCart
   ) {
-    const { user, guestUserId, cart } = await this.checkUserPaymentData(
+    const { user, guestUser, cart } = await this.checkUserPaymentData(
       auth,
-      true,
-      guestUser,
+      checkoutData,
       guestCart,
       true
     )
 
     const { transactionId, customerId } = await PaypalService.captureOrder(i18n, id)
 
-    await this.updateUser(user, remember, undefined, customerId)
+    if (user) {
+      await this.updateUser(user, customerId, checkoutData)
+    }
 
     await CartsService.onBuyItems(cart)
 
@@ -295,10 +201,10 @@ export default class PaymentsService {
       i18n,
       appName,
       appDomain,
+      checkoutData,
       user,
-      guestUserId,
+      guestUser,
       cart,
-      undefined,
       transactionId
     )
 

@@ -7,7 +7,7 @@ import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import { OrderBigbuy, OrderBigbuyProduct } from 'App/Types/order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
-import { GuestUserCheckoutAddress } from 'App/Types/user'
+import { CheckoutAddress } from 'App/Types/checkout'
 import { getCountryName, getCountryCode } from 'App/Utils/addresses'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
@@ -193,7 +193,7 @@ export default class BigbuyService {
   public static async createOrder(
     internalReference: string,
     email: string,
-    shipping: GuestUserCheckoutAddress,
+    shipping: CheckoutAddress,
     products: OrderBigbuyProduct[]
   ) {
     let orderId = ''

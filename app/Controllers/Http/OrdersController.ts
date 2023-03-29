@@ -4,6 +4,7 @@ import I18n from '@ioc:Adonis/Addons/I18n'
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import Order from 'App/Models/Order'
 import User from 'App/Models/User'
+import { CheckoutData } from 'App/Types/checkout'
 import { GuestCart } from 'App/Types/cart'
 import { OrderResponse, OrdersResponse } from 'App/Controllers/Http/types'
 import OrdersService from 'App/Services/OrdersService'
@@ -14,7 +15,6 @@ import { getSupportedLocale } from 'App/Utils/localization'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
-// import CreateOrderValidator from 'App/Validators/Order/CreateOrderValidator'
 import CreateAdminOrderValidator from 'App/Validators/Order/CreateAdminOrderValidator'
 import SendOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -88,29 +88,6 @@ export default class OrdersController {
     } as OrderResponse)
   }
 
-  /*public async store({ request, response, auth, i18n }: HttpContextContract) {
-    const validatedData = await request.validate(CreateOrderValidator)
-
-    const order = await OrdersService.createOrderByRoute(
-      i18n,
-      auth,
-      validatedData.appName,
-      validatedData.appDomain,
-      validatedData.braintreeTransactionId,
-      validatedData.paypalTransactionId,
-      validatedData.guestUser,
-      validatedData.guestCart as GuestCart
-    )
-
-    const successMsg = 'Successfully created order'
-    logRouteSuccess(request, successMsg)
-    return response.created({
-      code: 201,
-      message: successMsg,
-      order: order,
-    } as OrderResponse)
-  }*/
-
   public async storeAdmin({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateAdminOrderValidator)
     if (!validatedData.locale) {
@@ -122,12 +99,9 @@ export default class OrdersController {
       locale,
       validatedData.appName,
       validatedData.appDomain,
-      validatedData.braintreeTransactionId,
-      validatedData.paypalTransactionId,
-      validatedData.userId,
-      validatedData.guestUserEmail,
-      validatedData.shipping,
-      validatedData.cart as GuestCart
+      validatedData.checkoutData as CheckoutData,
+      validatedData.cart as GuestCart,
+      validatedData.paypalTransactionId
     )
 
     const successMsg = 'Successfully created order by admin'

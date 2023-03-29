@@ -5,42 +5,13 @@ import Drive from '@ioc:Adonis/Core/Drive'
 
 import { ContactTypes } from 'App/Constants/contact'
 import User from 'App/Models/User'
-import GuestUser from 'App/Models/GuestUser'
-import UserAddress from 'App/Models/UserAddress'
 import Order from 'App/Models/Order'
 import Cart from 'App/Models/Cart'
-import { GuestUserCheckoutAddress } from 'App/Types/user'
+import { CheckoutData } from 'App/Types/checkout'
 import { GuestCartCheck } from 'App/Types/cart'
-import Logger from '@ioc:Adonis/Core/Logger'
+import { logSuccess } from 'App/Utils/logger'
 
 export default class MailService {
-  public static async sendConfirmationEmail(
-    guestUser: GuestUser,
-    username: string,
-    i18n: I18nContract,
-    appName: string,
-    appDomain: string,
-    btnUrl: string
-  ) {
-    const currentYear = new Date().getFullYear()
-    await Mail.send((message) => {
-      message
-        .from(Env.get('SMTP_EMAIL'))
-        .to(guestUser.email)
-        .subject(i18n.formatMessage('messages.emails.confirmTransaction.subject'))
-        .htmlView('emails/auth', {
-          i18n,
-          appName,
-          appDomain,
-          currentYear,
-          username,
-          description: i18n.formatMessage('messages.emails.confirmTransaction.description'),
-          btnTxt: i18n.formatMessage('messages.emails.confirmTransaction.button'),
-          btnUrl,
-        })
-    })
-  }
-
   public static async sendActivationEmail(
     user: User,
     i18n: I18nContract,
@@ -186,17 +157,15 @@ export default class MailService {
           order,
         })
     })
-    Logger.error('Sent email check order')
+    logSuccess('Sent email check order')
   }
 
   public static async sendErrorCreateOrderEmail(
     i18n: I18nContract,
     appName: string,
     appDomain: string,
-    userEmail: string,
-    shipping: UserAddress | GuestUserCheckoutAddress,
     errorMsg: string,
-    braintreeTransactionId: string | undefined,
+    checkoutData: CheckoutData,
     paypalTransactionId: string | undefined,
     cart: Cart | GuestCartCheck
   ) {
@@ -212,16 +181,14 @@ export default class MailService {
           appName,
           appDomain,
           currentYear,
-          userEmail,
           currentDate,
           errorMsg,
-          braintreeTransactionId,
+          checkoutData,
           paypalTransactionId,
-          shipping,
           cart,
         })
     })
-    Logger.error('Sent email create order error')
+    logSuccess('Sent email create order error')
   }
 
   public static async sendErrorGetOrderEmail(
@@ -248,6 +215,6 @@ export default class MailService {
           order,
         })
     })
-    Logger.error('Sent email get order error')
+    logSuccess('Sent email get order error')
   }
 }

@@ -29,11 +29,6 @@ export const guestUserSchema = schema.object.optional().members({
   billing: addressSchema,
 })
 
-export const guestUserWithoutEmailSchema = schema.object.optional().members({
-  shipping: addressSchema,
-  billing: addressSchema,
-})
-
 export const guestCartSchema = schema.object.optional().members({
   items: schema.array.optional().members(
     schema.object().members({
@@ -42,6 +37,14 @@ export const guestCartSchema = schema.object.optional().members({
       quantity: schema.number(),
     })
   ),
+})
+
+export const checkoutDataSchema = schema.object().members({
+  email: schema.string(),
+  shipping: addressSchema,
+  billing: addressSchema,
+  remember: schema.boolean.optional(),
+  notes: schema.string.optional(),
 })
 
 export const googleIndexerUrlSchema = schema.object().members({
