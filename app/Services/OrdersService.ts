@@ -14,7 +14,6 @@ import PaymentsService from 'App/Services/PaymentsService'
 import BigbuyService from 'App/Services/BigbuyService'
 import MailService from 'App/Services/MailService'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 
@@ -83,7 +82,7 @@ export default class OrdersService {
           cart
         )
       }
-      throw new InternalServerException(errorMsg)
+      return
     }
 
     // Load payment data
@@ -103,7 +102,7 @@ export default class OrdersService {
           cart
         )
       }
-      throw new InternalServerException(errorMsg)
+      return
     }
 
     // Create Bigbuy order
@@ -130,7 +129,7 @@ export default class OrdersService {
           cart
         )
       }
-      throw new InternalServerException(errorMsg)
+      return
     }
 
     // Send check order email
@@ -147,7 +146,7 @@ export default class OrdersService {
     } catch (error) {
       const errorMsg = `Send check order email error: ${error.message}`
       await MailService.sendErrorGetOrderEmail(i18n, appName, appDomain, errorMsg, order)
-      throw new InternalServerException(errorMsg)
+      return
     }
 
     return order
