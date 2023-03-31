@@ -11,7 +11,6 @@ import { OrderPaypalProduct } from 'App/Types/order'
 import { CheckoutData } from 'App/Types/checkout'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { getCountryCode } from 'App/Utils/addresses'
-import { roundTwoDecimals } from 'App/Utils/numbers'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
@@ -182,8 +181,10 @@ export default class PaypalService {
     i18n: I18nContract,
     checkoutData: CheckoutData,
     products: OrderPaypalProduct[],
-    amount: string,
-    discount?: number
+    cartAmount: string,
+    discount: string,
+    vat: string,
+    amount: string
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
@@ -197,6 +198,10 @@ export default class PaypalService {
         'Paypal-Request-Id': uuidv4(),
       },
     }
+    console.log('cartAmount', cartAmount)
+    console.log('discount', discount)
+    console.log('vat', vat)
+    console.log('amount', amount)
     const body = {
       intent: 'CAPTURE',
       purchase_units: [
@@ -204,18 +209,24 @@ export default class PaypalService {
           items: products,
           amount: {
             currency_code: currency,
-            value: discount ? roundTwoDecimals(parseFloat(amount) - discount).toString() : amount,
+            value: amount,
             breakdown: {
+              discount: {
+                currency_code: currency,
+                value: discount,
+              },
               item_total: {
                 currency_code: currency,
-                value: amount,
+                value: cartAmount,
               },
-              discount: discount
-                ? {
-                    currency_code: currency,
-                    value: discount.toString(),
-                  }
-                : undefined,
+              shipping: {
+                currency_code: currency,
+                value: '0',
+              },
+              tax_total: {
+                currency_code: currency,
+                value: vat,
+              },
             },
           },
           payee: {
