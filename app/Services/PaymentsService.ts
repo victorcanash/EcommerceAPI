@@ -15,6 +15,7 @@ import PaypalService from 'App/Services/PaypalService'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import OrdersService from 'App/Services/OrdersService'
+import { roundTwoDecimals, roundTwoDecimalsToString } from 'App/Utils/numbers'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 
@@ -74,16 +75,16 @@ export default class PaymentsService {
     // First Buy Discount
     let discount = 0
     if (user && !user.firstOrder) {
-      discount = (firstBuyDiscount / 100) * cartAmount
+      discount = roundTwoDecimals((firstBuyDiscount / 100) * cartAmount)
     }
     // Total VAT
     const vat = (spainVat / 100) * (cartAmount - discount)
 
     return {
-      cartAmount: cartAmount.toFixed(2),
-      discount: discount.toFixed(2),
-      vat: vat.toFixed(2),
-      amount: (cartAmount - discount + vat).toFixed(2),
+      cartAmount: roundTwoDecimalsToString(cartAmount),
+      discount: roundTwoDecimalsToString(discount),
+      vat: roundTwoDecimalsToString(vat),
+      amount: roundTwoDecimalsToString(cartAmount - discount + vat),
     }
   }
 

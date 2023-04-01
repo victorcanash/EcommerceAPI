@@ -47,7 +47,6 @@ export type OrderPaypalProduct = {
   name: string
   description: string
   category: 'PHYSICAL_GOODS'
-  sku: string
   quantity: string
   unit_amount: {
     currency_code: string

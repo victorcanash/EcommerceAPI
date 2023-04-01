@@ -150,10 +150,9 @@ export default class PaypalService {
       if (item.quantity > 0) {
         if (item.inventory) {
           orderProducts.push({
-            name: item.inventory.product.name.current,
-            description: item.inventory.name.current,
+            name: item.inventory.name.current,
+            description: item.inventory.description.current,
             category: 'PHYSICAL_GOODS',
-            sku: item.inventory.sku,
             quantity: item.quantity.toString(),
             unit_amount: {
               currency_code: currency,
