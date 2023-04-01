@@ -197,10 +197,6 @@ export default class PaypalService {
         'Paypal-Request-Id': uuidv4(),
       },
     }
-    console.log('cartAmount', cartAmount)
-    console.log('discount', discount)
-    console.log('vat', vat)
-    console.log('amount', amount)
     const body = {
       intent: 'CAPTURE',
       purchase_units: [
