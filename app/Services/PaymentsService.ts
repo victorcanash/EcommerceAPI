@@ -3,7 +3,7 @@ import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { firstBuyDiscount, spainVat } from 'App/Constants/payment'
+import { firstBuyDiscountPercent, vatPercent } from 'App/Constants/payment'
 import { AddressTypes } from 'App/Constants/addresses'
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
@@ -75,10 +75,10 @@ export default class PaymentsService {
     // First Buy Discount
     let discount = 0
     if (user && !user.firstOrder) {
-      discount = roundTwoDecimals((firstBuyDiscount / 100) * cartAmount)
+      discount = roundTwoDecimals((firstBuyDiscountPercent / 100) * cartAmount)
     }
     // Total VAT
-    const vat = (spainVat / 100) * (cartAmount - discount)
+    const vat = (vatPercent / 100) * (cartAmount - discount)
 
     return {
       cartAmount: roundTwoDecimalsToString(cartAmount),
