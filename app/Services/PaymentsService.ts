@@ -25,33 +25,12 @@ export default class PaymentsService {
     paypalCustomerId: string,
     checkoutData: CheckoutData
   ) {
+    // Save payment data
     if (checkoutData.remember) {
       user.merge({
         paypalId: paypalCustomerId,
       })
       await user.save()
-      await user.load('shipping')
-      await user.load('billing')
-      if (user.shipping) {
-        user.shipping.merge(checkoutData.shipping)
-        await user.shipping.save()
-      } else {
-        await UserAddress.create({
-          ...checkoutData.shipping,
-          userId: user.id,
-          type: AddressTypes.SHIPPING,
-        })
-      }
-      if (user.billing) {
-        user.billing.merge(checkoutData.billing)
-        await user.billing.save()
-      } else {
-        await UserAddress.create({
-          ...checkoutData.billing,
-          userId: user.id,
-          type: AddressTypes.BILLING,
-        })
-      }
     } else {
       if (user.paypalId) {
         user.merge({
@@ -59,6 +38,29 @@ export default class PaymentsService {
         })
       }
       await user.save()
+    }
+    // Save addresses
+    await user.load('shipping')
+    await user.load('billing')
+    if (user.shipping) {
+      user.shipping.merge(checkoutData.shipping)
+      await user.shipping.save()
+    } else {
+      await UserAddress.create({
+        ...checkoutData.shipping,
+        userId: user.id,
+        type: AddressTypes.SHIPPING,
+      })
+    }
+    if (user.billing) {
+      user.billing.merge(checkoutData.billing)
+      await user.billing.save()
+    } else {
+      await UserAddress.create({
+        ...checkoutData.billing,
+        userId: user.id,
+        type: AddressTypes.BILLING,
+      })
     }
   }
 
