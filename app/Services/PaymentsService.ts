@@ -43,21 +43,29 @@ export default class PaymentsService {
     await user.load('shipping')
     await user.load('billing')
     if (user.shipping) {
-      user.shipping.merge(checkoutData.shipping)
+      user.shipping.merge({
+        ...checkoutData.shipping,
+        addressLine2: checkoutData.shipping.addressLine2 || '',
+      })
       await user.shipping.save()
     } else {
       await UserAddress.create({
         ...checkoutData.shipping,
+        addressLine2: checkoutData.shipping.addressLine2 || '',
         userId: user.id,
         type: AddressTypes.SHIPPING,
       })
     }
     if (user.billing) {
-      user.billing.merge(checkoutData.billing)
+      user.billing.merge({
+        ...checkoutData.billing,
+        addressLine2: checkoutData.billing.addressLine2 || '',
+      })
       await user.billing.save()
     } else {
       await UserAddress.create({
         ...checkoutData.billing,
+        addressLine2: checkoutData.billing.addressLine2 || '',
         userId: user.id,
         type: AddressTypes.BILLING,
       })
