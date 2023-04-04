@@ -44,11 +44,9 @@ export default Env.rules({
   PROD_CORS_ORIGIN_6: Env.schema.string.optional(),
 
   DRIVE_DISK: Env.schema.enum(['local', 's3'] as const),
-  // S3_KEY: Env.schema.string(),
-  // S3_SECRET: Env.schema.string(),
-  // S3_BUCKET: Env.schema.string(),
-  // S3_REGION: Env.schema.string(),
-  // S3_ENDPOINT: Env.schema.string.optional(),
+  CLOUDINARY_CLOUD_NAME: Env.schema.string(),
+  CLOUDINARY_API_KEY: Env.schema.string(),
+  CLOUDINARY_API_SECRET: Env.schema.string(),
 
   SMTP_HOST: Env.schema.string({ format: 'host' }),
   SMTP_PORT: Env.schema.number(),
