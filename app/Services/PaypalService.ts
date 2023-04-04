@@ -182,7 +182,6 @@ export default class PaypalService {
     products: OrderPaypalProduct[],
     cartAmount: string,
     discount: string,
-    vat: string,
     amount: string
   ) {
     let orderId = ''
@@ -217,10 +216,6 @@ export default class PaypalService {
               shipping: {
                 currency_code: currency,
                 value: '0',
-              },
-              tax_total: {
-                currency_code: currency,
-                value: vat,
               },
             },
           },

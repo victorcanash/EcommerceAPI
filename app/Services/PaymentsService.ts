@@ -3,7 +3,7 @@ import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { firstBuyDiscountPercent, vatPercent } from 'App/Constants/payment'
+import { firstBuyDiscountPercent } from 'App/Constants/payment'
 import { AddressTypes } from 'App/Constants/addresses'
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
@@ -87,14 +87,11 @@ export default class PaymentsService {
     if (user && !user.firstOrder) {
       discount = roundTwoDecimals((firstBuyDiscountPercent / 100) * cartAmount)
     }
-    // Total VAT
-    const vat = (vatPercent / 100) * (cartAmount - discount)
 
     return {
       cartAmount: roundTwoDecimalsToString(cartAmount),
       discount: roundTwoDecimalsToString(discount),
-      vat: roundTwoDecimalsToString(vat),
-      amount: roundTwoDecimalsToString(cartAmount - discount + vat),
+      amount: roundTwoDecimalsToString(cartAmount - discount),
     }
   }
 
@@ -132,7 +129,7 @@ export default class PaymentsService {
       }
       cart = await CartsService.createGuestCartCheck(guestCart?.items)
     }
-    const { cartAmount, discount, vat, amount } = this.checkPaymentData(user, cart)
+    const { cartAmount, discount, amount } = this.checkPaymentData(user, cart)
 
     return {
       user,
@@ -140,7 +137,6 @@ export default class PaymentsService {
       cart,
       cartAmount,
       discount,
-      vat,
       amount,
     }
   }
@@ -156,7 +152,7 @@ export default class PaymentsService {
       }
     }
     const cartCheck = await CartsService.createGuestCartCheck(cart?.items)
-    const { cartAmount, discount, vat, amount } = this.checkPaymentData(user, cartCheck)
+    const { cartAmount, discount, amount } = this.checkPaymentData(user, cartCheck)
 
     return {
       user,
@@ -164,7 +160,6 @@ export default class PaymentsService {
       cartCheck,
       cartAmount,
       discount,
-      vat,
       amount,
     }
   }
@@ -175,7 +170,7 @@ export default class PaymentsService {
     checkoutData: CheckoutData,
     guestCart?: GuestCart
   ) {
-    const { cart, cartAmount, discount, vat, amount } = await this.checkUserPaymentData(
+    const { cart, cartAmount, discount, amount } = await this.checkUserPaymentData(
       auth,
       checkoutData,
       guestCart
@@ -188,7 +183,6 @@ export default class PaymentsService {
       orderProducts,
       cartAmount,
       discount,
-      vat,
       amount
     )
 
