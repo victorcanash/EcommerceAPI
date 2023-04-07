@@ -1,5 +1,7 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
+import NP from 'number-precision'
+
 export default class AppProvider {
   constructor(protected app: ApplicationContract) {}
 
@@ -9,6 +11,7 @@ export default class AppProvider {
 
   public async boot() {
     // IoC container is ready
+    NP.enableBoundaryChecking(false)
   }
 
   public async ready() {
