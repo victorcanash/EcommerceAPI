@@ -10,9 +10,10 @@ import {
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 
+import NP from 'number-precision'
+
 import ProductBaseModel from 'App/Models/ProductBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
-import { roundTwoDecimals } from 'App/Utils/numbers'
 
 export default class ProductPack extends ProductBaseModel {
   @column()
@@ -58,16 +59,19 @@ export default class ProductPack extends ProductBaseModel {
   public get discountPercent() {
     const originalPrice = this.getOriginalPrice()
     const decreaseValue = originalPrice - this.price
-    const discountPercent = (decreaseValue / this.getOriginalPrice()) * 100
-    return roundTwoDecimals(discountPercent)
+    const discountPercent = NP.round(
+      NP.times(NP.divide(decreaseValue, this.getOriginalPrice()), 100),
+      2
+    )
+    return discountPercent
   }
 
   private getOriginalPrice() {
     let originalPrice = 0
     this.inventories.forEach((item) => {
-      originalPrice += item.realPrice
+      originalPrice = NP.plus(originalPrice, item.realPrice)
     })
-    return roundTwoDecimals(originalPrice)
+    return NP.round(originalPrice, 2)
   }
 
   @beforeFetch()

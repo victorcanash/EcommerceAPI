@@ -7,9 +7,10 @@ import {
   ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
 
+import NP from 'number-precision'
+
 import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
-import { roundTwoDecimals } from 'App/Utils/numbers'
 
 export default class ProductInventory extends ProductBaseModel {
   @column()
@@ -30,8 +31,11 @@ export default class ProductInventory extends ProductBaseModel {
   @computed()
   public get realPrice() {
     if (this.product?.activeDiscount) {
-      const discount = (this.product.activeDiscount.discountPercent / 100) * this.price
-      return roundTwoDecimals(this.price - discount)
+      const discount = NP.times(
+        NP.divide(this.product.activeDiscount.discountPercent, 100),
+        this.price
+      )
+      return NP.round(NP.minus(this.price, discount), 2)
     }
     return this.price
   }
