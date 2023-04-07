@@ -6,7 +6,13 @@ import CartItem from 'App/Models/CartItem'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
 import User from 'App/Models/User'
-import { GuestCartCheck, GuestCartCheckItem, GuestCartItem } from 'App/Types/cart'
+import {
+  GuestCartCheck,
+  GuestCartCheckItem,
+  GuestCartItem,
+  ItemAmount,
+  TotalAmount,
+} from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class CartsService {
@@ -25,16 +31,12 @@ export default class CartsService {
     return {
       itemVat,
       itemSubtotal,
-      itemTotal: itemTotal,
-    }
+      itemTotal,
+    } as ItemAmount
   }
 
   public static getTotalAmount(cart: Cart | GuestCartCheck, user: User | undefined) {
-    const itemsAmount: {
-      itemVat: number
-      itemSubtotal: number
-      itemTotal: number
-    }[] = []
+    const itemsAmount: ItemAmount[] = []
     let subtotal = 0
     let total = 0
     let totalQuantity = 0
@@ -60,7 +62,7 @@ export default class CartsService {
       totalDiscount: firstBuyDiscount,
       total,
       totalQuantity,
-    }
+    } as TotalAmount
   }
 
   // Check if there are the quantity desired by user and if there are items with 0 quantity

@@ -10,7 +10,7 @@ import CartItem from 'App/Models/CartItem'
 import User from 'App/Models/User'
 import { OrderPaypalProduct } from 'App/Types/order'
 import { CheckoutData } from 'App/Types/checkout'
-import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
+import { GuestCartCheck, GuestCartCheckItem, ItemAmount } from 'App/Types/cart'
 import CartsService from 'App/Services/CartsService'
 import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
@@ -149,11 +149,7 @@ export default class PaypalService {
   public static async createOrderProducts(
     currency: string,
     cart: Cart | GuestCartCheck,
-    itemsAmount: {
-      itemVat: number
-      itemSubtotal: number
-      itemTotal: number
-    }[]
+    itemsAmount: ItemAmount[]
   ) {
     const orderProducts: OrderPaypalProduct[] = []
     cart.items.forEach((item: CartItem | GuestCartCheckItem, index: number) => {
@@ -185,14 +181,15 @@ export default class PaypalService {
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
-    const { itemsAmount, totalDiscount, totalVat, subtotal, total } = CartsService.getTotalAmount(
-      cart,
-      user
-    )
-    if (subtotal <= 0) {
+    const totalAmount = CartsService.getTotalAmount(cart, user)
+    if (totalAmount.subtotal <= 0) {
       throw new PermissionException(`Your don't have cart amount`)
     }
-    const orderProducts = await PaypalService.createOrderProducts(currency, cart, itemsAmount)
+    const orderProducts = await PaypalService.createOrderProducts(
+      currency,
+      cart,
+      totalAmount.itemsAmount
+    )
     const authHeaders = await this.getAuthHeaders(i18n)
     const options: AxiosRequestConfig = {
       headers: {
@@ -210,19 +207,19 @@ export default class PaypalService {
           items: orderProducts,
           amount: {
             currency_code: currency,
-            value: total.toString(),
+            value: totalAmount.total.toString(),
             breakdown: {
               item_total: {
                 currency_code: currency,
-                value: subtotal.toString(),
+                value: totalAmount.subtotal.toString(),
               },
               tax_total: {
                 currency_code: currency,
-                value: totalVat.toString(),
+                value: totalAmount.totalVat.toString(),
               },
               discount: {
                 currency_code: currency,
-                value: totalDiscount.toString(),
+                value: totalAmount.totalDiscount.toString(),
               },
               shipping: {
                 currency_code: currency,
