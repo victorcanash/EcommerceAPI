@@ -7,12 +7,15 @@ import { v4 as uuidv4 } from 'uuid'
 
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
+import User from 'App/Models/User'
 import { OrderPaypalProduct } from 'App/Types/order'
 import { CheckoutData } from 'App/Types/checkout'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
+import CartsService from 'App/Services/CartsService'
 import { getCountryCode } from 'App/Utils/addresses'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
+import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class PaypalService {
   private static get baseUrl() {
@@ -143,35 +146,33 @@ export default class PaypalService {
     return result
   }
 
-  public static async createOrderProducts(cart: Cart | GuestCartCheck) {
+  public static async createOrderProducts(
+    currency: string,
+    cart: Cart | GuestCartCheck,
+    itemsAmount: {
+      itemVat: number
+      itemSubtotal: number
+      itemTotal: number
+    }[]
+  ) {
     const orderProducts: OrderPaypalProduct[] = []
-    const currency = Env.get('CURRENCY', 'EUR')
-    cart.items.forEach((item: CartItem | GuestCartCheckItem) => {
-      if (item.quantity > 0) {
-        if (item.inventory) {
-          orderProducts.push({
-            name: item.inventory.name.current,
-            description: item.inventory.description.current,
-            category: 'PHYSICAL_GOODS',
-            quantity: item.quantity.toString(),
-            unit_amount: {
-              currency_code: currency,
-              value: item.inventory.realPrice.toString(),
-            },
-          } as OrderPaypalProduct)
-        } else if (item.pack) {
-          orderProducts.push({
-            name: item.pack.name.current,
-            description: item.pack.description.current,
-            category: 'PHYSICAL_GOODS',
-            quantity: item.quantity.toString(),
-            unit_amount: {
-              currency_code: currency,
-              value: item.pack.price.toString(),
-            },
-          } as OrderPaypalProduct)
-        }
-      }
+    cart.items.forEach((item: CartItem | GuestCartCheckItem, index: number) => {
+      orderProducts.push({
+        name: item.inventory ? item.inventory.name.current : item.pack?.name.current || '',
+        description: item.inventory
+          ? item.inventory.description.current
+          : item.pack?.description.current || '',
+        category: 'PHYSICAL_GOODS',
+        quantity: item.quantity.toString(),
+        unit_amount: {
+          currency_code: currency,
+          value: itemsAmount[index].itemSubtotal.toString(),
+        },
+        tax: {
+          currency_code: currency,
+          value: itemsAmount[index].itemVat.toString(),
+        },
+      } as OrderPaypalProduct)
     })
     return orderProducts
   }
@@ -179,13 +180,19 @@ export default class PaypalService {
   public static async createOrder(
     i18n: I18nContract,
     checkoutData: CheckoutData,
-    products: OrderPaypalProduct[],
-    cartAmount: string,
-    discount: string,
-    amount: string
+    cart: Cart | GuestCartCheck,
+    user: User | undefined
   ) {
     let orderId = ''
     const currency = Env.get('CURRENCY', 'EUR')
+    const { itemsAmount, totalDiscount, totalVat, subtotal, total } = CartsService.getTotalAmount(
+      cart,
+      user
+    )
+    if (subtotal <= 0) {
+      throw new PermissionException(`Your don't have cart amount`)
+    }
+    const orderProducts = await PaypalService.createOrderProducts(currency, cart, itemsAmount)
     const authHeaders = await this.getAuthHeaders(i18n)
     const options: AxiosRequestConfig = {
       headers: {
@@ -200,18 +207,22 @@ export default class PaypalService {
       intent: 'CAPTURE',
       purchase_units: [
         {
-          items: products,
+          items: orderProducts,
           amount: {
             currency_code: currency,
-            value: amount,
+            value: total.toString(),
             breakdown: {
-              discount: {
-                currency_code: currency,
-                value: discount,
-              },
               item_total: {
                 currency_code: currency,
-                value: cartAmount,
+                value: subtotal.toString(),
+              },
+              tax_total: {
+                currency_code: currency,
+                value: totalVat.toString(),
+              },
+              discount: {
+                currency_code: currency,
+                value: totalDiscount.toString(),
               },
               shipping: {
                 currency_code: currency,

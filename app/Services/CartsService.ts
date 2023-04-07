@@ -1,7 +1,11 @@
+import NP from 'number-precision'
+
+import { firstBuyDiscountPercent, vatExtractPercent } from 'App/Constants/payments'
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
+import User from 'App/Models/User'
 import { GuestCartCheck, GuestCartCheckItem, GuestCartItem } from 'App/Types/cart'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
@@ -14,18 +18,48 @@ export default class CartsService {
     return this.getCartItemByField('id', id)
   }
 
-  public static getTotalAmount(cart: Cart | GuestCartCheck) {
-    let amount = 0
-    let quantity = 0
-    cart.items.forEach((item) => {
-      amount += item.inventory
-        ? item.inventory.serialize().realPrice * item.quantity
-        : (item.pack?.price || 0) * item.quantity
-      quantity += item.quantity
-    })
+  private static getItemAmount(item: CartItem | GuestCartCheckItem) {
+    const itemTotal = item.inventory ? item.inventory.serialize().realPrice : item.pack?.price || 0
+    const itemVat = -NP.round(NP.minus(NP.divide(itemTotal, vatExtractPercent), itemTotal), 2)
+    const itemSubtotal = NP.round(NP.minus(itemTotal, itemVat), 2)
     return {
-      amount,
-      quantity,
+      itemVat,
+      itemSubtotal,
+      itemTotal: itemTotal,
+    }
+  }
+
+  public static getTotalAmount(cart: Cart | GuestCartCheck, user: User | undefined) {
+    const itemsAmount: {
+      itemVat: number
+      itemSubtotal: number
+      itemTotal: number
+    }[] = []
+    let subtotal = 0
+    let total = 0
+    let totalQuantity = 0
+    cart.items.forEach((item) => {
+      if (item.quantity > 0 && (item.inventory || item.pack)) {
+        const { itemVat, itemSubtotal, itemTotal } = this.getItemAmount(item)
+        itemsAmount.push({ itemVat, itemSubtotal, itemTotal })
+        subtotal = NP.round(NP.plus(subtotal, NP.times(itemSubtotal, item.quantity)), 2)
+        total = NP.round(NP.plus(total, NP.times(itemTotal, item.quantity)), 2)
+        totalQuantity = NP.round(NP.plus(totalQuantity, item.quantity), 2)
+      }
+    })
+    const totalVat = NP.round(NP.minus(total, subtotal), 2)
+    let firstBuyDiscount = 0
+    if (user && !user.firstOrder) {
+      firstBuyDiscount = NP.round(NP.times(NP.divide(firstBuyDiscountPercent, 100), total), 2)
+    }
+    total = NP.minus(total, firstBuyDiscount)
+    return {
+      itemsAmount,
+      subtotal,
+      totalVat,
+      totalDiscount: firstBuyDiscount,
+      total,
+      totalQuantity,
     }
   }
 

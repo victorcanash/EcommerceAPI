@@ -3,7 +3,6 @@ import { I18nContract } from '@ioc:Adonis/Addons/I18n'
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { firstBuyDiscountPercent } from 'App/Constants/payment'
 import { AddressTypes } from 'App/Constants/addresses'
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
@@ -15,7 +14,6 @@ import PaypalService from 'App/Services/PaypalService'
 import UsersService from 'App/Services/UsersService'
 import CartsService from 'App/Services/CartsService'
 import OrdersService from 'App/Services/OrdersService'
-import { roundTwoDecimals, roundTwoDecimalsToString } from 'App/Utils/numbers'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import PermissionException from 'App/Exceptions/PermissionException'
 
@@ -72,26 +70,9 @@ export default class PaymentsService {
     }
   }
 
-  private static checkPaymentData(user: User | undefined, cart: Cart | GuestCartCheck) {
+  private static checkPaymentData(cart: Cart | GuestCartCheck) {
     if (!cart?.items || cart.items.length <= 0) {
       throw new PermissionException(`You don't have selected items in your cart`)
-    }
-
-    // Cart Amount
-    const cartAmount = CartsService.getTotalAmount(cart).amount
-    if (cartAmount <= 0) {
-      throw new PermissionException(`Your don't have cart amount`)
-    }
-    // First Buy Discount
-    let discount = 0
-    if (user && !user.firstOrder) {
-      discount = roundTwoDecimals((firstBuyDiscountPercent / 100) * cartAmount)
-    }
-
-    return {
-      cartAmount: roundTwoDecimalsToString(cartAmount),
-      discount: roundTwoDecimalsToString(discount),
-      amount: roundTwoDecimalsToString(cartAmount - discount),
     }
   }
 
@@ -129,15 +110,12 @@ export default class PaymentsService {
       }
       cart = await CartsService.createGuestCartCheck(guestCart?.items)
     }
-    const { cartAmount, discount, amount } = this.checkPaymentData(user, cart)
+    this.checkPaymentData(cart)
 
     return {
       user,
       guestUser,
       cart,
-      cartAmount,
-      discount,
-      amount,
     }
   }
 
@@ -152,15 +130,12 @@ export default class PaymentsService {
       }
     }
     const cartCheck = await CartsService.createGuestCartCheck(cart?.items)
-    const { cartAmount, discount, amount } = this.checkPaymentData(user, cartCheck)
+    this.checkPaymentData(cartCheck)
 
     return {
       user,
       guestUser,
       cartCheck,
-      cartAmount,
-      discount,
-      amount,
     }
   }
 
@@ -170,21 +145,9 @@ export default class PaymentsService {
     checkoutData: CheckoutData,
     guestCart?: GuestCart
   ) {
-    const { cart, cartAmount, discount, amount } = await this.checkUserPaymentData(
-      auth,
-      checkoutData,
-      guestCart
-    )
+    const { user, cart } = await this.checkUserPaymentData(auth, checkoutData, guestCart)
 
-    const orderProducts = await PaypalService.createOrderProducts(cart)
-    const transactionId = await PaypalService.createOrder(
-      i18n,
-      checkoutData,
-      orderProducts,
-      cartAmount,
-      discount,
-      amount
-    )
+    const transactionId = await PaypalService.createOrder(i18n, checkoutData, cart, user)
 
     return transactionId
   }
