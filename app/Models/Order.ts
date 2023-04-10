@@ -22,10 +22,8 @@ export default class Order extends AppBaseModel {
   @column()
   public bigbuyId?: string
 
-  @column({
-    prepare: (value: GuestCartItem[]) => JSON.stringify(value),
-  })
-  public products: GuestCartItem[]
+  @column()
+  public products: string
 
   @column()
   public notes: string
@@ -52,21 +50,22 @@ export default class Order extends AppBaseModel {
   public transactionData: OrderTransaction | undefined
 
   public async loadItemsData() {
-    if (this.products.length > 0) {
+    const items = JSON.parse(this.products) as GuestCartItem[]
+    if (items.length > 0) {
       const inventories = await ProductInventory.query().whereIn(
         'id',
-        this.products.map((item) => {
+        items.map((item) => {
           return item.inventoryId || -1
         })
       )
       const packs = await ProductPack.query().whereIn(
         'id',
-        this.products.map((item) => {
+        items.map((item) => {
           return item.packId || -1
         })
       )
-      for (let i = 0; i < this.products.length; i++) {
-        const product = this.products[i]
+      for (let i = 0; i < items.length; i++) {
+        const product = items[i]
         if (product.inventoryId) {
           const inventory = inventories.find((item) => item.id === product.inventoryId)
           if (inventory) {

@@ -10,7 +10,7 @@ export default class extends BaseSchema {
       table.integer('guest_user_id', 255).nullable()
       table.string('braintree_transaction_id', 255).notNullable()
       table.string('bigbuy_id', 255).nullable()
-      table.json('products').defaultTo([])
+      table.jsonb('products').defaultTo([])
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

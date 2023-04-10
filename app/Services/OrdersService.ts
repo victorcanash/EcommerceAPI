@@ -64,7 +64,7 @@ export default class OrdersService {
         userId: user?.id || undefined,
         guestUserId: guestUser?.id || undefined,
         paypalTransactionId: paypalTransactionId,
-        products: guestCartItems,
+        products: JSON.stringify(guestCartItems),
         notes: checkoutData.notes,
       })
       orderProducts = await BigbuyService.createOrderProducts(cart)
