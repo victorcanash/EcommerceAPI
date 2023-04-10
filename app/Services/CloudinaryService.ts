@@ -1,6 +1,6 @@
 import Env from '@ioc:Adonis/Core/Env'
 
-import { v2 as cloudinary, UploadApiResponse } from 'cloudinary'
+import { v2 as cloudinary } from 'cloudinary'
 
 import InternalServerException from 'App/Exceptions/InternalServerException'
 
@@ -13,17 +13,20 @@ export default class CloudinaryService {
     })
   }
 
-  public async uploadFile(filepath: string, publicId: string) {
-    let response = {} as UploadApiResponse
+  public async uploadFile(filepath: string) {
+    let url = ''
     await cloudinary.uploader
-      .upload(filepath, { public_id: publicId })
+      .upload(filepath, { folder: Env.get('CLOUDINARY_REVIEWS_FOLDER', '') })
       .then((result) => {
-        response = result
+        if (!result?.secure_url) {
+          throw new InternalServerException('Something went wrong, empty cloudinary image url')
+        }
+        url = result.secure_url
       })
       .catch((error) => {
-        throw new InternalServerException(error.message)
+        throw new InternalServerException(`Error uploading image to cloudinary: ${error.message}`)
       })
-    return response
+    return url
   }
 
   public getFile(publicId: string, width: number, height: number, crop = 'fill') {

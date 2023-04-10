@@ -47,6 +47,8 @@ export default Env.rules({
   CLOUDINARY_CLOUD_NAME: Env.schema.string(),
   CLOUDINARY_API_KEY: Env.schema.string(),
   CLOUDINARY_API_SECRET: Env.schema.string(),
+  CLOUDINARY_REVIEWS_FOLDER: Env.schema.string(),
+  CLOUDINARY_MAX_FILE_SIZE: Env.schema.string(),
 
   SMTP_HOST: Env.schema.string({ format: 'host' }),
   SMTP_PORT: Env.schema.number(),
