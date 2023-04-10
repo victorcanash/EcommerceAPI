@@ -162,7 +162,6 @@ export default class ProductsService {
     if (!inventory) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product inventory`)
     }
-
     return inventory
   }
 

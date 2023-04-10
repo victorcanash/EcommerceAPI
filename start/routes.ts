@@ -92,6 +92,13 @@ Route.group(() => {
     })
     .apiOnly()
 
+  Route.resource('product-reviews', 'PReviewsController')
+    .middleware({
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
+    })
+    .apiOnly()
+
   // Payment routes
 
   Route.post('payments/paypal-user-token', 'PaymentsController.getPaypalUserToken').middleware(

@@ -6,6 +6,7 @@ import ProductCategory from 'App/Models/ProductCategory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
+import ProductReview from 'App/Models/ProductReview'
 import Order from 'App/Models/Order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 
@@ -173,6 +174,15 @@ export type PPacksResponse = {
   productPacks: ProductPack[]
   totalPages: number
   currentPage: number
+}
+
+/**
+ * Product review JSON response for Controllers
+ */
+export type PReviewResponse = {
+  code: number
+  message: string
+  productReview: ProductReview
 }
 
 /**
