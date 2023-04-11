@@ -1,8 +1,6 @@
-import { column, computed } from '@ioc:Adonis/Lucid/Orm'
+import { column } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
-import ProductInventory from 'App/Models/ProductInventory'
-import ProductPack from 'App/Models/ProductPack'
 
 export default class ProductReview extends AppBaseModel {
   @column()
@@ -34,18 +32,4 @@ export default class ProductReview extends AppBaseModel {
 
   @column()
   public imageUrl?: string
-
-  @computed()
-  public get inventory() {
-    return this.inventoryData
-  }
-
-  public inventoryData: ProductInventory | undefined
-
-  @computed()
-  public get pack() {
-    return this.packData
-  }
-
-  public packData: ProductPack | undefined
 }

@@ -93,6 +93,7 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-reviews', 'PReviewsController')
+    .except(['show'])
     .middleware({
       update: ['auth:api', 'admin'],
       destroy: ['auth:api', 'admin'],

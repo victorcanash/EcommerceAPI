@@ -186,6 +186,17 @@ export type PReviewResponse = {
 }
 
 /**
+ * Product reviews JSON response for Controllers
+ */
+export type PReviewsResponse = {
+  code: number
+  message: string
+  productReviews: ProductReview[]
+  totalPages: number
+  currentPage: number
+}
+
+/**
  * Order JSON response for Controllers
  */
 export type OrderResponse = {

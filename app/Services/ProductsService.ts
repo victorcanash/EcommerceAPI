@@ -44,6 +44,10 @@ export default class ProductsService {
     return this.getPackByField('id', id)
   }
 
+  public static async getReviewById(id: number) {
+    return this.getReviewByField('id', id)
+  }
+
   public static async getImageById(product: Product, id: number) {
     const productImages = product.imageNames
     if (!productImages || productImages.length <= id) {
@@ -193,6 +197,16 @@ export default class ProductsService {
     }
 
     return pack
+  }
+
+  private static async getReviewByField(field: string, value: string | number) {
+    let review: ProductReview | null = null
+    review = await ProductReview.findBy(field, value)
+    if (!review) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting product review`)
+    }
+
+    return review
   }
 
   private static async calculateRating(findKey: string, item: ProductInventory | ProductPack) {
