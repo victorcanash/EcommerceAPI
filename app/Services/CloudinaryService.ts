@@ -14,19 +14,19 @@ export default class CloudinaryService {
   }
 
   public async uploadFile(filepath: string) {
-    let url = ''
+    let publicId = ''
     await cloudinary.uploader
       .upload(filepath, { folder: Env.get('CLOUDINARY_REVIEWS_FOLDER', '') })
       .then((result) => {
         if (!result?.secure_url) {
           throw new InternalServerException('Something went wrong, empty cloudinary image url')
         }
-        url = result.secure_url
+        publicId = result.public_id
       })
       .catch((error) => {
         throw new InternalServerException(`Error uploading image to cloudinary: ${error.message}`)
       })
-    return url
+    return publicId
   }
 
   public getFile(publicId: string, width: number, height: number, crop = 'fill') {

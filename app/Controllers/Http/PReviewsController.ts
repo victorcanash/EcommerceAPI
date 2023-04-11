@@ -18,6 +18,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import CreatePReviewValidator from 'App/Validators/Product/CreatePReviewValidator'
 import UpdatePReviewValidator from 'App/Validators/Product/UpdatePReviewValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
+import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class PReviewsController {
   public async index({ request, response }: HttpContextContract) {
@@ -62,7 +63,14 @@ export default class PReviewsController {
     let email = validatedData.email
     let publicName = validatedData.publicName
     if (!validApiToken) {
-      guestUser = await UsersService.getGuestUserByEmail(email)
+      guestUser = (await UsersService.getOptionalGuestUserByEmail(email)) || undefined
+      if (!guestUser) {
+        const loggedUser = await UsersService.getOptionalUserByEmail(email, false)
+        if (loggedUser) {
+          throw new PermissionException('You have to be logged to use this email')
+        }
+        throw new ModelNotFoundException(`Invalid email ${email} getting guest user`)
+      }
     } else {
       email = await UsersService.getAuthEmail(auth)
       if (email !== validatedData.email) {
