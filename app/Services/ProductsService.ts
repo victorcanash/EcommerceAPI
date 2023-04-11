@@ -217,7 +217,7 @@ export default class ProductsService {
       total += review.rating
       count++
     })
-    const rating = total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 1)
+    const rating = total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
     item.merge({
       rating: rating.toString(),
     })
