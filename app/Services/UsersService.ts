@@ -31,6 +31,10 @@ export default class UsersService {
     return this.getGuestUserByField('email', email)
   }
 
+  public static async getOptionalGuestUserByEmail(email: string) {
+    return this.getOptionalGuestUserByField('email', email)
+  }
+
   public static async getAuthEmail(
     auth: AuthContract,
     guard: keyof GuardsList = 'api'
@@ -135,7 +139,6 @@ export default class UsersService {
     if (user) {
       user.firstOrder = (await Order.findBy('userId', user.id)) || undefined
     }
-
     return user
   }
 
@@ -145,7 +148,12 @@ export default class UsersService {
     if (!guestUser) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting guest user`)
     }
+    return guestUser
+  }
 
+  private static async getOptionalGuestUserByField(field: string, value: string | number) {
+    let guestUser: GuestUser | null = null
+    guestUser = await GuestUser.query().where(field, value).first()
     return guestUser
   }
 }
