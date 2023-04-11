@@ -84,6 +84,13 @@ export default class PReviewsController {
       imageUrl: cloudinaryImgUrl,
     })
 
+    // Recalculate product rating
+    if (inventory) {
+      await ProductsService.calculateInventoryRating(inventory)
+    } else if (pack) {
+      await ProductsService.calculatePackRating(pack)
+    }
+
     const successMsg = `Successfully created product review by email ${email}`
     logRouteSuccess(request, successMsg)
     return response.created({

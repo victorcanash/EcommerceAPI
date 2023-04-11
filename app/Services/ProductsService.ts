@@ -1,5 +1,7 @@
 import Drive from '@ioc:Adonis/Core/Drive'
 
+import NP from 'number-precision'
+
 import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
@@ -7,6 +9,7 @@ import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductPack from 'App/Models/ProductPack'
 import LocalizedText from 'App/Models/LocalizedText'
+import ProductReview from 'App/Models/ProductReview'
 import BigbuyService from 'App/Services/BigbuyService'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
@@ -89,6 +92,14 @@ export default class ProductsService {
     await productBaseModel.name.save()
     productBaseModel.description.merge(description)
     await productBaseModel.description.save()
+  }
+
+  public static async calculateInventoryRating(inventory: ProductInventory) {
+    return this.calculateRating('inventoryId', inventory)
+  }
+
+  public static async calculatePackRating(pack: ProductPack) {
+    return this.calculateRating('packId', pack)
   }
 
   private static async getProductByField(
@@ -182,5 +193,20 @@ export default class ProductsService {
     }
 
     return pack
+  }
+
+  private static async calculateRating(findKey: string, item: ProductInventory | ProductPack) {
+    const reviews = await ProductReview.query().where(findKey, item.id)
+    let total = 0
+    let count = 0
+    reviews.forEach((review) => {
+      total += review.rating
+      count++
+    })
+    const rating = total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 1)
+    item.merge({
+      rating: rating.toString(),
+    })
+    item.save()
   }
 }

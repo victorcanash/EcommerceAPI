@@ -19,6 +19,9 @@ export default class ProductPack extends ProductBaseModel {
   @column()
   public price: number
 
+  @column()
+  public rating: string
+
   @manyToMany(() => ProductInventory, {
     pivotTable: 'product_packs_inventories',
     pivotTimestamps: true,

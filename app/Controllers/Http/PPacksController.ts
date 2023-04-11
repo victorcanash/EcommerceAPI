@@ -43,6 +43,7 @@ export default class PPacksController {
     )
     const productPack = await ProductPack.create({
       price: validatedData.price,
+      rating: '0',
       ...textsData,
     })
     await productPack.related('inventories').attach(validatedData.inventoriesIds)
