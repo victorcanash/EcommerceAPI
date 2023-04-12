@@ -28,6 +28,9 @@ export default class ProductInventory extends ProductBaseModel {
   @column()
   public rating: string
 
+  @column()
+  public reviewsCount: number
+
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
 

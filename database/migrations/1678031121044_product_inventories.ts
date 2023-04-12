@@ -7,6 +7,7 @@ export default class extends BaseSchema {
     this.schema.alterTable(this.tableName, (table) => {
       table.unique(['sku'])
       table.string('rating', 255).defaultTo('0')
+      table.integer('reviews_count', 255).defaultTo(0)
     })
   }
 
@@ -14,6 +15,7 @@ export default class extends BaseSchema {
     this.schema.table(this.tableName, (table) => {
       table.dropUnique(['sku'])
       table.dropColumn('rating')
+      table.dropColumn('reviews_count')
     })
   }
 }

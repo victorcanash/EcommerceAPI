@@ -220,6 +220,7 @@ export default class ProductsService {
     const rating = total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
     item.merge({
       rating: rating.toString(),
+      reviewsCount: count,
     })
     item.save()
   }
