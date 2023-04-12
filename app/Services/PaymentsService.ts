@@ -142,12 +142,13 @@ export default class PaymentsService {
   public static async createPaypalTransaction(
     i18n: I18nContract,
     auth: AuthContract,
+    currency: string,
     checkoutData: CheckoutData,
     guestCart?: GuestCart
   ) {
     const { user, cart } = await this.checkUserPaymentData(auth, checkoutData, guestCart)
 
-    const transactionId = await PaypalService.createOrder(i18n, checkoutData, cart, user)
+    const transactionId = await PaypalService.createOrder(i18n, currency, checkoutData, cart, user)
 
     return transactionId
   }

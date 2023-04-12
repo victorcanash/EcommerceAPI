@@ -10,6 +10,7 @@ export default class CreatePaypalTransactionValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    currency: schema.string(),
     checkoutData: checkoutDataSchema,
     guestCart: guestCartSchema,
   })

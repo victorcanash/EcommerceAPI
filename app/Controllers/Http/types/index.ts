@@ -29,7 +29,6 @@ export type InitAuthResponse = {
   packs: ProductPack[]
   user?: User
   guestCart?: GuestCartCheck
-  currency: string
   paypal?: {
     merchantId?: string
     clientId?: string

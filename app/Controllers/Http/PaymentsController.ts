@@ -32,6 +32,7 @@ export default class PaymentsController {
     const transactionId = await PaymentsService.createPaypalTransaction(
       i18n,
       auth,
+      validatedData.currency,
       validatedData.checkoutData as CheckoutData,
       validatedData.guestCart as GuestCart
     )

@@ -84,7 +84,6 @@ export default class AuthController {
       packs: packs,
       user: user,
       guestCart: guestCart,
-      currency: Env.get('CURRENCY', 'EUR'),
       paypal: {
         merchantId: Env.get('PAYPAL_MERCHANT_ID'),
         clientId: Env.get('PAYPAL_CLIENT_ID'),

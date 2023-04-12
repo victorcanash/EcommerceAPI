@@ -56,8 +56,6 @@ export default Env.rules({
   SMTP_PASSWORD: Env.schema.string(),
   SMTP_EMAIL: Env.schema.string(),
 
-  CURRENCY: Env.schema.string(),
-
   PAYPAL_ENV: Env.schema.enum(['sandbox', 'production'] as const),
   PAYPAL_MERCHANT_ID: Env.schema.string(),
   PAYPAL_CLIENT_ID: Env.schema.string(),

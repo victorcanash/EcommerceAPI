@@ -175,12 +175,12 @@ export default class PaypalService {
 
   public static async createOrder(
     i18n: I18nContract,
+    currency: string,
     checkoutData: CheckoutData,
     cart: Cart | GuestCartCheck,
     user: User | undefined
   ) {
     let orderId = ''
-    const currency = Env.get('CURRENCY', 'EUR')
     const totalAmount = CartsService.getTotalAmount(cart, user)
     if (totalAmount.subtotal <= 0) {
       throw new PermissionException(`Your don't have cart amount`)
