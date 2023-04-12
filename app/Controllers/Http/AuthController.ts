@@ -86,9 +86,9 @@ export default class AuthController {
       code: 201,
       message: successMsg,
       // Shop
-      categories: categories,
-      products: products,
-      packs: packs,
+      categories: categories || [],
+      products: products || [],
+      packs: packs || [],
       // User Auth
       user: user,
       guestCart: guestCart,
