@@ -38,30 +38,36 @@ import { logRouteSuccess } from 'App/Utils/logger'
 export default class AuthController {
   public async init({ request, response, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(InitValidator)
-
-    const categoryIds = validatedData.categoryIds || []
-    const productIds = validatedData.productIds || []
-    const packIds = validatedData.packIds || []
-    const categories = await ProductCategory.query().where((query) => {
-      if (categoryIds.length > 0) {
-        query.whereIn('id', categoryIds)
-      }
-    })
-    const products = await Product.query()
-      .where((query) => {
-        if (productIds.length > 0) {
-          query.whereIn('id', productIds)
-        }
-      })
-      .apply((scopes) => {
-        scopes.getAllData()
-      })
-    const packs = await ProductPack.query().where((query) => {
-      if (packIds.length > 0) {
-        query.whereIn('id', packIds)
-      }
-    })
-
+    // Shop
+    const categoryIds = validatedData.categoryIds
+    const productIds = validatedData.productIds
+    const packIds = validatedData.packIds
+    const categories = categoryIds
+      ? await ProductCategory.query().where((query) => {
+          if (categoryIds.length > 0) {
+            query.whereIn('id', categoryIds)
+          }
+        })
+      : undefined
+    const products = productIds
+      ? await Product.query()
+          .where((query) => {
+            if (productIds.length > 0) {
+              query.whereIn('id', productIds)
+            }
+          })
+          .apply((scopes) => {
+            scopes.getAllData()
+          })
+      : undefined
+    const packs = packIds
+      ? await ProductPack.query().where((query) => {
+          if (packIds.length > 0) {
+            query.whereIn('id', packIds)
+          }
+        })
+      : undefined
+    // User Auth
     const validToken = await auth.use('api').check()
     let user: User | undefined
     let guestCart: GuestCartCheck | undefined
@@ -71,7 +77,7 @@ export default class AuthController {
     } else {
       guestCart = await CartsService.createGuestCartCheck(validatedData.guestCart?.items)
     }
-
+    // Paypal Auth
     const paypalToken = await PaypalService.generateClientToken(i18n)
 
     const successMsg = `Successfully init user`
@@ -79,17 +85,21 @@ export default class AuthController {
     return response.created({
       code: 201,
       message: successMsg,
+      // Shop
       categories: categories,
       products: products,
       packs: packs,
+      // User Auth
       user: user,
       guestCart: guestCart,
+      // Paypal Auth
       paypal: {
         merchantId: Env.get('PAYPAL_MERCHANT_ID'),
         clientId: Env.get('PAYPAL_CLIENT_ID'),
         token: paypalToken,
         advancedCards: Env.get('PAYPAL_ADVANCED_CARDS') === 'enabled' ? true : false,
       },
+      // Google Auth
       google: {
         oauthId: Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
       },
