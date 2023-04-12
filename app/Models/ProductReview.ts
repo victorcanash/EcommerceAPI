@@ -19,7 +19,7 @@ export default class ProductReview extends AppBaseModel {
   public rating: number
 
   @column()
-  public title: string
+  public title?: string
 
   @column()
   public description: string

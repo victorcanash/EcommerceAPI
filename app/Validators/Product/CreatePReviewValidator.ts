@@ -16,7 +16,7 @@ export default class CreatePReviewValidator {
     ]),
     packId: schema.number.optional([rules.exists({ table: 'product_packs', column: 'id' })]),
     rating: schema.number([rules.range(0, 5)]),
-    title: schema.string(),
+    title: schema.string.optional(),
     description: schema.string(),
     email: schema.string(),
     publicName: schema.string(),

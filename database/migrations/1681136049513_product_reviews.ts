@@ -11,7 +11,7 @@ export default class extends BaseSchema {
       table.integer('inventory_id', 255).nullable()
       table.integer('pack_id', 255).nullable()
       table.integer('rating', 255).notNullable()
-      table.string('title', 255).notNullable()
+      table.string('title', 255).nullable()
       table.text('description', 'longtext').notNullable()
       table.string('email', 255).notNullable()
       table.string('public_name', 255).notNullable()
