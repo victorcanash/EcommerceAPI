@@ -58,6 +58,7 @@ export default class PReviewsController {
 
     // Get User
     const validApiToken = await auth.use('api').check()
+    const isAuthAdmin = !validApiToken ? false : await UsersService.isAuthAdmin(auth)
     let user: User | undefined
     let guestUser: GuestUser | undefined
     let email = validatedData.email
@@ -81,15 +82,17 @@ export default class PReviewsController {
     }
 
     // Check if the user has bought the related product
-    const order = await Order.query()
-      .where(user ? 'userId' : 'guestUserId', user ? user.id : guestUser?.id || -1)
-      .whereJsonSuperset(
-        'products',
-        inventory ? [{ inventoryId: inventory?.id }] : [{ packId: pack?.id }]
-      )
-      .first()
-    if (!order) {
-      throw new PermissionException('You have not bought the related product')
+    if (!isAuthAdmin) {
+      const order = await Order.query()
+        .where(user ? 'userId' : 'guestUserId', user ? user.id : guestUser?.id || -1)
+        .whereJsonSuperset(
+          'products',
+          inventory ? [{ inventoryId: inventory?.id }] : [{ packId: pack?.id }]
+        )
+        .first()
+      if (!order) {
+        throw new PermissionException('You have not bought the related product')
+      }
     }
 
     // Upload image
