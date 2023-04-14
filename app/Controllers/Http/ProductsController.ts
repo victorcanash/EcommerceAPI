@@ -29,7 +29,8 @@ export default class ProductsController {
     const categoryName = validatedFilterData.categoryName || null
     const adminData = validatedFilterData.adminData || false
 
-    const isAuthAdmin = await UsersService.isAuthAdmin(auth)
+    const validApiToken = await auth.use('api').check()
+    const isAuthAdmin = !validApiToken ? false : await UsersService.isAuthAdmin(auth)
     if (adminData && !isAuthAdmin) {
       throw new PermissionException('You need to be an admin to get admin data')
     }
