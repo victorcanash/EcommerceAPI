@@ -6,7 +6,12 @@ import ProductReview from 'App/Models/ProductReview'
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import Order from 'App/Models/Order'
-import { PReviewsResponse, PReviewResponse, BasicResponse } from 'App/Controllers/Http/types'
+import {
+  PReviewsResponse,
+  PReviewResponse,
+  CreatePReviewResponse,
+  BasicResponse,
+} from 'App/Controllers/Http/types'
 import ProductsService from 'App/Services/ProductsService'
 import UsersService from 'App/Services/UsersService'
 import CloudinaryService from 'App/Services/CloudinaryService'
@@ -126,7 +131,7 @@ export default class PReviewsController {
     await productReview.load('product')
 
     // Recalculate product rating
-    await ProductsService.calculateProductRating(product)
+    const { rating, reviewsCount } = await ProductsService.calculateProductRating(product)
 
     const successMsg = `Successfully created product review by email ${email}`
     logRouteSuccess(request, successMsg)
@@ -134,7 +139,11 @@ export default class PReviewsController {
       code: 201,
       message: successMsg,
       productReview: productReview,
-    } as PReviewResponse)
+      productRating: {
+        rating: rating,
+        reviewsCount: reviewsCount,
+      },
+    } as CreatePReviewResponse)
   }
 
   public async update({ params: { id }, request, response }: HttpContextContract) {

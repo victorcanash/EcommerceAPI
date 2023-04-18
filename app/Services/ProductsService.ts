@@ -117,12 +117,19 @@ export default class ProductsService {
       total += review.rating
       count++
     })
-    const rating = total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
+    const rating = (
+      total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
+    ).toString()
     product.merge({
-      rating: rating.toString(),
+      rating: rating,
       reviewsCount: count,
     })
     product.save()
+
+    return {
+      rating: rating,
+      reviewsCount: count,
+    }
   }
 
   private static async getProductByField(
