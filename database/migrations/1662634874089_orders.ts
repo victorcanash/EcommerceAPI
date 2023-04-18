@@ -11,7 +11,7 @@ export default class extends BaseSchema {
       table.string('paypal_transaction_id', 255).nullable()
       table.string('bigbuy_id', 255).nullable()
       table.jsonb('products').defaultTo([])
-      table.string('notes', 255).defaultTo('')
+      table.text('notes', 'longtext')
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
