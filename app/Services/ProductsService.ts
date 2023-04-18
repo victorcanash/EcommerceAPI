@@ -15,13 +15,24 @@ import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 
 export default class ProductsService {
-  public static async getProductById(
+  public static async getProductById(id: number) {
+    return this.getProductByField('id', id, false, false, false)
+  }
+
+  public static async getProductByIdWithInventories(
     id: number,
-    allData: boolean,
     adminData = false,
     bigbuyData?: boolean
   ) {
-    return this.getProductByField('id', id, allData, adminData, bigbuyData)
+    return this.getProductByField('id', id, true, false, adminData, bigbuyData)
+  }
+
+  public static async getProductByIdWithVariants(
+    id: number,
+    adminData = false,
+    bigbuyData?: boolean
+  ) {
+    return this.getProductByField('id', id, false, true, adminData, bigbuyData)
   }
 
   public static async getCategoryById(id: number) {
@@ -98,18 +109,27 @@ export default class ProductsService {
     await productBaseModel.description.save()
   }
 
-  public static async calculateInventoryRating(inventory: ProductInventory) {
-    return this.calculateRating('inventoryId', inventory)
-  }
-
-  public static async calculatePackRating(pack: ProductPack) {
-    return this.calculateRating('packId', pack)
+  public static async calculateProductRating(product: Product) {
+    const reviews = await ProductReview.query().where('productId', product.id)
+    let total = 0
+    let count = 0
+    reviews.forEach((review) => {
+      total += review.rating
+      count++
+    })
+    const rating = total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
+    product.merge({
+      rating: rating.toString(),
+      reviewsCount: count,
+    })
+    product.save()
   }
 
   private static async getProductByField(
     field: string,
     value: string | number,
-    allData: boolean,
+    inventoriesData: boolean,
+    variantsData: boolean,
     adminData: boolean,
     bigbuyData?: boolean
   ) {
@@ -117,8 +137,11 @@ export default class ProductsService {
     product = await Product.query()
       .where(field, value)
       .apply((scopes) => {
-        if (allData) {
-          scopes.getAllData()
+        if (inventoriesData) {
+          scopes.getInventoriesData()
+        }
+        if (variantsData) {
+          scopes.getVariantsData()
         }
         if (adminData) {
           scopes.getAdminData()
@@ -207,21 +230,5 @@ export default class ProductsService {
     }
 
     return review
-  }
-
-  private static async calculateRating(findKey: string, item: ProductInventory | ProductPack) {
-    const reviews = await ProductReview.query().where(findKey, item.id)
-    let total = 0
-    let count = 0
-    reviews.forEach((review) => {
-      total += review.rating
-      count++
-    })
-    const rating = total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
-    item.merge({
-      rating: rating.toString(),
-      reviewsCount: count,
-    })
-    item.save()
   }
 }

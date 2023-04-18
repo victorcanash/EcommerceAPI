@@ -57,7 +57,7 @@ export default class AuthController {
             }
           })
           .apply((scopes) => {
-            scopes.getAllData()
+            scopes.getInventoriesData()
           })
       : undefined
     const packs = packIds

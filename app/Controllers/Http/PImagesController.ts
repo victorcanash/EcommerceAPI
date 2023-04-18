@@ -9,7 +9,7 @@ import { generateUniqueFilename } from 'App/Utils/uploader'
 
 export default class PImagesController {
   public async show({ params: { product_id, id }, request, response }: HttpContextContract) {
-    const product = await ProductsService.getProductById(product_id, false)
+    const product = await ProductsService.getProductById(product_id)
 
     const image = await ProductsService.getImageById(product, id)
 
@@ -21,7 +21,7 @@ export default class PImagesController {
   }
 
   public async store({ params: { product_id }, request, response }: HttpContextContract) {
-    const product = await ProductsService.getProductById(product_id, false)
+    const product = await ProductsService.getProductById(product_id)
 
     const validatedData = await request.files('images', {
       size: '2mb',
@@ -54,7 +54,7 @@ export default class PImagesController {
   }
 
   public async destroy({ params: { product_id, id }, request, response }: HttpContextContract) {
-    const product = await ProductsService.getProductById(product_id, false)
+    const product = await ProductsService.getProductById(product_id)
 
     const image = await ProductsService.getImageById(product, id)
 

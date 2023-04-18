@@ -38,7 +38,7 @@ export default class ProductsController {
     const products = await Product.query()
       .apply((scopes) => {
         scopes.filter(keywords, categoryName)
-        scopes.getAllData()
+        scopes.getInventoriesData()
         if (adminData) {
           scopes.getAdminData()
         }
@@ -78,7 +78,7 @@ export default class ProductsController {
       }
     }
 
-    const product = await ProductsService.getProductById(id, true, adminData, bigbuyData)
+    const product = await ProductsService.getProductByIdWithInventories(id, adminData, bigbuyData)
 
     const successMsg = `Successfully got product by id ${id}`
     logRouteSuccess(request, successMsg)
@@ -111,7 +111,7 @@ export default class ProductsController {
   }
 
   public async update({ params: { id }, request, response }: HttpContextContract) {
-    const product = await ProductsService.getProductById(id, false)
+    const product = await ProductsService.getProductById(id)
 
     const validatedData = await request.validate(UpdateProductValidator)
 
@@ -133,7 +133,7 @@ export default class ProductsController {
   }
 
   public async destroy({ params: { id }, request, response }: HttpContextContract) {
-    const product = await ProductsService.getProductById(id, false)
+    const product = await ProductsService.getProductById(id)
 
     await product.delete()
 

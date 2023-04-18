@@ -23,6 +23,12 @@ export default class Product extends ProductBaseModel {
   @column({ serializeAs: null })
   public images: string
 
+  @column()
+  public rating: string
+
+  @column()
+  public reviewsCount: number
+
   @computed()
   public get imageNames() {
     return this.images ? this.images.split(',') : ([] as string[])
@@ -119,9 +125,19 @@ export default class Product extends ProductBaseModel {
     }
   )
 
-  public static getAllData = scope((query: ModelQueryBuilderContract<typeof Product, Product>) => {
-    query.preload('inventories').preload('activeDiscount')
-  })
+  public static getInventoriesData = scope(
+    (query: ModelQueryBuilderContract<typeof Product, Product>) => {
+      query.preload('inventories').preload('activeDiscount')
+    }
+  )
+
+  public static getVariantsData = scope(
+    (query: ModelQueryBuilderContract<typeof Product, Product>) => {
+      query.preload('inventories', (query) => {
+        query.preload('packs')
+      })
+    }
+  )
 
   public static getAdminData = scope(
     (query: ModelQueryBuilderContract<typeof Product, Product>) => {

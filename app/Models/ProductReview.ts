@@ -1,6 +1,7 @@
-import { column } from '@ioc:Adonis/Lucid/Orm'
+import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
+import Product from 'App/Models/Product'
 
 export default class ProductReview extends AppBaseModel {
   @column()
@@ -10,10 +11,7 @@ export default class ProductReview extends AppBaseModel {
   public guestUserId?: number
 
   @column()
-  public inventoryId?: number
-
-  @column()
-  public packId?: number
+  public productId: number
 
   @column()
   public rating: number
@@ -32,4 +30,7 @@ export default class ProductReview extends AppBaseModel {
 
   @column()
   public imageUrl?: string
+
+  @belongsTo(() => Product)
+  public product: BelongsTo<typeof Product>
 }

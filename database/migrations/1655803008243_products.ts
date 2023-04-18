@@ -25,6 +25,8 @@ export default class extends BaseSchema {
         .inTable('localized_texts')
         .onDelete('CASCADE')
       table.text('images', 'longtext').nullable()
+      table.string('rating', 255).defaultTo('0')
+      table.integer('reviews_count', 255).defaultTo(0)
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

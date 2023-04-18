@@ -16,7 +16,6 @@ export default class PInventoriesController {
       validatedData.description
     )
     const productInventory = await ProductInventory.create({
-      rating: '0',
       ...validatedData,
       ...textsData,
     })

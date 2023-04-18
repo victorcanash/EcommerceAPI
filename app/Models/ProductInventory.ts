@@ -5,12 +5,15 @@ import {
   computed,
   beforeFetch,
   ModelQueryBuilderContract,
+  manyToMany,
+  ManyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import NP from 'number-precision'
 
 import ProductBaseModel from 'App/Models/ProductBaseModel'
 import Product from 'App/Models/Product'
+import ProductPack from 'App/Models/ProductPack'
 
 export default class ProductInventory extends ProductBaseModel {
   @column()
@@ -25,14 +28,18 @@ export default class ProductInventory extends ProductBaseModel {
   @column()
   public quantity: number
 
-  @column()
-  public rating: string
-
-  @column()
-  public reviewsCount: number
-
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
+
+  @manyToMany(() => ProductPack, {
+    pivotTable: 'product_packs_inventories',
+    pivotTimestamps: true,
+    localKey: 'id',
+    pivotForeignKey: 'inventory_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'pack_id',
+  })
+  public packs: ManyToMany<typeof ProductPack>
 
   @computed()
   public get realPrice() {

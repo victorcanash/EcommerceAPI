@@ -8,9 +8,10 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.integer('user_id', 255).nullable()
       table.integer('guest_user_id', 255).nullable()
-      table.string('braintree_transaction_id', 255).notNullable()
+      table.string('paypal_transaction_id', 255).nullable()
       table.string('bigbuy_id', 255).nullable()
       table.jsonb('products').defaultTo([])
+      table.string('notes', 255).defaultTo('')
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

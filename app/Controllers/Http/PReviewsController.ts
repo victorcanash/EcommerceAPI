@@ -3,7 +3,6 @@ import Application from '@ioc:Adonis/Core/Application'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import ProductReview from 'App/Models/ProductReview'
-import ProductPack from 'App/Models/ProductPack'
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import Order from 'App/Models/Order'
@@ -30,7 +29,10 @@ export default class PReviewsController {
     const sortBy = validatedSortData.sortBy || defaultSortBy
     const order = validatedSortData.order || defaultOrder
 
-    const reviews = await ProductReview.query().orderBy(sortBy, order).paginate(page, limit)
+    const reviews = await ProductReview.query()
+      .preload('product')
+      .orderBy(sortBy, order)
+      .paginate(page, limit)
     const result = reviews.toJSON()
 
     const successMsg = 'Successfully got product reviews'
@@ -46,15 +48,6 @@ export default class PReviewsController {
 
   public async store({ request, response, auth }: HttpContextContract) {
     const validatedData = await request.validate(CreatePReviewValidator)
-
-    // Get Related Product
-    const inventory = validatedData.inventoryId
-      ? await ProductsService.getInventoryById(validatedData.inventoryId)
-      : undefined
-    let pack: ProductPack | undefined
-    if (!inventory) {
-      pack = await ProductsService.getPackById(validatedData.packId || -1)
-    }
 
     // Get User
     const validApiToken = await auth.use('api').check()
@@ -81,14 +74,23 @@ export default class PReviewsController {
       publicName = `${user.firstName} ${user.lastName}`
     }
 
+    // Get Product
+    const product = await ProductsService.getProductByIdWithVariants(validatedData.productId)
+
     // Check if the user has bought the related product
     if (!isAuthAdmin) {
       const order = await Order.query()
         .where(user ? 'userId' : 'guestUserId', user ? user.id : guestUser?.id || -1)
-        .whereJsonSuperset(
-          'products',
-          inventory ? [{ inventoryId: inventory?.id }] : [{ packId: pack?.id }]
-        )
+        .where((query) => {
+          product.inventories.forEach((inventoryItem, index) => {
+            index === 0
+              ? query.whereJsonSuperset('products', [{ inventoryId: inventoryItem.id }])
+              : query.orWhereJsonSuperset('products', [{ inventoryId: inventoryItem.id }])
+            inventoryItem.packs.forEach((packItem) => {
+              query.orWhereJsonSuperset('products', [{ packId: packItem.id }])
+            })
+          })
+        })
         .first()
       if (!order) {
         throw new PermissionException('You have not bought the related product')
@@ -112,8 +114,7 @@ export default class PReviewsController {
     const productReview = await ProductReview.create({
       userId: user?.id,
       guestUserId: guestUser?.id,
-      inventoryId: inventory?.id,
-      packId: pack?.id,
+      productId: product?.id,
       rating: validatedData.rating,
       title: validatedData.title,
       description: validatedData.description,
@@ -122,12 +123,10 @@ export default class PReviewsController {
       imageUrl: cloudinaryImgUrl,
     })
 
+    await productReview.load('product')
+
     // Recalculate product rating
-    if (inventory) {
-      await ProductsService.calculateInventoryRating(inventory)
-    } else if (pack) {
-      await ProductsService.calculatePackRating(pack)
-    }
+    await ProductsService.calculateProductRating(product)
 
     const successMsg = `Successfully created product review by email ${email}`
     logRouteSuccess(request, successMsg)
@@ -147,13 +146,8 @@ export default class PReviewsController {
     await productReview.save()
 
     // Recalculate product rating
-    if (productReview.inventoryId) {
-      const inventory = await ProductsService.getInventoryById(productReview.inventoryId)
-      await ProductsService.calculateInventoryRating(inventory)
-    } else if (productReview.packId) {
-      const pack = await ProductsService.getPackById(productReview.packId)
-      await ProductsService.calculatePackRating(pack)
-    }
+    await productReview.load('product')
+    await ProductsService.calculateProductRating(productReview.product)
 
     const successMsg = `Successfully updated product review by id ${id}`
     logRouteSuccess(request, successMsg)
