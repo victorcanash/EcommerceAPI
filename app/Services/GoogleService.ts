@@ -12,10 +12,11 @@ export default class GoogleService {
   private jwtClient: JWT
 
   constructor() {
+    const privateKey = Env.get('GOOGLE_AUTH_PRIVATE_KEY', '').replace(/\\n/gm, '\n')
     this.jwtClient = new google.auth.JWT(
       Env.get('GOOGLE_AUTH_CLIENT_EMAIL', ''),
       undefined,
-      Env.get('GOOGLE_AUTH_PRIVATE_KEY', ''),
+      privateKey,
       ['https://www.googleapis.com/auth/indexing'],
       undefined
     )
