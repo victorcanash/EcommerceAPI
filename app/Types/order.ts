@@ -24,7 +24,28 @@ export type OrderBigbuyProduct = {
 }
 
 export type OrderTransaction = {
-  amount: string
+  amount: {
+    currencyCode: string
+    value: string
+    breakdown: {
+      itemTotal: {
+        currencyCode: string
+        value: string
+      }
+      taxTotal: {
+        currencyCode: string
+        value: string
+      }
+      discount: {
+        currencyCode: string
+        value: string
+      }
+      shipping: {
+        currencyCode: string
+        value: string
+      }
+    }
+  }
   billing: {
     firstName: string
     lastName: string

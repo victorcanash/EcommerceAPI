@@ -96,8 +96,30 @@ export default class Order extends AppBaseModel {
   public async loadPaymentData() {
     if (this.paypalTransactionId) {
       const transactionInfo = await PaypalService.getOrderInfo(this.paypalTransactionId)
+      const amountInfo = transactionInfo?.purchase_units[0]?.amount
       this.transactionData = {
-        amount: transactionInfo?.purchase_units[0]?.amount?.value || '',
+        amount: {
+          currencyCode: amountInfo?.currency_code || '',
+          value: amountInfo?.value || '',
+          breakdown: {
+            itemTotal: {
+              currencyCode: amountInfo?.breakdown?.item_total?.currency_code || '',
+              value: amountInfo?.breakdown?.item_total?.value || '',
+            },
+            taxTotal: {
+              currencyCode: amountInfo?.breakdown?.tax_total?.currency_code || '',
+              value: amountInfo?.breakdown?.tax_total?.value || '',
+            },
+            discount: {
+              currencyCode: amountInfo?.breakdown?.discount?.currency_code || '',
+              value: amountInfo?.breakdown?.discount?.value || '',
+            },
+            shipping: {
+              currencyCode: amountInfo?.breakdown?.shipping?.currency_code || '',
+              value: amountInfo?.breakdown?.shipping?.value || '',
+            },
+          },
+        },
         billing: {
           firstName: transactionInfo?.payment_source?.card?.name || '',
           lastName: '',
