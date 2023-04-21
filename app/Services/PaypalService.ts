@@ -137,11 +137,11 @@ export default class PaypalService {
         if (response.status === 200 && response.data) {
           result = response.data
         } else {
-          throw new Error('Something went wrong')
+          throw new Error('Something went wrong, empty paypal order data')
         }
       })
       .catch((error) => {
-        throw new ModelNotFoundException(error.message)
+        throw new ModelNotFoundException(`Error getting paypal order info: ${error.message}`)
       })
     return result
   }

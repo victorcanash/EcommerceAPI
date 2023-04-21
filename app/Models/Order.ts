@@ -50,7 +50,7 @@ export default class Order extends AppBaseModel {
   public transactionData: OrderTransaction | undefined
 
   public async loadItemsData() {
-    const items = JSON.parse(this.products) as GuestCartItem[]
+    const items = this.products as unknown as GuestCartItem[]
     if (items.length > 0) {
       const inventories = await ProductInventory.query().whereIn(
         'id',
