@@ -117,7 +117,7 @@ export default class UsersController {
     const validatedData = await request.validate(SendContactEmailValidator)
     let validatedImages = [] as MultipartFileContract[]
 
-    if (validatedData.type === ContactTypes.REFUND_ORDER) {
+    /*if (validatedData.type === ContactTypes.REFUND_ORDER) {
       validatedImages = await request.files('images', {
         size: '2mb',
         extnames: ['jpg', 'jpeg', 'png'],
@@ -125,7 +125,7 @@ export default class UsersController {
       if (validatedImages.length < 1) {
         throw new BadRequestException('Images field must contain at least 1 file')
       }
-    }
+    }*/
 
     if (validatedData.type !== ContactTypes.NORMAL) {
       const order = await OrdersService.getOrderByBigbuyId(validatedData.orderBigbuyId || '', false)
