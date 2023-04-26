@@ -96,7 +96,11 @@ export default class Order extends AppBaseModel {
     if (this.bigbuyId) {
       this.bigbuyData = await BigbuyService.getOrderInfo(this.bigbuyId)
       if (getTracking) {
-        this.bigbuyData.tracking = await BigbuyService.getOrderTracking(this.bigbuyId)
+        try {
+          this.bigbuyData.tracking = await BigbuyService.getOrderTracking(this.bigbuyId)
+        } catch (error) {
+          this.bigbuyData.tracking = undefined
+        }
       }
     }
   }
