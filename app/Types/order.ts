@@ -13,6 +13,7 @@ export type OrderBigbuy = {
     companyName: string
   }
   products: OrderBigbuyProduct[]
+  tracking?: OrderBigbuyTracking
 }
 
 export type OrderBigbuyProduct = {
@@ -21,6 +22,11 @@ export type OrderBigbuyProduct = {
   quantity: number
   name?: string
   internalReference: string
+}
+
+export type OrderBigbuyTracking = {
+  trackingNumber: string
+  statusDescription: string
 }
 
 export type OrderTransaction = {

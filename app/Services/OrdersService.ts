@@ -24,7 +24,8 @@ export default class OrdersService {
     value: string | number,
     itemsData: boolean,
     bigbuyData = false,
-    paymentData = false
+    paymentData = false,
+    trackingData = false
   ) {
     let order: Order | null = null
     order = await Order.query().where(field, value).first()
@@ -35,7 +36,7 @@ export default class OrdersService {
       await order.loadItemsData()
     }
     if (bigbuyData) {
-      await order.loadBigbuyData()
+      await order.loadBigbuyData(trackingData)
     }
     if (paymentData) {
       await order.loadPaymentData()
@@ -162,18 +163,27 @@ export default class OrdersService {
     id: number,
     itemsData: boolean,
     bigbuyData = false,
-    paymentData = false
+    paymentData = false,
+    trackingData = false
   ) {
-    return this.getOrderByField('id', id, itemsData, bigbuyData, paymentData)
+    return this.getOrderByField('id', id, itemsData, bigbuyData, paymentData, trackingData)
   }
 
   public static async getOrderByBigbuyId(
     bigbuyId: string,
     itemsData: boolean,
     bigbuyData = false,
-    paymentData = false
+    paymentData = false,
+    trackingData = false
   ) {
-    return this.getOrderByField('bigbuyId', bigbuyId, itemsData, bigbuyData, paymentData)
+    return this.getOrderByField(
+      'bigbuyId',
+      bigbuyId,
+      itemsData,
+      bigbuyData,
+      paymentData,
+      trackingData
+    )
   }
 
   public static async showOrder(
@@ -185,10 +195,10 @@ export default class OrdersService {
     const validToken = await ctx.auth.use('api').check()
     let order: Order | undefined
     if (validToken) {
-      order = await this.getOrderById(id || -1, true, true, true)
+      order = await this.getOrderById(id || -1, true, true, true, true)
       await ctx.bouncer.with('OrderPolicy').authorize('view', order)
     } else {
-      order = await this.getOrderByBigbuyId(bigbuyId || '', true, true, true)
+      order = await this.getOrderByBigbuyId(bigbuyId || '', true, true, true, true)
       if (order.userId) {
         throw new PermissionException('You have to be logged to get this order')
       }

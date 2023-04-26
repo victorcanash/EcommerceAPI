@@ -92,9 +92,12 @@ export default class Order extends AppBaseModel {
     }
   }
 
-  public async loadBigbuyData() {
+  public async loadBigbuyData(getTracking?: boolean) {
     if (this.bigbuyId) {
       this.bigbuyData = await BigbuyService.getOrderInfo(this.bigbuyId)
+      if (getTracking) {
+        this.bigbuyData.tracking = await BigbuyService.getOrderTracking(this.bigbuyId)
+      }
     }
   }
 

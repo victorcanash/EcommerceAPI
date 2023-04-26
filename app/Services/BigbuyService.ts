@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
-import { OrderBigbuy, OrderBigbuyProduct } from 'App/Types/order'
+import { OrderBigbuy, OrderBigbuyProduct, OrderBigbuyTracking } from 'App/Types/order'
 import { GuestCartCheck, GuestCartCheckItem } from 'App/Types/cart'
 import { CheckoutAddress } from 'App/Types/checkout'
 import { getCountryName, getCountryCode } from 'App/Utils/addresses'
@@ -162,6 +162,35 @@ export default class BigbuyService {
       })
       .catch((error) => {
         throw new ModelNotFoundException(`Error getting bigbuy order info: ${error.message}`)
+      })
+    return result
+  }
+
+  public static async getOrderTracking(bigbuyId: string) {
+    let result = {
+      trackingNumber: '',
+      statusDescription: '',
+    } as OrderBigbuyTracking
+    const options: AxiosRequestConfig = {
+      headers: this.getAuthHeaders(),
+    }
+    await axios
+      .get(`${this.baseUrl}/rest/tracking/order/${bigbuyId}.json`, options)
+      .then(async (response: AxiosResponse) => {
+        if (
+          response.status === 200 &&
+          response.data?.trackings &&
+          response.data.trackings.length > 0
+        ) {
+          result = {
+            ...response.data.trackings[0],
+          }
+        } else {
+          throw new Error('Something went wrong')
+        }
+      })
+      .catch((error) => {
+        throw new ModelNotFoundException(`Error getting bigbuy order tracking: ${error.message}`)
       })
     return result
   }
