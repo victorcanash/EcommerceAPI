@@ -179,11 +179,13 @@ export default class BigbuyService {
       .then(async (response: AxiosResponse) => {
         if (
           response.status === 200 &&
-          response.data?.trackings &&
-          response.data.trackings.length > 0
+          response.data &&
+          response.data.length > 0 &&
+          response.data[0].trackings &&
+          response.data[0].trackings.length > 0
         ) {
           result = {
-            ...response.data.trackings[0],
+            ...response.data[0].trackings[0],
           }
         } else {
           throw new Error('Something went wrong')
