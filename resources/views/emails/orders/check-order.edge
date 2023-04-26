@@ -135,7 +135,7 @@
                 </ul>
               </li>
               <li>
-                {{ t('messages.emails.checkOrder.totalField', { amount: Number(order.transaction.amount).toFixed(2) }) }} €
+                {{ t('messages.emails.checkOrder.totalField', { amount: order.transaction.amount.value }) }} €
               </li>
             </ul>
           </div>
