@@ -19,6 +19,7 @@ export default class extends BaseSchema {
         .inTable('localized_texts')
         .onDelete('CASCADE')
       table.float('price', 255).notNullable()
+      table.string('image').nullable()
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })

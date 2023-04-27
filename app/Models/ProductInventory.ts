@@ -28,6 +28,9 @@ export default class ProductInventory extends ProductBaseModel {
   @column()
   public quantity: number
 
+  @column()
+  public image?: string
+
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
 

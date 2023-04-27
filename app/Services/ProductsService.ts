@@ -1,5 +1,3 @@
-import Drive from '@ioc:Adonis/Core/Drive'
-
 import NP from 'number-precision'
 
 import ProductBaseModel from 'App/Models/ProductBaseModel'
@@ -12,7 +10,6 @@ import LocalizedText from 'App/Models/LocalizedText'
 import ProductReview from 'App/Models/ProductReview'
 import BigbuyService from 'App/Services/BigbuyService'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
-import FileNotFoundException from 'App/Exceptions/FileNotFoundException'
 
 export default class ProductsService {
   public static async getProductById(id: number) {
@@ -57,21 +54,6 @@ export default class ProductsService {
 
   public static async getReviewById(id: number) {
     return this.getReviewByField('id', id)
-  }
-
-  public static async getImageById(product: Product, id: number) {
-    const productImages = product.imageNames
-    if (!productImages || productImages.length <= id) {
-      throw new FileNotFoundException(`Invalid image id ${id} getting product image`)
-    }
-
-    if (!(await Drive.exists(productImages[id]))) {
-      throw new FileNotFoundException(
-        `Not found image name ${productImages[id]} in drive disk getting product image`
-      )
-    }
-
-    return productImages[id]
   }
 
   public static async createLocalizedTexts(

@@ -20,19 +20,11 @@ export default class Product extends ProductBaseModel {
   @column()
   public categoryId: number
 
-  @column({ serializeAs: null })
-  public images: string
-
   @column()
   public rating: string
 
   @column()
   public reviewsCount: number
-
-  @computed()
-  public get imageNames() {
-    return this.images ? this.images.split(',') : ([] as string[])
-  }
 
   @belongsTo(() => ProductCategory, {
     foreignKey: 'categoryId',

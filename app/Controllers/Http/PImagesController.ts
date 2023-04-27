@@ -1,4 +1,4 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+/*import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Drive from '@ioc:Adonis/Core/Drive'
 
 import ProductsService from 'App/Services/ProductsService'
@@ -74,4 +74,4 @@ export default class PImagesController {
       productImages: productImages,
     } as PImagesResponse)
   }
-}
+}*/

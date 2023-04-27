@@ -24,7 +24,6 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('localized_texts')
         .onDelete('CASCADE')
-      table.text('images', 'longtext').nullable()
       table.string('rating', 255).defaultTo('0')
       table.integer('reviews_count', 255).defaultTo(0)
 
