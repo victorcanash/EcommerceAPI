@@ -11,12 +11,12 @@ import {
   scope,
 } from '@ioc:Adonis/Lucid/Orm'
 
-import ProductBaseModel from 'App/Models/ProductBaseModel'
+import TextsBaseModel from 'App/Models/TextsBaseModel'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 
-export default class Product extends ProductBaseModel {
+export default class Product extends TextsBaseModel {
   @column()
   public categoryId: number
 

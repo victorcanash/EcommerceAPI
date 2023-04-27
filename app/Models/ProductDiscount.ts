@@ -1,9 +1,9 @@
 import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 
-import ProductBaseModel from 'App/Models/ProductBaseModel'
+import TextsBaseModel from 'App/Models/TextsBaseModel'
 import Product from 'App/Models/Product'
 
-export default class ProductDiscount extends ProductBaseModel {
+export default class ProductDiscount extends TextsBaseModel {
   @column()
   public productId: number
 

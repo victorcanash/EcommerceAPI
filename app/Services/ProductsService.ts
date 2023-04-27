@@ -1,6 +1,6 @@
 import NP from 'number-precision'
 
-import ProductBaseModel from 'App/Models/ProductBaseModel'
+import TextsBaseModel from 'App/Models/TextsBaseModel'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
@@ -75,7 +75,7 @@ export default class ProductsService {
   }
 
   public static async updateLocalizedTexts(
-    productBaseModel: ProductBaseModel,
+    productBaseModel: TextsBaseModel,
     name: {
       en: string | undefined
       es: string | undefined

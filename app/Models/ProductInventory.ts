@@ -11,11 +11,11 @@ import {
 
 import NP from 'number-precision'
 
-import ProductBaseModel from 'App/Models/ProductBaseModel'
+import TextsBaseModel from 'App/Models/TextsBaseModel'
 import Product from 'App/Models/Product'
 import ProductPack from 'App/Models/ProductPack'
 
-export default class ProductInventory extends ProductBaseModel {
+export default class ProductInventory extends TextsBaseModel {
   @column()
   public productId: number
 

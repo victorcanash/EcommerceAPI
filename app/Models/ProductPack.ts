@@ -12,10 +12,10 @@ import {
 
 import NP from 'number-precision'
 
-import ProductBaseModel from 'App/Models/ProductBaseModel'
+import TextsBaseModel from 'App/Models/TextsBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
 
-export default class ProductPack extends ProductBaseModel {
+export default class ProductPack extends TextsBaseModel {
   @column()
   public price: number
 
