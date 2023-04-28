@@ -13,7 +13,7 @@ import ProductPack from 'App/Models/ProductPack'
 export default class Landing extends TextsBaseModel {
   @column({
     prepare: (value: string[]) => JSON.stringify(value),
-    consume: (value: string) => JSON.parse(value) as string[],
+    consume: (value: string) => value as unknown as string[],
   })
   public images: string[]
 

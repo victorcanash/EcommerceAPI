@@ -49,7 +49,10 @@ Route.group(() => {
   // Product routes
 
   Route.resource('landings', 'LandingsController')
-    .except(['show', 'store', 'update', 'destroy'])
+    .except(['show', 'update', 'destroy'])
+    .middleware({
+      '*': ['auth:api', 'admin'],
+    })
     .apiOnly()
 
   Route.resource('product-categories', 'PCategoriesController')

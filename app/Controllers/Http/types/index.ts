@@ -99,6 +99,15 @@ export type CItemResponse = {
 }
 
 /**
+ * Landing JSON response for Controllers
+ */
+export type LandingResponse = {
+  code: number
+  message: string
+  landing: Landing
+}
+
+/**
  * Landings JSON response for Controllers
  */
 export type LandingsResponse = {
