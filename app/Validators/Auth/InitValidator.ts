@@ -13,12 +13,9 @@ export default class InitValidator {
     categoryIds: schema.array
       .optional()
       .members(schema.number([rules.exists({ table: 'product_categories', column: 'id' })])),
-    productIds: schema.array
+    landingIds: schema.array
       .optional()
-      .members(schema.number([rules.exists({ table: 'products', column: 'id' })])),
-    packIds: schema.array
-      .optional()
-      .members(schema.number([rules.exists({ table: 'product_packs', column: 'id' })])),
+      .members(schema.number([rules.exists({ table: 'landings', column: 'id' })])),
     guestCart: guestCartSchema,
   })
 
