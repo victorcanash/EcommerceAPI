@@ -14,6 +14,7 @@ export default class UpdateProductValidator {
   })
 
   public schema = schema.create({
+    landingId: schema.number.optional([rules.exists({ table: 'landings', column: 'id' })]),
     categoryId: schema.number.optional([
       rules.exists({ table: 'product_categories', column: 'id' }),
     ]),

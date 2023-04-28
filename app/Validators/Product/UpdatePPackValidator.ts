@@ -10,6 +10,7 @@ export default class UpdatePPackValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    landingId: schema.number.optional([rules.exists({ table: 'landings', column: 'id' })]),
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
     price: schema.number.optional(),

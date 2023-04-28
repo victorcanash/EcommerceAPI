@@ -42,8 +42,7 @@ export default class PPacksController {
       validatedData.description
     )
     const productPack = await ProductPack.create({
-      price: validatedData.price,
-      image: validatedData.image,
+      ...validatedData,
       ...textsData,
     })
     await productPack.related('inventories').attach(validatedData.inventoriesIds)
@@ -68,10 +67,7 @@ export default class PPacksController {
       validatedData.name,
       validatedData.description
     )
-    productPack.merge({
-      price: validatedData.price,
-      image: validatedData.image,
-    })
+    productPack.merge(validatedData)
     await productPack.related('inventories').detach()
     if (validatedData.inventoriesIds && validatedData.inventoriesIds?.length > 0) {
       await productPack.related('inventories').attach(validatedData.inventoriesIds)

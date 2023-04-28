@@ -18,6 +18,9 @@ import ProductDiscount from 'App/Models/ProductDiscount'
 
 export default class Product extends TextsBaseModel {
   @column()
+  public landingId: number
+
+  @column()
   public categoryId: number
 
   @column()

@@ -17,6 +17,9 @@ import ProductInventory from 'App/Models/ProductInventory'
 
 export default class ProductPack extends TextsBaseModel {
   @column()
+  public landingId: number
+
+  @column()
   public price: number
 
   @column()
