@@ -1,6 +1,7 @@
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
 import CartItem from 'App/Models/CartItem'
+import Landing from 'App/Models/Landing'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductDiscount from 'App/Models/ProductDiscount'
@@ -96,6 +97,17 @@ export type CItemResponse = {
   code: number
   message: string
   cartItem: CartItem
+}
+
+/**
+ * Landings JSON response for Controllers
+ */
+export type LandingsResponse = {
+  code: number
+  message: string
+  landings: Landing[]
+  totalPages: number
+  currentPage: number
 }
 
 /**

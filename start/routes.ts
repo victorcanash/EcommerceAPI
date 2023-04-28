@@ -48,16 +48,18 @@ Route.group(() => {
 
   // Product routes
 
-  Route.resource('products', 'ProductsController')
-    .middleware({
-      store: ['auth:api', 'admin'],
-      update: ['auth:api', 'admin'],
-      destroy: ['auth:api', 'admin'],
-    })
+  Route.resource('landings', 'LandingsController')
+    .except(['show', 'store', 'update', 'destroy'])
     .apiOnly()
 
   Route.resource('product-categories', 'PCategoriesController')
     .except(['index', 'show'])
+    .middleware({
+      '*': ['auth:api', 'admin'],
+    })
+    .apiOnly()
+
+  Route.resource('products', 'ProductsController')
     .middleware({
       '*': ['auth:api', 'admin'],
     })
