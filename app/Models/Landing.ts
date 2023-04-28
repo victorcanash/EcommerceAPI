@@ -1,4 +1,10 @@
-import { column, hasMany, HasMany, ModelQueryBuilderContract, scope } from '@ioc:Adonis/Lucid/Orm'
+import {
+  column,
+  hasMany,
+  HasMany,
+  ModelQueryBuilderContract,
+  beforeFetch,
+} from '@ioc:Adonis/Lucid/Orm'
 
 import TextsBaseModel from 'App/Models/TextsBaseModel'
 import Product from 'App/Models/Product'
@@ -25,12 +31,13 @@ export default class Landing extends TextsBaseModel {
   })
   public packs: HasMany<typeof ProductPack>
 
-  public static getData = scope((query: ModelQueryBuilderContract<typeof Landing, Landing>) => {
+  @beforeFetch()
+  public static beforeFetch(query: ModelQueryBuilderContract<typeof Landing>) {
     query.preload('products', (query) => {
       query.apply((scopes) => {
         scopes.getInventoriesData()
       })
     })
     query.preload('packs')
-  })
+  }
 }

@@ -17,12 +17,7 @@ export default class LandingsController {
     const sortBy = validatedSortData.sortBy || defaultSortBy
     const order = validatedSortData.order || defaultOrder
 
-    const landings = await Landing.query()
-      .apply((scopes) => {
-        scopes.getData()
-      })
-      .orderBy(sortBy, order)
-      .paginate(page, limit)
+    const landings = await Landing.query().orderBy(sortBy, order).paginate(page, limit)
     const result = landings.toJSON()
 
     const successMsg = 'Successfully got landings'
