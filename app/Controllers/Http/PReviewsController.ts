@@ -137,16 +137,16 @@ export default class PReviewsController {
     })
 
     // Recalculate product rating
-    let rating = {
+    let productRating = {
       rating: '',
       reviewsCount: 0,
     }
     if (product) {
       await productReview.load('product')
-      rating = await ProductsService.calculateProductRating(product)
+      productRating = await ProductsService.calculateProductRating(product)
     } else if (pack) {
       await productReview.load('pack')
-      rating = await ProductsService.calculatePackRating(pack)
+      productRating = await ProductsService.calculatePackRating(pack)
     }
 
     const successMsg = `Successfully created product review by email ${email}`
@@ -155,7 +155,7 @@ export default class PReviewsController {
       code: 201,
       message: successMsg,
       productReview: productReview,
-      productRating: rating,
+      productRating: productRating,
     } as CreatePReviewResponse)
   }
 
@@ -168,16 +168,12 @@ export default class PReviewsController {
     await productReview.save()
 
     // Recalculate product rating
-    let rating = {
-      rating: '',
-      reviewsCount: 0,
-    }
     if (productReview.productId) {
       await productReview.load('product')
-      rating = await ProductsService.calculateProductRating(productReview.product)
+      await ProductsService.calculateProductRating(productReview.product)
     } else if (productReview.packId) {
       await productReview.load('pack')
-      rating = await ProductsService.calculatePackRating(productReview.pack)
+      await ProductsService.calculatePackRating(productReview.pack)
     }
 
     const successMsg = `Successfully updated product review by id ${id}`
