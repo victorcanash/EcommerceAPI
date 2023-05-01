@@ -25,6 +25,12 @@ export default class ProductPack extends TextsBaseModel {
   @column()
   public image?: string
 
+  @column()
+  public rating: string
+
+  @column()
+  public reviewsCount: number
+
   @manyToMany(() => ProductInventory, {
     pivotTable: 'product_packs_inventories',
     pivotTimestamps: true,

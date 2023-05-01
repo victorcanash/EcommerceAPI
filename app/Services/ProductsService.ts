@@ -92,7 +92,15 @@ export default class ProductsService {
   }
 
   public static async calculateProductRating(product: Product) {
-    const reviews = await ProductReview.query().where('productId', product.id)
+    return this.calculateRating('productId', product)
+  }
+
+  public static async calculatePackRating(pack: ProductPack) {
+    return this.calculateRating('packId', pack)
+  }
+
+  private static async calculateRating(keyId: string, relatedProduct: Product | ProductPack) {
+    const reviews = await ProductReview.query().where(keyId, relatedProduct.id)
     let total = 0
     let count = 0
     reviews.forEach((review) => {
@@ -102,11 +110,11 @@ export default class ProductsService {
     const rating = (
       total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
     ).toString()
-    product.merge({
+    relatedProduct.merge({
       rating: rating,
       reviewsCount: count,
     })
-    product.save()
+    await relatedProduct.save()
 
     return {
       rating: rating,

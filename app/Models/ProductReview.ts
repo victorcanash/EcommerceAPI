@@ -2,6 +2,7 @@ import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 
 import AppBaseModel from 'App/Models/AppBaseModel'
 import Product from 'App/Models/Product'
+import ProductPack from 'App/Models/ProductPack'
 
 export default class ProductReview extends AppBaseModel {
   @column()
@@ -11,7 +12,10 @@ export default class ProductReview extends AppBaseModel {
   public guestUserId?: number
 
   @column()
-  public productId: number
+  public productId?: number
+
+  @column()
+  public packId?: number
 
   @column()
   public rating: number
@@ -33,4 +37,9 @@ export default class ProductReview extends AppBaseModel {
 
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
+
+  @belongsTo(() => ProductPack, {
+    foreignKey: 'packId',
+  })
+  public pack: BelongsTo<typeof ProductPack>
 }
