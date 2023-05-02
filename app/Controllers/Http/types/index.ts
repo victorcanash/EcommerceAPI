@@ -30,13 +30,8 @@ export type InitAuthResponse = {
   user?: User
   guestCart?: GuestCartCheck
   paypal?: {
-    merchantId?: string
-    clientId?: string
     token?: string
     advancedCards?: boolean
-  }
-  google: {
-    oauthId: string
   }
 }
 

@@ -80,14 +80,8 @@ export default class AuthController {
       guestCart: guestCart,
       // Paypal Auth
       paypal: {
-        merchantId: Env.get('PAYPAL_MERCHANT_ID'),
-        clientId: Env.get('PAYPAL_CLIENT_ID'),
         token: paypalToken,
         advancedCards: Env.get('PAYPAL_ADVANCED_CARDS') === 'enabled' ? true : false,
-      },
-      // Google Auth
-      google: {
-        oauthId: Env.get('GOOGLE_OAUTH_CLIENT_ID', ''),
       },
     } as InitAuthResponse)
   }
