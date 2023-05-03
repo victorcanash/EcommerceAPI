@@ -117,7 +117,8 @@ export default class OrdersService {
         order.id.toString(),
         checkoutData.email,
         checkoutData.shipping,
-        orderProducts
+        orderProducts,
+        checkoutData.notes
       )
       order.merge({ bigbuyId })
       await order.save()

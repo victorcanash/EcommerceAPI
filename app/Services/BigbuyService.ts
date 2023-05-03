@@ -225,7 +225,8 @@ export default class BigbuyService {
     internalReference: string,
     email: string,
     shipping: CheckoutAddress,
-    products: OrderBigbuyProduct[]
+    products: OrderBigbuyProduct[],
+    comment?: string
   ) {
     let orderId = ''
     const options: AxiosRequestConfig = {
@@ -276,7 +277,7 @@ export default class BigbuyService {
               }`,
               phone: '644348466',
               email: email,
-              comment: '',
+              comment: comment || null,
             },
             products: products,
           },
