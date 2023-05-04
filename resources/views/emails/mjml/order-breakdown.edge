@@ -1,0 +1,271 @@
+<mjml lang="es">
+  <mj-head>
+    <mj-raw>
+      <meta name="color-scheme" content="light"></meta>
+      <meta name="supported-color-schemes" content="light"></meta>
+    </mj-raw>
+    <mj-font name="Arial" href="https://fonts.googleapis.com/css?family=Roboto:500,600,700" />
+    <mj-preview>Desglose del pedido</mj-preview>
+    <mj-title>Desglose del pedido</mj-title>
+    <mj-attributes>
+      <mj-text font-family="Arial" font-weight="500" font-size="16px" line-height="24px" />
+      <mj-button font-family="Arial" font-weight="600" font-size="16px" line-height="24px" />
+      <mj-divider border-color="rgba(88,100,83,0.31)" border-width="1px" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      a {
+        color:black;
+      	text-decoration:none;
+      }
+      tr {
+      	font-size:16px;
+      }
+      :root {
+        color-scheme: light;
+        supported-color-schemes: light;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    /* HEADER */
+    <mj-section padding-bottom="10px">
+      <mj-column>
+        <mj-table>
+          <tr>
+            <td width="83px">
+              <a href="laenvasadora.es">
+                <img width="78px" src="{{cloudinarySrc}}v1680693087/laenvasadora/LOGOS/LOGO_ENVASADORA_CON_REDONDA_VERDE_txc8ia.png" alt="" width="200px" href="https://laenvasadora.es" />
+              </a>
+            </td>
+            <td style="font-weight:700;font-size:25px;">
+              La Envasadora
+            </td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+		/* CONTENT */
+    <mj-section>
+      <mj-column width="100%">
+        <mj-text font-weight="700" font-size="24px" line-height="28px">
+          Fecha estimada de entrega: 2 días laborales
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-text font-weight="600" padding-bottom="5px">
+          Hola, {{firstName}}
+        </mj-text>
+        <mj-text padding-top="0px">
+          ¡Esperamos que hayas disfrutado al comprar con nosotros!<br />
+          Cuando el pedido salga del almacén, te enviaremos un correo electrónico de confirmación.
+        </mj-text>
+      </mj-column>
+      <mj-column width="50%">
+        <mj-text>
+          <div style="font-weight:600">
+            Dirección de entrega
+          </div>
+          <span>
+            {{order.bigbuy.shippingAddress.firstName}} {{order.bigbuy.shippingAddress.lastName}}<br />
+            {{order.bigbuy.shippingAddress.address}}<br />
+            {{order.bigbuy.shippingAddress.postcode}} {{order.bigbuy.shippingAddress.town}}<br />
+            {{order.bigbuy.shippingAddress.country}}
+          </span>
+        </mj-text>
+      </mj-column>
+      <mj-column width="50%">
+        <mj-text>
+          <div style="font-weight:600">
+            Número de pedido
+          </div>
+          {{order.bigbuyId}}<br />
+          <div style="font-weight:600;margin-top:19px">
+            Fecha de la compra
+          </div>
+          {{orderCreatedDate}}<br />
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-text>
+          @if(order.transaction?.paypalAccount?.payerEmail)
+          	<div style="font-weight:600">
+              Pagado con PayPal
+            </div>
+            {{order.transaction.paypalAccount.payerEmail}}
+          @elseif(order.transaction?.creditCard?.cardType && order.transaction?.creditCard?.last4)
+            <div style="font-weight:600">
+              Pagado con tarjeta
+            </div>
+            {{order.transaction.creditCard.cardType}} ....{{order.transaction.creditCard.last4}}
+          @end
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%" padding-top="15px">
+        <mj-text font-weight="700" font-size="24px" line-height="28px">
+          Productos:
+      	</mj-text>
+      </mj-column>
+      @each(item in order.items)
+      	<mj-column width="50%">
+          @if(item.pack?.image || item.inventory?.product?.image)
+            <mj-image border-radius="12px" alt="{{item.inventory?.name.current || item.pack?.name.current}}" name="{{item.inventory?.name.current || item.pack?.name.current}}" title="{{item.inventory?.name.current || item.pack?.name.current}}" src="{{cloudinarySrc}}{{item.pack?.image || item.inventory?.product?.image}}" />
+          @else
+            <mj-image border-radius="12px" src="{{cloudinarySrc}}v1681059169/laenvasadora/LANDING%20PAGE/placeholder_tl7jks.jpg}}" />
+          @end
+      	</mj-column>
+      	<mj-column width="50%">
+          <mj-text>
+            <span style="font-weight:600">
+              Producto:
+            </span>
+            {{{item.inventory?.name.current || item.pack?.name.current}}}
+          </mj-text>
+          <mj-divider />
+          <mj-text>
+            <span style="font-weight:600">
+              Precio:
+            </span>
+            {{item.inventory ? item.inventory.realPrice : item.pack?.price || 0}}{{currencySymbol}}
+          </mj-text>
+          <mj-divider />
+          <mj-text>
+            <span style="font-weight:600">
+              Cantidad:
+            </span>
+            {{item.quantity.toString()}}
+          </mj-text>
+          <mj-divider />
+          <mj-text>
+            <span style="font-weight:600">
+              Subtotal:
+            </span>
+            {{((item.inventory ? item.inventory.realPrice : item.pack?.price || 0) * item.quantity).toString()}}{{currencySymbol}}
+          </mj-text>
+      	</mj-column>
+      	<mj-column width="100%">
+      		<mj-divider border-color="rgba(88,100,83,0.6)" border-width="4px" />
+      	</mj-column>
+      @end
+      <mj-column width="100%">
+        <mj-text font-weight="700" font-size="24px" line-height="28px">
+          Desglose
+      	</mj-text>
+        <mj-text>
+          <span style="font-weight:600">
+            Subtotal:
+          </span>
+          {{subtotal}}{{currencySymbol}}
+        </mj-text>
+        @if(discount > 0)
+        <mj-text>
+          <span style="font-weight:600">
+            Descuento 1a compra:
+          </span>
+          -10%
+        </mj-text>
+        @end
+        <mj-text>
+          <span style="font-weight:600">
+            Envío:
+          </span>
+          @if(shipping > 0)
+          	{{shipping}}{{currencySymbol}}
+          @else
+          	Envío gratuito
+          @end
+        </mj-text>
+        <mj-text>
+          <span style="font-weight:600">
+            Total:
+          </span>
+          {{total}}{{currencySymbol}} (IVA incluido)
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-button background-color="#E85D4E" href="{{orderPath}}">
+          Ver pedido
+        </mj-button>
+        <mj-divider border-color="rgba(88,100,83,0.6)" border-width="4px" />
+      </mj-column>
+      <mj-column width="100%">
+        <mj-text>
+          Un saludo,<br />
+          <span style="font-weight:600">
+            El equipo de La Envasadora.
+          </span>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    /* FOOTER */
+    <mj-section background-color="#d9d9d9">
+      <mj-column>
+        <mj-table>
+          <tr>
+            <td rowspan="2" style="width:35px">
+              <img src="{{cloudinarySrc}}v1683184156/laenvasadora/fontawesome/circle-question-regular_dkctcw.png" style="width:24px;" />
+            </td>
+            <td style="text-align:left;">
+              ¿Necesitas ayuda?
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align:left">
+              <a href="https://laenvasadora.es/contacto">Ayuda y contacto.</a>
+            </td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#e5ecdc">
+      <mj-column>
+        <mj-text>
+          Garantía de 2 años por el fabricante.
+        </mj-text>
+        <mj-text>
+          <a href="https://laenvasadora.es/conditions">
+          	Condiciones de venta.<br />
+          </a>
+          <a href="https://laenvasadora.es/legal">
+            Aviso legal.
+          </a>
+        </mj-text>
+      </mj-column>
+      <mj-column>
+        <mj-spacer height="25px" />
+        <mj-table width="60%">
+          <tr style="font-weight:600;height:35px">
+            <th colspan="3">
+            	Síguenos en
+            </th>
+          </tr>
+          <tr>
+            <td style="text-align:center;padding:0px;">
+              <a href="https://www.instagram.com/laenvasadora/">
+                <img src="{{cloudinarySrc}}v1683115285/laenvasadora/fontawesome/instagram_ifnmzm.png" style="width:40px;" />
+              </a>
+            </td>
+            <td style="margin-top:2px;text-align:center;">
+              <a href="https://www.facebook.com/profile.php?id=100092231104587">
+                <img src="{{cloudinarySrc}}v1683115290/laenvasadora/fontawesome/facebook_wq8rgo.png" style="width:40px;" />
+              </a>
+            </td>
+            <td style="margin-top:3px;text-align:center;">
+              <a href="https://www.tiktok.com/@laenvasadora">
+                <img src="{{cloudinarySrc}}v1683115293/laenvasadora/fontawesome/tiktok_mt6zza.png" style="width:35px;" />
+              </a>
+            </td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+		<mj-section background-color="#e5ecdc">
+      <mj-column>
+        <mj-text font-size="14px" line-height="21px">
+          Todos nuestros artículos se envían con el embalaje en perfectas condiciones.<br /><br />
+          Si en la entrega hubiera daños exteriores o alguna anomalía en el embalaje, deberá dejar constancia en el albarán o prueba de entrega indicando "EMBALAJE EN MAL ESTADO".<br /><br />
+          Esto es imprescindible para que la agencia acepte la reclamación.<br />En caso de que sea necesario, deberá abrir una incidencia de postventa antes de que transcurran 5 días desde la entrega.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

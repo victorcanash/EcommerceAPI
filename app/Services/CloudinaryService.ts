@@ -37,4 +37,10 @@ export default class CloudinaryService {
     })
     return url
   }
+
+  public static getFullSrc(src?: string) {
+    return `https://res.cloudinary.com/${Env.get('CLOUDINARY_CLOUD_NAME', ' ')}/image/upload/${
+      src || ''
+    }`
+  }
 }
