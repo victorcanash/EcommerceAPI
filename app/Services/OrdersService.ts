@@ -46,13 +46,12 @@ export default class OrdersService {
 
   private static async createOrder(
     i18n: I18nContract,
-    appName: string,
-    appDomain: string,
     checkoutData: CheckoutData,
     user: User | undefined,
     guestUser: GuestUser | undefined,
     cart: Cart | GuestCartCheck,
     paypalTransactionId: string,
+    currency: string,
     sendCreateOrderEmail: boolean
   ) {
     let order: Order | undefined
@@ -76,12 +75,11 @@ export default class OrdersService {
       if (sendCreateOrderEmail) {
         await MailService.sendErrorCreateOrderEmail(
           i18n,
-          appName,
-          appDomain,
           errorMsg,
           checkoutData,
           paypalTransactionId,
-          cart
+          cart,
+          currency
         )
         return
       } else {
@@ -98,12 +96,11 @@ export default class OrdersService {
       if (sendCreateOrderEmail) {
         await MailService.sendErrorCreateOrderEmail(
           i18n,
-          appName,
-          appDomain,
           errorMsg,
           checkoutData,
           paypalTransactionId,
-          cart
+          cart,
+          currency
         )
         return
       } else {
@@ -128,12 +125,11 @@ export default class OrdersService {
       if (sendCreateOrderEmail) {
         await MailService.sendErrorCreateOrderEmail(
           i18n,
-          appName,
-          appDomain,
           errorMsg,
           checkoutData,
           paypalTransactionId,
-          cart
+          cart,
+          currency
         )
         return
       } else {
@@ -146,15 +142,14 @@ export default class OrdersService {
       await order.loadBigbuyData()
       await MailService.sendCheckOrderEmail(
         i18n,
-        appName,
-        appDomain,
         checkoutData.email,
         user?.firstName || checkoutData.shipping.firstName,
-        order
+        order,
+        currency
       )
     } catch (error) {
       const errorMsg = `Send check order email error: ${error.message}`
-      await MailService.sendErrorGetOrderEmail(i18n, appName, appDomain, errorMsg, order)
+      await MailService.sendErrorGetOrderEmail(i18n, errorMsg, order, currency)
     }
 
     return order
@@ -213,23 +208,21 @@ export default class OrdersService {
 
   public static async createOrderByPayment(
     i18n: I18nContract,
-    appName: string,
-    appDomain: string,
     checkoutData: CheckoutData,
     user: User | undefined,
     guestUser: GuestUser | undefined,
     cart: Cart | GuestCartCheck,
-    paypalTransactionId: string
+    paypalTransactionId: string,
+    currency: string
   ) {
     const order = await this.createOrder(
       i18n,
-      appName,
-      appDomain,
       checkoutData,
       user,
       guestUser,
       cart,
       paypalTransactionId,
+      currency,
       true
     )
     return order
@@ -237,11 +230,10 @@ export default class OrdersService {
 
   public static async createOrderByAdminRoute(
     locale: string,
-    appName: string,
-    appDomain: string,
     checkoutData: CheckoutData,
     cart: GuestCart,
-    paypalTransactionId: string
+    paypalTransactionId: string,
+    currency: string
   ) {
     const { user, guestUser, cartCheck } = await PaymentsService.checkAdminPaymentData(
       checkoutData,
@@ -249,13 +241,12 @@ export default class OrdersService {
     )
     const order = await this.createOrder(
       I18n.locale(locale),
-      appName,
-      appDomain,
       checkoutData,
       user,
       guestUser,
       cartCheck,
       paypalTransactionId,
+      currency,
       false
     )
     return order

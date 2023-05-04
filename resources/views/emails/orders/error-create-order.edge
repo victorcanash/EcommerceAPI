@@ -9,8 +9,6 @@
         <td valign="top" style="color: #525C66; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; -webkit-text-size-adjust: none;">
 
           @!component('emails/header', {
-            appName,
-            appDomain,
             username: 'admin',
           })
 
@@ -27,6 +25,9 @@
               </li>
               <li>
                 Locale: {{locale}}
+              </li>
+              <li>
+                Currency: {{currency}}
               </li>
               <li>
                 Paypal transaction ID: {{paypalTransactionId}}
@@ -89,7 +90,6 @@
           </div>
 
           @!component('emails/footer', {
-            appName,
             currentYear,
           })
 

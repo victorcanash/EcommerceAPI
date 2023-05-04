@@ -10,8 +10,7 @@ export default class SendOrderEmailValidator {
 
   public schema = schema.create({
     locale: schema.string(),
-    appName: schema.string(),
-    appDomain: schema.string(),
+    currency: schema.string(),
   })
 
   public messages: CustomMessages = {}

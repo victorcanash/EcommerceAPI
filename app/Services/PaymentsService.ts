@@ -157,9 +157,8 @@ export default class PaymentsService {
     id: string,
     i18n: I18nContract,
     auth: AuthContract,
-    appName: string,
-    appDomain: string,
     checkoutData: CheckoutData,
+    currency: string,
     guestCart?: GuestCart
   ) {
     const { user, guestUser, cart } = await this.checkUserPaymentData(
@@ -179,13 +178,12 @@ export default class PaymentsService {
 
     OrdersService.createOrderByPayment(
       i18n,
-      appName,
-      appDomain,
       checkoutData,
       user,
       guestUser,
       cart,
-      transactionId
+      transactionId,
+      currency
     )
 
     return transactionId

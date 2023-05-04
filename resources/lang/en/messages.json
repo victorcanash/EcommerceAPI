@@ -32,20 +32,7 @@
       "button": "Confirm purchase"
     },
     "checkOrder": {
-      "subject": "Please check your order",
-      "description": "You have realized a new order:",
-      "numberField": "Order number: { id }",
-      "statusField": "Status: { status }",
-      "dateField": "Order date: {orderDate, date, medium}",
-      "paidCard": "Paid with { cardType } ....{ last4 }",
-      "paidPaypal": "Paid with Paypal { payerEmail }",
-      "billing": "Billing:",
-      "shipping": "Shipping:",
-      "products": "Products:",
-      "productReference": "The product reference no longer exists",
-      "quantityField": "Quantity: { quantity }",
-      "skuField": "SKU: { sku }",
-      "totalField": "Total: { amount }"
+      "subject": "Please check your order"
     }
   }
 }

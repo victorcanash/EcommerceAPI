@@ -97,11 +97,10 @@ export default class OrdersController {
 
     const order = await OrdersService.createOrderByAdminRoute(
       locale,
-      validatedData.appName,
-      validatedData.appDomain,
       validatedData.checkoutData as CheckoutData,
       validatedData.cart as GuestCart,
-      validatedData.paypalTransactionId
+      validatedData.paypalTransactionId,
+      validatedData.currency
     )
 
     const successMsg = 'Successfully created order by admin'
@@ -127,11 +126,10 @@ export default class OrdersController {
 
     await MailService.sendCheckOrderEmail(
       I18n.locale(locale),
-      validatedData.appName,
-      validatedData.appDomain,
       user.email,
       (user as User)?.firstName || order.bigbuyData?.shippingAddress?.firstName || '',
-      order
+      order,
+      validatedData.currency
     )
 
     const successMsg = 'Successfully sent check order email'

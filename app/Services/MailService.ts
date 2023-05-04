@@ -9,6 +9,7 @@ import Order from 'App/Models/Order'
 import Cart from 'App/Models/Cart'
 import { CheckoutData } from 'App/Types/checkout'
 import { GuestCartCheck } from 'App/Types/cart'
+import OrderBreakdownEmail from 'App/Mailers/OrderBreakdownEmail'
 import { logSuccess } from 'App/Utils/logger'
 
 export default class MailService {
@@ -136,38 +137,28 @@ export default class MailService {
 
   public static async sendCheckOrderEmail(
     i18n: I18nContract,
-    appName: string,
-    appDomain: string,
     email: string,
     firstName: string,
-    order: Order
+    order: Order,
+    currency: string
   ) {
-    const currentYear = new Date().getFullYear()
-    await Mail.send((message) => {
-      message
-        .from(Env.get('SMTP_EMAIL'))
-        .to(email)
-        .subject(i18n.formatMessage('messages.emails.checkOrder.subject'))
-        .htmlView('emails/orders/check-order', {
-          i18n,
-          appName,
-          appDomain,
-          currentYear,
-          firstName,
-          order,
-        })
-    })
+    await new OrderBreakdownEmail(
+      i18n,
+      email,
+      firstName,
+      order,
+      currency === 'EUR' ? '€' : '$'
+    ).sendLater()
     logSuccess('Sent email check order')
   }
 
   public static async sendErrorCreateOrderEmail(
     i18n: I18nContract,
-    appName: string,
-    appDomain: string,
     errorMsg: string,
     checkoutData: CheckoutData,
     paypalTransactionId: string | undefined,
-    cart: Cart | GuestCartCheck
+    cart: Cart | GuestCartCheck,
+    currency: string
   ) {
     const currentYear = new Date().getFullYear()
     const currentDate = new Date().toLocaleDateString()
@@ -178,14 +169,13 @@ export default class MailService {
         .subject('Error creating new order')
         .htmlView('emails/orders/error-create-order', {
           locale: i18n.locale,
-          appName,
-          appDomain,
           currentYear,
           currentDate,
           errorMsg,
           checkoutData,
           paypalTransactionId,
           cart,
+          currency,
         })
     })
     logSuccess('Sent email create order error')
@@ -193,10 +183,9 @@ export default class MailService {
 
   public static async sendErrorGetOrderEmail(
     i18n: I18nContract,
-    appName: string,
-    appDomain: string,
     errorMsg: string,
-    order: Order
+    order: Order,
+    currency: string
   ) {
     const currentYear = new Date().getFullYear()
     const currentDate = new Date().toLocaleDateString()
@@ -207,12 +196,11 @@ export default class MailService {
         .subject('Error sending new order email')
         .htmlView('emails/orders/error-get-order-email', {
           locale: i18n.locale,
-          appName,
-          appDomain,
           currentYear,
           currentDate,
           errorMsg,
           order,
+          currency,
         })
     })
     logSuccess('Sent email get order error')

@@ -10,10 +10,9 @@ export default class CapturePaypalTransactionValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    appName: schema.string(),
-    appDomain: schema.string(),
     checkoutData: checkoutDataSchema,
     guestCart: guestCartSchema,
+    currency: schema.string(),
   })
 
   public messages: CustomMessages = {}

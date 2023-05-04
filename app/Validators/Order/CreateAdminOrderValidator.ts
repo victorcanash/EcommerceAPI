@@ -10,14 +10,13 @@ export default class CreateAdminOrderValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    appName: schema.string(),
-    appDomain: schema.string(),
     locale: schema.string(),
     checkoutData: checkoutDataSchema,
     cart: guestCartSchema,
     paypalTransactionId: schema.string({}, [
       rules.unique({ table: 'orders', column: 'paypal_transaction_id' }),
     ]),
+    currency: schema.string(),
   })
 
   public messages: CustomMessages = {}

@@ -59,9 +59,8 @@ export default class PaymentsController {
       id,
       i18n,
       auth,
-      validatedData.appName,
-      validatedData.appDomain,
       validatedData.checkoutData as CheckoutData,
+      validatedData.currency,
       validatedData.guestCart as GuestCart
     )
 

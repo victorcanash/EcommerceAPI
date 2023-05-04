@@ -32,20 +32,7 @@
       "button": "Confirmar compra"
     },
     "checkOrder": {
-      "subject": "Por favor mira tu pedido",
-      "description": "Has realizado un nuevo pedido:",
-      "numberField": "Número de pedido: { id }",
-      "statusField": "Estado: { status }",
-      "dateField": "Fecha del pedido: {orderDate, date, medium}",
-      "paidCard": "Pagado con { cardType } ....{ last4 }",
-      "paidPaypal": "Pagado con Paypal { payerEmail }",
-      "billing": "Facturación:",
-      "shipping": "Envío:",
-      "products": "Productos:",
-      "productReference": "La referencia del producto ya no existe",
-      "quantityField": "Cantidad: { quantity }",
-      "skuField": "SKU: { sku }",
-      "totalField": "Total: { amount }"
+      "subject": "Por favor mira tu pedido"
     }
   }
 }
