@@ -69,6 +69,7 @@
     "@adonisjs/mail": "^8.1.2",
     "@adonisjs/repl": "^3.1.11",
     "@adonisjs/view": "^6.2.0",
+    "@types/mjml": "^4.7.1",
     "@types/url-parse": "^1.4.8",
     "adonis5-swagger": "^1.4.1",
     "axios": "^1.1.3",
