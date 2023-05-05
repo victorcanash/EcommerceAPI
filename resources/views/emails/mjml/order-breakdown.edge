@@ -30,18 +30,7 @@
     /* HEADER */
     <mj-section padding-bottom="10px">
       <mj-column>
-        <mj-table>
-          <tr>
-            <td width="83px">
-              <a href="laenvasadora.es">
-                <img width="78px" src="{{cloudinarySrc}}v1680693087/laenvasadora/LOGOS/LOGO_ENVASADORA_CON_REDONDA_VERDE_txc8ia.png" alt="" width="200px" href="https://laenvasadora.es" />
-              </a>
-            </td>
-            <td style="font-weight:700;font-size:25px;">
-              La Envasadora
-            </td>
-          </tr>
-        </mj-table>
+        <mj-image align="left" src="{{cloudinarySrc}}v1683277396/laenvasadora/LOGOS/LOGO-EMAIL-SPACE-GREY_o4uvuy.png" alt="laenvasadora" width="320px" href="https://laenvasadora.es" />
       </mj-column>
     </mj-section>
 		/* CONTENT */
@@ -110,7 +99,7 @@
           @if(item.pack?.image || item.inventory?.product?.image)
             <mj-image border-radius="12px" alt="{{item.inventory?.name.current || item.pack?.name.current}}" name="{{item.inventory?.name.current || item.pack?.name.current}}" title="{{item.inventory?.name.current || item.pack?.name.current}}" src="{{cloudinarySrc}}{{item.pack?.image || item.inventory?.product?.image}}" />
           @else
-            <mj-image border-radius="12px" src="{{cloudinarySrc}}v1681059169/laenvasadora/LANDING%20PAGE/placeholder_tl7jks.jpg}}" />
+            <mj-image border-radius="12px" src="{{cloudinarySrc}}v1681059169/laenvasadora/LANDING%20PAGE/placeholder_tl7jks.jpg" />
           @end
       	</mj-column>
       	<mj-column width="50%">
