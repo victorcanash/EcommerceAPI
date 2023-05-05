@@ -34,18 +34,16 @@ export default class OrderBreakdownEmail extends BaseMailer {
       discount: this.order.transaction?.amount.breakdown.discount.value || '0',
       shipping: this.order.transaction?.amount.breakdown.shipping.value || '0',
       total: this.order.transaction?.amount.value || '0',
-      orderPath: this.order.guestUserId
-        ? `laenvasadora.es/orders?id=${this.order.bigbuyId}&email=${this.email}`
-        : 'laenvasadora.es/orders',
+      orderPath: `https://laenvasadora.es/orders?id=${this.order.bigbuyId}&email=${this.email}`,
       currencySymbol: this.currencySymbol,
       cloudinarySrc: CloudinaryService.getFullSrc(),
     })
 
     message
-      .subject(this.i18n.formatMessage('messages.emails.checkOrder.subject'))
+      .subject(this.i18n.formatMessage('Desglose del pedido'))
       .from(Env.get('SMTP_EMAIL'))
       .to(this.email)
       .html(mjml(input).html)
-    logSuccess('Sent email check order')
+    logSuccess('Sent order breakdown email')
   }
 }
