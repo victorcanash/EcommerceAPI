@@ -1,0 +1,144 @@
+<mjml lang="es">
+  <mj-head>
+    <mj-raw>
+      <meta name="color-scheme" content="light" />
+      <meta name="supported-color-schemes" content="light" />
+    </mj-raw>
+    <mj-font name="Arial" href="https://fonts.googleapis.com/css?family=Roboto:500,600,700" />
+    <mj-preview>Pedido expedido</mj-preview>
+    <mj-title>Pedido expedido</mj-title>
+    <mj-attributes>
+      <mj-text font-family="Arial" font-weight="500" font-size="16px" line-height="24px" />
+      <mj-button font-family="Arial" font-weight="600" font-size="16px" line-height="24px" />
+      <mj-divider border-color="rgba(88,100,83,0.31)" border-width="1px" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      a {
+        color:black;
+      	text-decoration:none;
+      }
+      tr {
+      	font-size:16px;
+      }
+      :root {
+        color-scheme: light;
+        supported-color-schemes: light;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    /* HEADER */
+    <mj-section padding-bottom="10px">
+      <mj-column>
+        <mj-image align="left" src="{{cloudinarySrc}}v1683277396/laenvasadora/LOGOS/LOGO-EMAIL-SPACE-GREY_o4uvuy.png" alt="laenvasadora" width="320px" href="https://laenvasadora.es" />
+      </mj-column>
+    </mj-section>
+		/* CONTENT */
+    <mj-section>
+      <mj-column width="100%">
+        <mj-text font-weight="700" font-size="24px" line-height="28px">
+          ¡Pedido expedido!
+        </mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-text font-weight="600" padding-bottom="5px">
+          Hola {{firstName}},
+        </mj-text>
+        <mj-text padding-top="0px">
+          Nos complace informarte que tu pedido ha sido expedido y ya se encuentra en manos de Correos Express para su entrega.
+        </mj-text>
+				<mj-text>
+					Para que puedas hacer un seguimiento de tu pedido te facilitamos el número de seguimiento de Correos Express {{bigbuy.tracking.id}}.
+				</mj-text>
+				<mj-text>
+					También puedes consultarlo desde nuestra página web haciendo click abajo del todo en el botón “Ver pedido”. De esta manera podrás conocer el estado del pedido con todos sus datos.
+				</mj-text>
+				<mj-text>
+					Agradecemos tu confianza y esperamos que tu experiencia de compra con nosotros haya sido satisfactoria. Si necesitas cualquier tipo de asistencia, por favor no dudes en ponerte en contacto con nuestro servicio de atención al cliente, estaremos encantados de ayudarte.
+				</mj-text>
+				<mj-text>
+					Gracias por elegirnos.
+        </mj-text>
+        <mj-text>
+					Atentamente,<br />
+					El Equipo de La Envasadora<br />
+					<a href="laenvasadora.es">laenvasadora.es</a>
+        </mj-text>
+        <mj-button background-color="#E85D4E" href="{{orderPath}}">
+          Ver pedido
+        </mj-button>
+      </mj-column>
+    </mj-section>
+    /* FOOTER */
+    <mj-section background-color="#d9d9d9">
+      <mj-column>
+        <mj-table>
+          <tr>
+            <td rowspan="2" style="width:35px">
+              <img src="{{cloudinarySrc}}v1683184156/laenvasadora/fontawesome/circle-question-regular_dkctcw.png" style="width:24px;" />
+            </td>
+            <td style="text-align:left;">
+              <a href="https://laenvasadora.es/contacto">¿Necesitas ayuda?</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align:left">
+              <a href="https://laenvasadora.es/contacto">Ayuda y contacto.</a>
+            </td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#e5ecdc">
+      <mj-column>
+        <mj-text>
+          Garantía de 2 años por el fabricante.
+        </mj-text>
+        <mj-text>
+          <a href="https://laenvasadora.es/conditions">
+          	Condiciones de venta.<br />
+          </a>
+          <a href="https://laenvasadora.es/legal">
+            Aviso legal.
+          </a>
+        </mj-text>
+      </mj-column>
+      <mj-column>
+        <mj-spacer height="25px" />
+        <mj-table width="60%">
+          <tr style="font-weight:600;height:35px">
+            <th colspan="3">
+            	Síguenos en
+            </th>
+          </tr>
+          <tr>
+            <td style="text-align:center;padding:0px;">
+              <a href="https://www.instagram.com/laenvasadora/">
+                <img src="{{cloudinarySrc}}v1683115285/laenvasadora/fontawesome/instagram_ifnmzm.png" style="width:40px;" />
+              </a>
+            </td>
+            <td style="margin-top:2px;text-align:center;">
+              <a href="https://www.facebook.com/profile.php?id=100092231104587">
+                <img src="{{cloudinarySrc}}v1683115290/laenvasadora/fontawesome/facebook_wq8rgo.png" style="width:40px;" />
+              </a>
+            </td>
+            <td style="margin-top:3px;text-align:center;">
+              <a href="https://www.tiktok.com/@laenvasadora">
+                <img src="{{cloudinarySrc}}v1683115293/laenvasadora/fontawesome/tiktok_mt6zza.png" style="width:35px;" />
+              </a>
+            </td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+		<mj-section background-color="#e5ecdc">
+      <mj-column>
+        <mj-text font-size="14px" line-height="21px">
+          Todos nuestros artículos se envían con el embalaje en perfectas condiciones.<br /><br />
+          Si en la entrega hubiera daños exteriores o alguna anomalía en el embalaje, deberá dejar constancia en el albarán o prueba de entrega indicando "EMBALAJE EN MAL ESTADO".<br /><br />
+          Esto es imprescindible para que la agencia acepte la reclamación.<br />En caso de que sea necesario, deberá abrir una incidencia de postventa antes de que transcurran 5 días desde la entrega.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
