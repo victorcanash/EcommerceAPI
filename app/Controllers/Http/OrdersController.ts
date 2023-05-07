@@ -88,7 +88,7 @@ export default class OrdersController {
     } as OrderResponse)
   }
 
-  public async storeAdmin({ request, response }: HttpContextContract) {
+  public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateAdminOrderValidator)
     if (!validatedData.locale) {
       throw new BadRequestException(`Unsupported locale: ${validatedData.locale}`)

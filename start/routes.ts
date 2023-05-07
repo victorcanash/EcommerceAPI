@@ -108,12 +108,12 @@ Route.group(() => {
   // Order routes
 
   Route.resource('orders', 'OrdersController')
-    .except(['store', 'update', 'destroy'])
+    .except(['update', 'destroy'])
     .middleware({
       index: ['auth:api'],
+      store: ['auth:api', 'admin'],
     })
     .apiOnly()
-  Route.post('orders/admin', 'OrdersController.storeAdmin').middleware(['auth:api', 'admin'])
   Route.post(
     'orders/send-email/breakdown/:id',
     'OrdersController.sendOrderBreakdownEmail'
