@@ -138,7 +138,8 @@ export default class OrdersController {
 
     const { locale, order, user } = await OrdersService.checkSendOrderEmailData(
       id,
-      validatedData.locale
+      validatedData.locale,
+      true
     )
 
     await MailService.sendOrderIssuedEmail(

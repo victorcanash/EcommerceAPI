@@ -255,8 +255,12 @@ export default class OrdersService {
     return order
   }
 
-  public static async checkSendOrderEmailData(orderId: number, locale: string) {
-    const order = await OrdersService.getOrderById(orderId, true, true, true)
+  public static async checkSendOrderEmailData(
+    orderId: number,
+    locale: string,
+    trackingData = false
+  ) {
+    const order = await OrdersService.getOrderById(orderId, true, true, true, trackingData)
     const user = order.userId
       ? await UsersService.getUserById(order.userId, false)
       : await UsersService.getGuestUserById(order.guestUserId || -1)
