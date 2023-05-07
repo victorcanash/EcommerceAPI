@@ -24,7 +24,7 @@ export default class OrderReviewEmail extends BaseMailer {
       i18n: this.i18n,
       firstName: this.firstName,
       order: this.order,
-      reviewPath: `https://laenvasadora.es/#reviews?email=${this.email}`,
+      reviewPath: `https://laenvasadora.es/?email=${this.email}#reviews`,
       cloudinarySrc: CloudinaryService.getFullSrc(),
     })
 
