@@ -13,6 +13,7 @@ import CartsService from 'App/Services/CartsService'
 import PaymentsService from 'App/Services/PaymentsService'
 import BigbuyService from 'App/Services/BigbuyService'
 import MailService from 'App/Services/MailService'
+import { getSupportedLocale } from 'App/Utils/localization'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 import InternalServerException from 'App/Exceptions/InternalServerException'
 import PermissionException from 'App/Exceptions/PermissionException'
@@ -235,12 +236,14 @@ export default class OrdersService {
     paypalTransactionId: string,
     currency: string
   ) {
+    const supportedLocale = getSupportedLocale(locale)
+
     const { user, guestUser, cartCheck } = await PaymentsService.checkAdminPaymentData(
       checkoutData,
       cart
     )
     const order = await this.createOrder(
-      I18n.locale(locale),
+      I18n.locale(supportedLocale),
       checkoutData,
       user,
       guestUser,
@@ -250,5 +253,18 @@ export default class OrdersService {
       false
     )
     return order
+  }
+
+  public static async checkSendOrderEmailData(orderId: number, locale: string) {
+    const order = await OrdersService.getOrderById(orderId, true, true, true)
+    const user = order.userId
+      ? await UsersService.getUserById(order.userId, false)
+      : await UsersService.getGuestUserById(order.guestUserId || -1)
+    const supportedLocale = getSupportedLocale(locale)
+    return {
+      locale: supportedLocale,
+      order: order,
+      user: user,
+    }
   }
 }

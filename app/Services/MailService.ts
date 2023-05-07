@@ -11,6 +11,8 @@ import { CheckoutData } from 'App/Types/checkout'
 import { GuestCartCheck } from 'App/Types/cart'
 import RegisterWelcomeEmail from 'App/Mailers/RegisterWelcomeEmail'
 import OrderBreakdownEmail from 'App/Mailers/OrderBreakdownEmail'
+import OrderIssuedEmail from 'App/Mailers/OrderIssuedEmail'
+import OrderReviewEmail from 'App/Mailers/OrderReviewEmail'
 import { logSuccess } from 'App/Utils/logger'
 
 export default class MailService {
@@ -162,6 +164,24 @@ export default class MailService {
       order,
       currency === 'EUR' ? '€' : '$'
     ).sendLater()
+  }
+
+  public static async sendOrderIssuedEmail(
+    i18n: I18nContract,
+    email: string,
+    firstName: string,
+    order: Order
+  ) {
+    await new OrderIssuedEmail(i18n, email, firstName, order).sendLater()
+  }
+
+  public static async sendOrderReviewEmail(
+    i18n: I18nContract,
+    email: string,
+    firstName: string,
+    order: Order
+  ) {
+    await new OrderReviewEmail(i18n, email, firstName, order).sendLater()
   }
 
   public static async sendErrorCreateOrderEmail(

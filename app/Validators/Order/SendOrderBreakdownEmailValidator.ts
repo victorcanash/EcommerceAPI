@@ -3,7 +3,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
 
-export default class SendOrderEmailValidator {
+export default class SendOrderBreakdownEmailValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public reporter = CustomReporter

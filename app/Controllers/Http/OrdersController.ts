@@ -11,14 +11,14 @@ import OrdersService from 'App/Services/OrdersService'
 import UsersService from 'App/Services/UsersService'
 import MailService from 'App/Services/MailService'
 import { logRouteSuccess } from 'App/Utils/logger'
-import { getSupportedLocale } from 'App/Utils/localization'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
 import CreateAdminOrderValidator from 'App/Validators/Order/CreateAdminOrderValidator'
-import SendOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
+import SendOrderBreakdownEmailValidator from 'App/Validators/Order/SendOrderBreakdownEmailValidator'
+import SendOrderIssuedEmailValidator from 'App/Validators/Order/SendOrderIssuedEmailValidator'
+import SendOrderReviewEmailValidator from 'App/Validators/Order/SendOrderReviewEmailValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
-import BadRequestException from 'App/Exceptions/BadRequestException'
 
 export default class OrdersController {
   public async index({ request, response, auth, bouncer }: HttpContextContract) {
@@ -90,13 +90,9 @@ export default class OrdersController {
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateAdminOrderValidator)
-    if (!validatedData.locale) {
-      throw new BadRequestException(`Unsupported locale: ${validatedData.locale}`)
-    }
-    const locale = getSupportedLocale(validatedData.locale)
 
     const order = await OrdersService.createOrderByAdminRoute(
-      locale,
+      validatedData.locale,
       validatedData.checkoutData as CheckoutData,
       validatedData.cart as GuestCart,
       validatedData.paypalTransactionId,
@@ -113,16 +109,12 @@ export default class OrdersController {
   }
 
   public async sendOrderBreakdownEmail({ params: { id }, request, response }: HttpContextContract) {
-    const order = await OrdersService.getOrderById(id, true, true, true)
-    const user = order.userId
-      ? await UsersService.getUserById(order.userId, false)
-      : await UsersService.getGuestUserById(order.guestUserId || -1)
+    const validatedData = await request.validate(SendOrderBreakdownEmailValidator)
 
-    const validatedData = await request.validate(SendOrderEmailValidator)
-    if (!validatedData.locale) {
-      throw new BadRequestException(`Unsupported locale: ${validatedData.locale}`)
-    }
-    const locale = getSupportedLocale(validatedData.locale)
+    const { locale, order, user } = await OrdersService.checkSendOrderEmailData(
+      id,
+      validatedData.locale
+    )
 
     await MailService.sendOrderBreakdownEmail(
       I18n.locale(locale),
@@ -133,6 +125,54 @@ export default class OrdersController {
     )
 
     const successMsg = 'Successfully sent order breakdown email'
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      order: order,
+    } as OrderResponse)
+  }
+
+  public async sendOrderIssuedEmail({ params: { id }, request, response }: HttpContextContract) {
+    const validatedData = await request.validate(SendOrderIssuedEmailValidator)
+
+    const { locale, order, user } = await OrdersService.checkSendOrderEmailData(
+      id,
+      validatedData.locale
+    )
+
+    await MailService.sendOrderIssuedEmail(
+      I18n.locale(locale),
+      user.email,
+      (user as User)?.firstName || order.bigbuyData?.shippingAddress?.firstName || '',
+      order
+    )
+
+    const successMsg = 'Successfully sent order issued email'
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      order: order,
+    } as OrderResponse)
+  }
+
+  public async sendOrderReviewEmail({ params: { id }, request, response }: HttpContextContract) {
+    const validatedData = await request.validate(SendOrderReviewEmailValidator)
+
+    const { locale, order, user } = await OrdersService.checkSendOrderEmailData(
+      id,
+      validatedData.locale
+    )
+
+    await MailService.sendOrderReviewEmail(
+      I18n.locale(locale),
+      user.email,
+      (user as User)?.firstName || order.bigbuyData?.shippingAddress?.firstName || '',
+      order
+    )
+
+    const successMsg = 'Successfully sent order review email'
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,
