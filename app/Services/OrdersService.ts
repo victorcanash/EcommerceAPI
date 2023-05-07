@@ -140,7 +140,7 @@ export default class OrdersService {
     // Send check order email
     try {
       await order.loadBigbuyData()
-      await MailService.sendCheckOrderEmail(
+      await MailService.sendOrderBreakdownEmail(
         i18n,
         checkoutData.email,
         user?.firstName || checkoutData.shipping.firstName,
@@ -148,7 +148,7 @@ export default class OrdersService {
         currency
       )
     } catch (error) {
-      const errorMsg = `Send check order email error: ${error.message}`
+      const errorMsg = `Send order breakdown email error: ${error.message}`
       await MailService.sendErrorGetOrderEmail(i18n, errorMsg, order, currency)
     }
 

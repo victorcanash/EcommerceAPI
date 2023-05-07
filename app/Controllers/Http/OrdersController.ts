@@ -112,7 +112,7 @@ export default class OrdersController {
     } as OrderResponse)
   }
 
-  public async sendCheckEmail({ params: { id }, request, response }: HttpContextContract) {
+  public async sendOrderBreakdownEmail({ params: { id }, request, response }: HttpContextContract) {
     const order = await OrdersService.getOrderById(id, true, true, true)
     const user = order.userId
       ? await UsersService.getUserById(order.userId, false)
@@ -124,7 +124,7 @@ export default class OrdersController {
     }
     const locale = getSupportedLocale(validatedData.locale)
 
-    await MailService.sendCheckOrderEmail(
+    await MailService.sendOrderBreakdownEmail(
       I18n.locale(locale),
       user.email,
       (user as User)?.firstName || order.bigbuyData?.shippingAddress?.firstName || '',
@@ -132,7 +132,7 @@ export default class OrdersController {
       validatedData.currency
     )
 
-    const successMsg = 'Successfully sent check order email'
+    const successMsg = 'Successfully sent order breakdown email'
     logRouteSuccess(request, successMsg)
     return response.created({
       code: 201,

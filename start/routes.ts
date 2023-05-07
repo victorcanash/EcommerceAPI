@@ -114,10 +114,10 @@ Route.group(() => {
     })
     .apiOnly()
   Route.post('orders/admin', 'OrdersController.storeAdmin').middleware(['auth:api', 'admin'])
-  Route.post('orders/send-email/check/:id', 'OrdersController.sendCheckEmail').middleware([
-    'auth:api',
-    'admin',
-  ])
+  Route.post(
+    'orders/send-email/breakdown/:id',
+    'OrdersController.sendOrderBreakdownEmail'
+  ).middleware(['auth:api', 'admin'])
 
   // Google API routes
 

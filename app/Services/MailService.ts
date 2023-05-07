@@ -9,10 +9,19 @@ import Order from 'App/Models/Order'
 import Cart from 'App/Models/Cart'
 import { CheckoutData } from 'App/Types/checkout'
 import { GuestCartCheck } from 'App/Types/cart'
+import RegisterWelcomeEmail from 'App/Mailers/RegisterWelcomeEmail'
 import OrderBreakdownEmail from 'App/Mailers/OrderBreakdownEmail'
 import { logSuccess } from 'App/Utils/logger'
 
 export default class MailService {
+  public static async sendRegisterWelcomeEmail(
+    i18n: I18nContract,
+    email: string,
+    firstName: string
+  ) {
+    await new RegisterWelcomeEmail(i18n, email, firstName).sendLater()
+  }
+
   public static async sendActivationEmail(
     user: User,
     i18n: I18nContract,
@@ -37,6 +46,7 @@ export default class MailService {
           btnUrl,
         })
     })
+    logSuccess('Sent activation email')
   }
 
   public static async sendResetPswEmail(
@@ -63,6 +73,7 @@ export default class MailService {
           btnUrl,
         })
     })
+    logSuccess('Sent reset psw email')
   }
 
   public static async sendUpdateEmail(
@@ -96,6 +107,7 @@ export default class MailService {
         btnUrl,
       })
     })
+    logSuccess('Sent update email')
   }
 
   public static async sendContactEmail(
@@ -133,9 +145,10 @@ export default class MailService {
         }
       }
     })
+    logSuccess('Sent contact email')
   }
 
-  public static async sendCheckOrderEmail(
+  public static async sendOrderBreakdownEmail(
     i18n: I18nContract,
     email: string,
     firstName: string,
@@ -149,7 +162,6 @@ export default class MailService {
       order,
       currency === 'EUR' ? '€' : '$'
     ).sendLater()
-    logSuccess('Sent email check order')
   }
 
   public static async sendErrorCreateOrderEmail(
@@ -178,7 +190,7 @@ export default class MailService {
           currency,
         })
     })
-    logSuccess('Sent email create order error')
+    logSuccess('Sent error create order email')
   }
 
   public static async sendErrorGetOrderEmail(
@@ -203,6 +215,6 @@ export default class MailService {
           currency,
         })
     })
-    logSuccess('Sent email get order error')
+    logSuccess('Sent error get order email')
   }
 }

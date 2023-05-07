@@ -63,11 +63,12 @@ export default class UsersController {
     } as UserResponse)
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request, response, i18n }: HttpContextContract) {
     const validatedData = await request.validate(CreateUserValidator)
 
     const user = await User.create(validatedData)
     await Cart.create({ userId: user.id })
+    await MailService.sendRegisterWelcomeEmail(i18n, user.email, user.firstName)
 
     const successMsg = 'Successfully created user'
     logRouteSuccess(request, successMsg)
