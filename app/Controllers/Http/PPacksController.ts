@@ -36,13 +36,14 @@ export default class PPacksController {
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePPackValidator)
+    let { inventoriesIds, ...createPackData } = validatedData
 
     const textsData = await ProductsService.createLocalizedTexts(
       validatedData.name,
       validatedData.description
     )
     const productPack = await ProductPack.create({
-      ...validatedData,
+      ...createPackData,
       ...textsData,
     })
     await productPack.related('inventories').attach(validatedData.inventoriesIds)
@@ -61,13 +62,14 @@ export default class PPacksController {
     const productPack = await ProductsService.getPackById(id)
 
     const validatedData = await request.validate(UpdatePPackValidator)
+    let { inventoriesIds, ...updatePackData } = validatedData
 
     await ProductsService.updateLocalizedTexts(
       productPack,
       validatedData.name,
       validatedData.description
     )
-    productPack.merge(validatedData)
+    productPack.merge(updatePackData)
     await productPack.related('inventories').detach()
     if (validatedData.inventoriesIds && validatedData.inventoriesIds?.length > 0) {
       await productPack.related('inventories').attach(validatedData.inventoriesIds)
