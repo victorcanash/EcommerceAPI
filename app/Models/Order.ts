@@ -57,12 +57,14 @@ export default class Order extends AppBaseModel {
       items = this.products as unknown as GuestCartItem[]
     }
     if (items.length > 0) {
-      const inventories = await ProductInventory.query().whereIn(
-        'id',
-        items.map((item) => {
-          return item.inventoryId || -1
-        })
-      )
+      const inventories = await ProductInventory.query()
+        .whereIn(
+          'id',
+          items.map((item) => {
+            return item.inventoryId || -1
+          })
+        )
+        .preload('product')
       const packs = await ProductPack.query().whereIn(
         'id',
         items.map((item) => {
