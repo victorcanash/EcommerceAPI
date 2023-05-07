@@ -21,7 +21,7 @@ export default class RegisterWelcomeEmail extends BaseMailer {
     })
 
     message
-      .subject(this.i18n.formatMessage('Bienvenido a La Envasadora'))
+      .subject('Bienvenido a La Envasadora')
       .from(Env.get('SMTP_EMAIL'))
       .to(this.email)
       .html(mjml(input).html)

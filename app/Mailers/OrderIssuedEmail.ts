@@ -29,7 +29,7 @@ export default class OrderIssuedEmail extends BaseMailer {
     })
 
     message
-      .subject(this.i18n.formatMessage('Pedido expedido'))
+      .subject('Pedido expedido')
       .from(Env.get('SMTP_EMAIL'))
       .to(this.email)
       .html(mjml(input).html)

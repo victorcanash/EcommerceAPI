@@ -40,7 +40,7 @@ export default class OrderBreakdownEmail extends BaseMailer {
     })
 
     message
-      .subject(this.i18n.formatMessage('Desglose del pedido'))
+      .subject('Desglose del pedido')
       .from(Env.get('SMTP_EMAIL'))
       .to(this.email)
       .html(mjml(input).html)

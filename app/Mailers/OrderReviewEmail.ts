@@ -29,7 +29,7 @@ export default class OrderReviewEmail extends BaseMailer {
     })
 
     message
-      .subject(this.i18n.formatMessage('¿Te ha gustado nuestro producto?'))
+      .subject('¿Te ha gustado nuestro producto?')
       .from(Env.get('SMTP_EMAIL'))
       .to(this.email)
       .html(mjml(input).html)
