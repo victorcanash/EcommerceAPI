@@ -16,8 +16,7 @@ import SortValidator from 'App/Validators/List/SortValidator'
 import FilterOrderValidator from 'App/Validators/Order/FilterOrderValidator'
 import CreateAdminOrderValidator from 'App/Validators/Order/CreateAdminOrderValidator'
 import SendOrderBreakdownEmailValidator from 'App/Validators/Order/SendOrderBreakdownEmailValidator'
-import SendOrderIssuedEmailValidator from 'App/Validators/Order/SendOrderIssuedEmailValidator'
-import SendOrderReviewEmailValidator from 'App/Validators/Order/SendOrderReviewEmailValidator'
+import SendOrderEmailValidator from 'App/Validators/Order/SendOrderEmailValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
 
 export default class OrdersController {
@@ -111,9 +110,11 @@ export default class OrdersController {
   public async sendOrderBreakdownEmail({ params: { id }, request, response }: HttpContextContract) {
     const validatedData = await request.validate(SendOrderBreakdownEmailValidator)
 
-    const { locale, order, user } = await OrdersService.checkSendOrderEmailData(
+    const { locale, order, user } = await OrdersService.checkSendOrderEmailDataById(
       id,
-      validatedData.locale
+      validatedData.locale,
+      true,
+      false
     )
 
     await MailService.sendOrderBreakdownEmail(
@@ -133,12 +134,13 @@ export default class OrdersController {
     } as OrderResponse)
   }
 
-  public async sendOrderIssuedEmail({ params: { id }, request, response }: HttpContextContract) {
-    const validatedData = await request.validate(SendOrderIssuedEmailValidator)
+  public async sendOrderIssuedEmail({ request, response }: HttpContextContract) {
+    const validatedData = await request.validate(SendOrderEmailValidator)
 
-    const { locale, order, user } = await OrdersService.checkSendOrderEmailData(
-      id,
+    const { locale, order, user } = await OrdersService.checkSendOrderEmailDataByBigbuyId(
+      validatedData.bigbuyId,
       validatedData.locale,
+      true,
       true
     )
 
@@ -158,11 +160,11 @@ export default class OrdersController {
     } as OrderResponse)
   }
 
-  public async sendOrderReviewEmail({ params: { id }, request, response }: HttpContextContract) {
-    const validatedData = await request.validate(SendOrderReviewEmailValidator)
+  public async sendOrderReviewEmail({ request, response }: HttpContextContract) {
+    const validatedData = await request.validate(SendOrderEmailValidator)
 
-    const { locale, order, user } = await OrdersService.checkSendOrderEmailData(
-      id,
+    const { locale, order, user } = await OrdersService.checkSendOrderEmailDataByBigbuyId(
+      validatedData.bigbuyId,
       validatedData.locale
     )
 

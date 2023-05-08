@@ -255,20 +255,50 @@ export default class OrdersService {
     return order
   }
 
-  public static async checkSendOrderEmailData(
+  public static async checkSendOrderEmailDataById(
     orderId: number,
     locale: string,
+    allData = false,
     trackingData = false
   ) {
-    const order = await OrdersService.getOrderById(orderId, true, true, true, trackingData)
+    const order = await OrdersService.getOrderById(orderId, allData, allData, allData, trackingData)
+    const { supportedLocale, user } = await this.checkSendOrderEmailData(order, locale)
+    return {
+      locale: supportedLocale,
+      order,
+      user,
+    }
+  }
+
+  public static async checkSendOrderEmailDataByBigbuyId(
+    bigbuyId: string,
+    locale: string,
+    allData = false,
+    trackingData = false
+  ) {
+    const order = await OrdersService.getOrderByBigbuyId(
+      bigbuyId,
+      allData,
+      allData,
+      allData,
+      trackingData
+    )
+    const { supportedLocale, user } = await this.checkSendOrderEmailData(order, locale)
+    return {
+      locale: supportedLocale,
+      order,
+      user,
+    }
+  }
+
+  private static async checkSendOrderEmailData(order: Order, locale: string) {
     const user = order.userId
       ? await UsersService.getUserById(order.userId, false)
       : await UsersService.getGuestUserById(order.guestUserId || -1)
     const supportedLocale = getSupportedLocale(locale)
     return {
-      locale: supportedLocale,
-      order: order,
-      user: user,
+      supportedLocale,
+      user,
     }
   }
 }

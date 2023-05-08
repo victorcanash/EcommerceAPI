@@ -118,11 +118,11 @@ Route.group(() => {
     'orders/send-email/breakdown/:id',
     'OrdersController.sendOrderBreakdownEmail'
   ).middleware(['auth:api', 'admin'])
-  Route.post('orders/send-email/issued/:id', 'OrdersController.sendOrderIssuedEmail').middleware([
+  Route.post('orders/send-email/issued', 'OrdersController.sendOrderIssuedEmail').middleware([
     'auth:api',
     'admin',
   ])
-  Route.post('orders/send-email/review/:id', 'OrdersController.sendOrderReviewEmail').middleware([
+  Route.post('orders/send-email/review', 'OrdersController.sendOrderReviewEmail').middleware([
     'auth:api',
     'admin',
   ])
