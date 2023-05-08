@@ -31,6 +31,9 @@ export default class ProductInventory extends TextsBaseModel {
   @column()
   public image?: string
 
+  @column()
+  public metaId?: string
+
   @belongsTo(() => Product)
   public product: BelongsTo<typeof Product>
 

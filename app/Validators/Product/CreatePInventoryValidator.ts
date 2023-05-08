@@ -17,6 +17,9 @@ export default class CreatePInventoryValidator {
     price: schema.number(),
     quantity: schema.number(),
     image: schema.string.optional(),
+    metaId: schema.string.optional({}, [
+      rules.unique({ table: 'product_inventories', column: 'meta_id' }),
+    ]),
   })
 
   public messages: CustomMessages = {}

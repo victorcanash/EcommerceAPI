@@ -31,6 +31,9 @@ export default class ProductPack extends TextsBaseModel {
   @column()
   public reviewsCount: number
 
+  @column()
+  public metaId?: string
+
   @manyToMany(() => ProductInventory, {
     pivotTable: 'product_packs_inventories',
     pivotTimestamps: true,
