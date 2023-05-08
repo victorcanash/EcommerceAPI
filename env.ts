@@ -69,4 +69,6 @@ export default Env.rules({
   GOOGLE_OAUTH_CLIENT_SECRET: Env.schema.string(),
   GOOGLE_AUTH_CLIENT_EMAIL: Env.schema.string(),
   GOOGLE_AUTH_PRIVATE_KEY: Env.schema.string(),
+
+  FB_ACCESS_TOKEN: Env.schema.string(),
 })
