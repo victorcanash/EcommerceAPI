@@ -36,7 +36,7 @@ export default class PPacksController {
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePPackValidator)
-    let { inventoriesIds, ...createPackData } = validatedData
+    const { inventoriesIds, ...createPackData } = validatedData
 
     const textsData = await ProductsService.createLocalizedTexts(
       validatedData.name,
@@ -62,7 +62,7 @@ export default class PPacksController {
     const productPack = await ProductsService.getPackById(id)
 
     const validatedData = await request.validate(UpdatePPackValidator)
-    let { inventoriesIds, ...updatePackData } = validatedData
+    const { inventoriesIds, ...updatePackData } = validatedData
 
     await ProductsService.updateLocalizedTexts(
       productPack,
