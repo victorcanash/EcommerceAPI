@@ -14,6 +14,7 @@ export default class CreateProductValidator {
     categoryId: schema.number([rules.exists({ table: 'product_categories', column: 'id' })]),
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
+    metaId: schema.string.optional({}, [rules.unique({ table: 'products', column: 'meta_id' })]),
   })
 
   public messages: CustomMessages = {}

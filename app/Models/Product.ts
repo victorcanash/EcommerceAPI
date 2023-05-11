@@ -29,6 +29,9 @@ export default class Product extends TextsBaseModel {
   @column()
   public reviewsCount: number
 
+  @column()
+  public metaId?: string
+
   @belongsTo(() => ProductCategory, {
     foreignKey: 'categoryId',
   })
