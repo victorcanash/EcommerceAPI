@@ -20,13 +20,6 @@ export default class UpdateProductValidator {
     ]),
     name: optLocalizedTextSchema,
     description: optLocalizedTextSchema,
-    metaId: schema.string.optional({}, [
-      rules.unique({
-        table: 'products',
-        column: 'meta_id',
-        whereNot: { id: this.refs.id },
-      }),
-    ]),
   })
 
   public messages: CustomMessages = {}
