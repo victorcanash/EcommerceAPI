@@ -15,9 +15,7 @@ export default class CreatePPackValidator {
     description: reqLocalizedTextSchema,
     price: schema.number(),
     image: schema.string.optional(),
-    metaId: schema.string.optional({}, [
-      rules.unique({ table: 'product_packs', column: 'meta_id' }),
-    ]),
+    metaId: schema.string.optional(),
     inventoriesIds: schema
       .array([rules.minLength(1)])
       .members(schema.number([rules.exists({ table: 'product_inventories', column: 'id' })])),

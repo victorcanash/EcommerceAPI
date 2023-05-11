@@ -23,13 +23,7 @@ export default class UpdatePInventoryValidator {
     price: schema.number.optional(),
     quantity: schema.number.optional(),
     image: schema.string.optional(),
-    metaId: schema.string.optional({}, [
-      rules.unique({
-        table: 'product_inventories',
-        column: 'meta_id',
-        whereNot: { id: this.refs.id },
-      }),
-    ]),
+    metaId: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}

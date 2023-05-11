@@ -9,23 +9,13 @@ export default class UpdatePPackValidator {
 
   public reporter = CustomReporter
 
-  public refs = schema.refs({
-    id: this.ctx.params.id,
-  })
-
   public schema = schema.create({
     landingId: schema.number.optional([rules.exists({ table: 'landings', column: 'id' })]),
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
     price: schema.number.optional(),
     image: schema.string.optional(),
-    metaId: schema.string.optional({}, [
-      rules.unique({
-        table: 'product_packs',
-        column: 'meta_id',
-        whereNot: { id: this.refs.id },
-      }),
-    ]),
+    metaId: schema.string.optional(),
     inventoriesIds: schema.array
       .optional([rules.minLength(1)])
       .members(schema.number([rules.exists({ table: 'product_inventories', column: 'id' })])),
