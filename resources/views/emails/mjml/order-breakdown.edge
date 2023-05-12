@@ -96,8 +96,8 @@
       </mj-column>
       @each(item in order.items)
       	<mj-column width="50%">
-          @if(item.pack?.image || item.inventory?.product?.image)
-            <mj-image border-radius="12px" alt="{{item.inventory?.name.current || item.pack?.name.current}}" name="{{item.inventory?.name.current || item.pack?.name.current}}" title="{{item.inventory?.name.current || item.pack?.name.current}}" src="{{cloudinarySrc}}{{item.pack?.image || item.inventory?.product?.image}}" />
+          @if(item.pack?.image || item.inventory?.image)
+            <mj-image border-radius="12px" alt="{{item.inventory?.name.current || item.pack?.name.current}}" name="{{item.inventory?.name.current || item.pack?.name.current}}" title="{{item.inventory?.name.current || item.pack?.name.current}}" src="{{cloudinarySrc}}{{item.pack?.image || item.inventory?.image}}" />
           @else
             <mj-image border-radius="12px" src="{{cloudinarySrc}}v1681059169/laenvasadora/LANDING%20PAGE/placeholder_tl7jks.jpg" />
           @end
