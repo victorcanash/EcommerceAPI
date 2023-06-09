@@ -18,6 +18,7 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('localized_texts')
         .onDelete('CASCADE')
+      table.string('image').nullable()
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
