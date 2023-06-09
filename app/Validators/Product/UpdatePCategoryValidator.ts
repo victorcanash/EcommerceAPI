@@ -12,6 +12,7 @@ export default class UpdatePCategoryValidator {
   public schema = schema.create({
     name: optLocalizedTextSchema,
     description: optLocalizedTextSchema,
+    image: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}

@@ -15,7 +15,10 @@ export default class PCategoriesController {
       validatedData.name,
       validatedData.description
     )
-    const productCategory = await ProductCategory.create(textsData)
+    const productCategory = await ProductCategory.create({
+      ...validatedData,
+      ...textsData,
+    })
 
     const successMsg = 'Successfully created product category'
     logRouteSuccess(request, successMsg)
@@ -36,6 +39,8 @@ export default class PCategoriesController {
       validatedData.name,
       validatedData.description
     )
+    productCategory.merge(validatedData)
+    await productCategory.save()
 
     const successMsg = `Successfully updated product category by id ${id}`
     logRouteSuccess(request, successMsg)

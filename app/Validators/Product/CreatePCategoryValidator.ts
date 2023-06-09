@@ -12,6 +12,7 @@ export default class CreatePCategoryValidator {
   public schema = schema.create({
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
+    image: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}
