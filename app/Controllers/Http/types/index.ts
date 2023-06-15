@@ -25,8 +25,6 @@ export type BasicResponse = {
 export type InitAuthResponse = {
   code: number
   message: string
-  categories: ProductCategory[]
-  landings: Landing[]
   user?: User
   guestCart?: GuestCartCheck
   paypal?: {

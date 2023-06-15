@@ -7,8 +7,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { Providers } from 'App/Constants/auth'
 import User from 'App/Models/User'
 import Cart from 'App/Models/Cart'
-import Landing from 'App/Models/Landing'
-import ProductCategory from 'App/Models/ProductCategory'
 import { GuestCartCheck } from 'App/Types/cart'
 import {
   BasicResponse,
@@ -37,23 +35,6 @@ import { logRouteSuccess } from 'App/Utils/logger'
 export default class AuthController {
   public async init({ request, response, auth, i18n }: HttpContextContract) {
     const validatedData = await request.validate(InitValidator)
-    // Shop
-    const categoryIds = validatedData.categoryIds
-    const landingIds = validatedData.landingIds
-    const categories = categoryIds
-      ? await ProductCategory.query().where((query) => {
-          if (categoryIds.length > 0) {
-            query.whereIn('id', categoryIds)
-          }
-        })
-      : undefined
-    const landings = landingIds
-      ? await Landing.query().where((query) => {
-          if (landingIds.length > 0) {
-            query.whereIn('id', landingIds)
-          }
-        })
-      : undefined
     // User Auth
     const validToken = await auth.use('api').check()
     let user: User | undefined
@@ -72,9 +53,6 @@ export default class AuthController {
     return response.created({
       code: 201,
       message: successMsg,
-      // Shop
-      categories: categories || [],
-      landings: landings || [],
       // User Auth
       user: user,
       guestCart: guestCart,
