@@ -5,6 +5,9 @@ import ProductCategory from 'App/Models/ProductCategory'
 
 export default class ProductCategoryGroup extends TextsBaseModel {
   @column()
+  public slug: string
+
+  @column()
   public image?: string
 
   @hasMany(() => ProductCategory, {

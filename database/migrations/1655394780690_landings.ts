@@ -18,6 +18,7 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('localized_texts')
         .onDelete('CASCADE')
+      table.string('slug')
       table.jsonb('images').defaultTo([])
 
       table.timestamp('created_at', { useTz: true })

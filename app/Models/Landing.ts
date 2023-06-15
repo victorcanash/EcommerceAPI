@@ -11,6 +11,9 @@ import Product from 'App/Models/Product'
 import ProductPack from 'App/Models/ProductPack'
 
 export default class Landing extends TextsBaseModel {
+  @column()
+  public slug: string
+
   @column({
     prepare: (value: string[]) => JSON.stringify(value),
     consume: (value: string) => value as unknown as string[],
