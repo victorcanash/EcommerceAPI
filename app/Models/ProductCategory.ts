@@ -6,13 +6,13 @@ import ProductCategoryGroup from 'App/Models/ProductCategoryGroup'
 
 export default class ProductCategory extends TextsBaseModel {
   @column()
+  public categoryGroupId?: number
+
+  @column()
   public slug: string
 
   @column()
   public image?: string
-
-  @column()
-  public categoryGroupId?: number
 
   @belongsTo(() => ProductCategoryGroup)
   public categoryGroup: BelongsTo<typeof ProductCategoryGroup>

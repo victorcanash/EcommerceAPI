@@ -21,9 +21,6 @@ export default class Product extends TextsBaseModel {
   public landingId: number
 
   @column()
-  public categoryId: number
-
-  @column()
   public rating: string
 
   @column()
