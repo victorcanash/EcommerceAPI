@@ -12,6 +12,7 @@ export default class CreateLandingValidator {
   public schema = schema.create({
     slug: schema.string({}, [rules.unique({ table: 'landings', column: 'slug' })]),
     images: schema.array().members(schema.string()),
+    tutorialSources: schema.array().members(schema.string()),
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
   })

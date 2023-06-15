@@ -20,6 +20,7 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
       table.string('slug').notNullable().unique()
       table.jsonb('images').defaultTo([])
+      table.jsonb('tutorialSources').defaultTo([])
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })

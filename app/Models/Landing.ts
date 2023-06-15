@@ -14,6 +14,12 @@ export default class Landing extends TextsBaseModel {
   })
   public images: string[]
 
+  @column({
+    prepare: (value: string[]) => JSON.stringify(value),
+    consume: (value: string) => value as unknown as string[],
+  })
+  public tutorialSources: string[]
+
   @hasMany(() => Product, {
     onQuery: (query) => {
       query.orderBy('id', 'asc')
