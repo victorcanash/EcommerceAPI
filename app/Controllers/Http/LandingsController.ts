@@ -6,6 +6,7 @@ import ProductsService from 'App/Services/ProductsService'
 import { LandingResponse, LandingsResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
+import FilterLandingValidator from 'App/Validators/Product/FilterLandingValidator'
 import CreateLandingValidator from 'App/Validators/Product/CreateLandingValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
@@ -19,7 +20,17 @@ export default class LandingsController {
     const sortBy = validatedSortData.sortBy || defaultSortBy
     const order = validatedSortData.order || defaultOrder
 
-    const landings = await Landing.query().orderBy(sortBy, order).paginate(page, limit)
+    const validatedFilterData = await request.validate(FilterLandingValidator)
+    const productsData = validatedFilterData.productsData || false
+
+    const landings = await Landing.query()
+      .apply((scopes) => {
+        if (productsData) {
+          scopes.getProductsData()
+        }
+      })
+      .orderBy(sortBy, order)
+      .paginate(page, limit)
     const result = landings.toJSON()
 
     const successMsg = 'Successfully got landings'
@@ -31,6 +42,23 @@ export default class LandingsController {
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
     } as LandingsResponse)
+  }
+
+  public async show({ params: { id }, request, response }: HttpContextContract) {
+    const landing = await Landing.query()
+      .where('slug', id)
+      .apply((scopes) => {
+        scopes.getProductsData()
+      })
+      .first()
+
+    const successMsg = `Successfully got landing by id ${id}`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      landing: landing,
+    } as LandingResponse)
   }
 
   public async store({ request, response }: HttpContextContract) {

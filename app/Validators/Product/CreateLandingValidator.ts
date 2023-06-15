@@ -1,4 +1,4 @@
-import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
+import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { CustomReporter } from 'App/Validators/Reporters/CustomReporter'
@@ -10,6 +10,7 @@ export default class CreateLandingValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
+    slug: schema.string({}, [rules.unique({ table: 'landings', column: 'slug' })]),
     images: schema.array().members(schema.string()),
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
