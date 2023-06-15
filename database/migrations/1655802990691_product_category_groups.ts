@@ -1,17 +1,11 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'products'
+  protected tableName = 'product_category_groups'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id').primary()
-      table
-        .integer('landing_id')
-        .unsigned()
-        .references('id')
-        .inTable('landings')
-        .onDelete('RESTRICT')
+      table.increments('id')
       table
         .integer('name_id')
         .unsigned()
@@ -24,11 +18,10 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('localized_texts')
         .onDelete('CASCADE')
-      table.string('rating', 255).defaultTo('0')
-      table.integer('reviews_count', 255).defaultTo(0)
+      table.string('image').nullable()
 
-      table.timestamp('created_at', { useTz: true }).notNullable()
-      table.timestamp('updated_at', { useTz: true }).notNullable()
+      table.timestamp('created_at', { useTz: true })
+      table.timestamp('updated_at', { useTz: true })
     })
   }
 

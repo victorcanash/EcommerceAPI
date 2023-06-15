@@ -1,7 +1,5 @@
 import {
   column,
-  belongsTo,
-  BelongsTo,
   hasMany,
   HasMany,
   hasOne,
@@ -9,6 +7,8 @@ import {
   computed,
   ModelQueryBuilderContract,
   scope,
+  ManyToMany,
+  manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import TextsBaseModel from 'App/Models/TextsBaseModel'
@@ -29,10 +29,15 @@ export default class Product extends TextsBaseModel {
   @column()
   public reviewsCount: number
 
-  @belongsTo(() => ProductCategory, {
-    foreignKey: 'categoryId',
+  @manyToMany(() => ProductCategory, {
+    pivotTable: 'product_categories_products',
+    pivotTimestamps: true,
+    localKey: 'id',
+    pivotForeignKey: 'product_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'category_id',
   })
-  public category: BelongsTo<typeof ProductCategory>
+  public categories: ManyToMany<typeof ProductCategory>
 
   @hasMany(() => ProductInventory, {
     onQuery: (query) => {
@@ -96,7 +101,7 @@ export default class Product extends TextsBaseModel {
             .orWhereHas('description', (query) => {
               query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
             })
-            .orWhereHas('category', (query) => {
+            .orWhereHas('categories', (query) => {
               query
                 .whereHas('name', (query) => {
                   query
@@ -110,7 +115,7 @@ export default class Product extends TextsBaseModel {
                 })
             })
         })
-        .whereHas('category', (query) => {
+        .whereHas('categories', (query) => {
           if (categoryName) {
             query.whereHas('name', (query) => {
               query.where('en', categoryName).orWhere('es', categoryName)

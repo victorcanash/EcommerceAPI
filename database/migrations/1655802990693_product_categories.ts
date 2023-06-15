@@ -7,6 +7,13 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       table
+        .integer('category_group_id')
+        .unsigned()
+        .references('id')
+        .inTable('product_category_groups')
+        .onDelete('CASCADE')
+        .nullable()
+      table
         .integer('name_id')
         .unsigned()
         .references('id')
