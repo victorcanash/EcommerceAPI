@@ -61,6 +61,9 @@ export default class ProductsService {
           })
         })
       })
+      .apply((scopes) => {
+        scopes.getProductsData()
+      })
       .orderBy(sortBy, order)
       .paginate(page, limit)
 
