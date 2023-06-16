@@ -3,11 +3,12 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import Landing from 'App/Models/Landing'
 import ProductsService from 'App/Services/ProductsService'
-import { LandingResponse, LandingsResponse } from 'App/Controllers/Http/types'
+import { BasicResponse, LandingResponse, LandingsResponse } from 'App/Controllers/Http/types'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterLandingValidator from 'App/Validators/Product/FilterLandingValidator'
 import CreateLandingValidator from 'App/Validators/Product/CreateLandingValidator'
+import UpdateLandingValidator from 'App/Validators/Product/UpdateLandingValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class LandingsController {
@@ -44,15 +45,10 @@ export default class LandingsController {
     } as LandingsResponse)
   }
 
-  public async show({ params: { id }, request, response }: HttpContextContract) {
-    const landing = await Landing.query()
-      .where('slug', id)
-      .apply((scopes) => {
-        scopes.getProductsData()
-      })
-      .first()
+  public async show({ params: { id: slug }, request, response }: HttpContextContract) {
+    const landing = await ProductsService.getLandingBySlug(slug, true)
 
-    const successMsg = `Successfully got landing by id ${id}`
+    const successMsg = `Successfully got landing by slug ${slug}`
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
@@ -80,5 +76,40 @@ export default class LandingsController {
       message: successMsg,
       landing: landing,
     } as LandingResponse)
+  }
+
+  public async update({ params: { id }, request, response }: HttpContextContract) {
+    const landing = await ProductsService.getLandingById(id)
+
+    const validatedData = await request.validate(UpdateLandingValidator)
+
+    await ProductsService.updateLocalizedTexts(
+      landing,
+      validatedData.name,
+      validatedData.description
+    )
+    landing.merge(validatedData)
+    await landing.save()
+
+    const successMsg = `Successfully updated landing by id ${id}`
+    logRouteSuccess(request, successMsg)
+    return response.created({
+      code: 201,
+      message: successMsg,
+      landing: landing,
+    } as LandingResponse)
+  }
+
+  public async destroy({ params: { id }, request, response }: HttpContextContract) {
+    const landing = await ProductsService.getLandingById(id)
+
+    await landing.delete()
+
+    const successMsg = `Successfully deleted landing by id ${id}`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+    } as BasicResponse)
   }
 }

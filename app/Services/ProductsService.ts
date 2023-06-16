@@ -2,6 +2,7 @@ import NP from 'number-precision'
 
 import TextsBaseModel from 'App/Models/TextsBaseModel'
 import Product from 'App/Models/Product'
+import Landing from 'App/Models/Landing'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
@@ -30,6 +31,14 @@ export default class ProductsService {
     bigbuyData?: boolean
   ) {
     return this.getProductByField('id', id, false, true, adminData, bigbuyData)
+  }
+
+  public static async getLandingById(id: string, productsData?: boolean) {
+    return this.getLandingByField('id', id, productsData)
+  }
+
+  public static async getLandingBySlug(slug: string, productsData?: boolean) {
+    return this.getLandingByField('slug', slug, productsData)
   }
 
   public static async getCategoryById(id: number) {
@@ -172,6 +181,26 @@ export default class ProductsService {
     }
 
     return product
+  }
+
+  private static async getLandingByField(
+    field: string,
+    value: string | number,
+    productsData?: boolean
+  ) {
+    let landing: Landing | null = null
+    landing = await Landing.query()
+      .where(field, value)
+      .apply((scopes) => {
+        if (productsData) {
+          scopes.getProductsData()
+        }
+      })
+      .first()
+    if (!landing) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting landing`)
+    }
+    return landing
   }
 
   private static async getCategoryByField(field: string, value: string | number) {

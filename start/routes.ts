@@ -49,9 +49,10 @@ Route.group(() => {
   // Product routes
 
   Route.resource('landings', 'LandingsController')
-    .except(['update', 'destroy'])
     .middleware({
       store: ['auth:api', 'admin'],
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
     })
     .apiOnly()
 
