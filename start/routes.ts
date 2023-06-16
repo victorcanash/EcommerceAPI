@@ -57,9 +57,10 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-categories', 'PCategoriesController')
-    .except(['index', 'show'])
     .middleware({
-      '*': ['auth:api', 'admin'],
+      store: ['auth:api', 'admin'],
+      update: ['auth:api', 'admin'],
+      destroy: ['auth:api', 'admin'],
     })
     .apiOnly()
 

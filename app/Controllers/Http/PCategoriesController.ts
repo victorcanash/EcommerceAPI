@@ -1,13 +1,83 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { ModelPaginatorContract } from '@ioc:Adonis/Lucid/Orm'
 
+import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import ProductCategory from 'App/Models/ProductCategory'
+import ProductCategoryGroup from 'App/Models/ProductCategoryGroup'
 import ProductsService from 'App/Services/ProductsService'
-import { PCategoryResponse, BasicResponse } from 'App/Controllers/Http/types'
+import { BasicResponse, PCategoryResponse, PCategoriesResponse } from 'App/Controllers/Http/types'
+import PaginationValidator from 'App/Validators/List/PaginationValidator'
+import SortValidator from 'App/Validators/List/SortValidator'
+import FilterPCategoryValidator from 'App/Validators/Product/FilterPCategoryValidator'
 import CreatePCategoryValidator from 'App/Validators/Product/CreatePCategoryValidator'
 import UpdatePCategoryValidator from 'App/Validators/Product/UpdatePCategoryValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PCategoriesController {
+  public async index({ request, response }: HttpContextContract) {
+    const validatedPaginationData = await request.validate(PaginationValidator)
+    const page = validatedPaginationData.page || defaultPage
+    const limit = validatedPaginationData.limit || defaultLimit
+
+    const validatedSortData = await request.validate(SortValidator)
+    const sortBy = validatedSortData.sortBy || defaultSortBy
+    const order = validatedSortData.order || defaultOrder
+
+    const validatedFilterData = await request.validate(FilterPCategoryValidator)
+    const categoryGroups = validatedFilterData.categoryGroups || false
+
+    let categories: ModelPaginatorContract<ProductCategory | ProductCategoryGroup> | undefined
+    if (categoryGroups) {
+      categories = await ProductCategoryGroup.query().orderBy(sortBy, order).paginate(page, limit)
+    } else {
+      categories = await ProductCategory.query().orderBy(sortBy, order).paginate(page, limit)
+    }
+    const result = categories.toJSON()
+
+    const successMsg = 'Successfully got product categories'
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      productCategories: result.data,
+      totalPages: Math.ceil(result.meta.total / limit),
+      currentPage: result.meta.current_page as number,
+    } as PCategoriesResponse)
+  }
+
+  public async show({ params: { id: slug }, request, response }: HttpContextContract) {
+    const validatedPaginationData = await request.validate(PaginationValidator)
+    const page = validatedPaginationData.page || defaultPage
+    const limit = validatedPaginationData.limit || defaultLimit
+
+    const validatedSortData = await request.validate(SortValidator)
+    const sortBy = validatedSortData.sortBy || defaultSortBy
+    const order = validatedSortData.order || defaultOrder
+
+    const category = await ProductsService.getCategoryBySlug(slug)
+
+    const landingsResult = await ProductsService.getLandingsByCategoryId(
+      category.id,
+      page,
+      limit,
+      sortBy,
+      order
+    )
+
+    const successMsg = `Successfully got product category by slug ${slug}`
+    logRouteSuccess(request, successMsg)
+    return response.ok({
+      code: 200,
+      message: successMsg,
+      productCategory: category,
+      landingsResult: {
+        landings: landingsResult.data,
+        totalPages: Math.ceil(landingsResult.meta.total / limit),
+        currentPage: landingsResult.meta.current_page as number,
+      },
+    } as PCategoryResponse)
+  }
+
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePCategoryValidator)
 
@@ -15,10 +85,19 @@ export default class PCategoriesController {
       validatedData.name,
       validatedData.description
     )
-    const productCategory = await ProductCategory.create({
-      ...validatedData,
-      ...textsData,
-    })
+
+    let productCategory: ProductCategory | ProductCategoryGroup | null
+    if (!validatedData.isCategoryGroup) {
+      productCategory = await ProductCategory.create({
+        ...validatedData,
+        ...textsData,
+      })
+    } else {
+      productCategory = await ProductCategoryGroup.create({
+        ...validatedData,
+        ...textsData,
+      })
+    }
 
     const successMsg = 'Successfully created product category'
     logRouteSuccess(request, successMsg)

@@ -139,6 +139,11 @@ export type PCategoryResponse = {
   code: number
   message: string
   productCategory: ProductCategory | ProductCategoryGroup
+  landingsResult?: {
+    landings: Landing[]
+    totalPages: number
+    currentPage: number
+  }
 }
 
 /**

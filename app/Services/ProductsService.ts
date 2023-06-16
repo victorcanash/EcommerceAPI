@@ -1,9 +1,11 @@
 import NP from 'number-precision'
 
+import { defaultLimit, defaultOrder, defaultPage, defaultSortBy } from 'App/Constants/lists'
 import TextsBaseModel from 'App/Models/TextsBaseModel'
 import Product from 'App/Models/Product'
 import Landing from 'App/Models/Landing'
 import ProductCategory from 'App/Models/ProductCategory'
+import ProductCategoryGroup from 'App/Models/ProductCategoryGroup'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductPack from 'App/Models/ProductPack'
@@ -41,12 +43,37 @@ export default class ProductsService {
     return this.getLandingByField('slug', slug, productsData)
   }
 
+  public static async getLandingsByCategoryId(
+    categoryId: number,
+    page = defaultPage,
+    limit = defaultLimit,
+    sortBy = defaultSortBy,
+    order = defaultOrder
+  ) {
+    const landings = await Landing.query()
+      .whereHas('products', (query) => {
+        query.where('categoryId', categoryId)
+      })
+      .orWhereHas('packs', (query) => {
+        query.whereHas('inventories', (query) => {
+          query.whereHas('product', (query) => {
+            query.where('categoryId', categoryId)
+          })
+        })
+      })
+      .orderBy(sortBy, order)
+      .paginate(page, limit)
+
+    const result = landings.toJSON()
+    return result
+  }
+
   public static async getCategoryById(id: number) {
     return this.getCategoryByField('id', id)
   }
 
-  public static async getCategoryByName(name: string) {
-    return this.getCategoryByField('name', name)
+  public static async getCategoryBySlug(slug: string) {
+    return this.getCategoryByField('slug', slug)
   }
 
   public static async getInventoryById(id: number) {
@@ -204,15 +231,10 @@ export default class ProductsService {
   }
 
   private static async getCategoryByField(field: string, value: string | number) {
-    let category: ProductCategory | null = null
-    if (field === 'name' || field === 'description') {
-      category = await ProductCategory.query()
-        .whereHas(field, (query) => {
-          query.where('en', value).orWhere('es', value)
-        })
-        .first()
-    } else {
-      category = await ProductCategory.findBy(field, value)
+    let category: ProductCategory | ProductCategoryGroup | null = null
+    category = await ProductCategoryGroup.query().where(field, value).preload('categories').first()
+    if (!category) {
+      category = await ProductCategory.query().where(field, value).first()
     }
     if (!category) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product category`)
