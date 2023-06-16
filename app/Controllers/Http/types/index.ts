@@ -4,6 +4,7 @@ import CartItem from 'App/Models/CartItem'
 import Landing from 'App/Models/Landing'
 import Product from 'App/Models/Product'
 import ProductCategory from 'App/Models/ProductCategory'
+import ProductCategoryGroup from 'App/Models/ProductCategoryGroup'
 import ProductDiscount from 'App/Models/ProductDiscount'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductPack from 'App/Models/ProductPack'
@@ -127,7 +128,6 @@ export type ProductsResponse = {
   code: number
   message: string
   products: Product[]
-  category: ProductCategory | null
   totalPages: number
   currentPage: number
 }
@@ -138,7 +138,18 @@ export type ProductsResponse = {
 export type PCategoryResponse = {
   code: number
   message: string
-  productCategory: ProductCategory
+  productCategory: ProductCategory | ProductCategoryGroup
+}
+
+/**
+ * Product categories JSON response for Controllers
+ */
+export type PCategoriesResponse = {
+  code: number
+  message: string
+  productCategories: ProductCategory | ProductCategoryGroup[]
+  totalPages: number
+  currentPage: number
 }
 
 /**

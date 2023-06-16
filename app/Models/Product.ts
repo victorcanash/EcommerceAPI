@@ -84,41 +84,25 @@ export default class Product extends TextsBaseModel {
   }
 
   public static filter = scope(
-    (
-      query: ModelQueryBuilderContract<typeof Product, Product>,
-      keywords: string,
-      categoryName: string | null
-    ) => {
-      query
-        .where((query) => {
-          query
-            .whereHas('name', (query) => {
-              query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
-            })
-            .orWhereHas('description', (query) => {
-              query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
-            })
-            .orWhereHas('categories', (query) => {
-              query
-                .whereHas('name', (query) => {
-                  query
-                    .where('en', 'ILIKE', `%${keywords}%`)
-                    .orWhere('es', 'ILIKE', `%${keywords}%`)
-                })
-                .orWhereHas('description', (query) => {
-                  query
-                    .where('en', 'ILIKE', `%${keywords}%`)
-                    .orWhere('es', 'ILIKE', `%${keywords}%`)
-                })
-            })
-        })
-        .whereHas('categories', (query) => {
-          if (categoryName) {
-            query.whereHas('name', (query) => {
-              query.where('en', categoryName).orWhere('es', categoryName)
-            })
-          }
-        })
+    (query: ModelQueryBuilderContract<typeof Product, Product>, keywords: string) => {
+      query.where((query) => {
+        query
+          .whereHas('name', (query) => {
+            query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
+          })
+          .orWhereHas('description', (query) => {
+            query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
+          })
+          .orWhereHas('categories', (query) => {
+            query
+              .whereHas('name', (query) => {
+                query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
+              })
+              .orWhereHas('description', (query) => {
+                query.where('en', 'ILIKE', `%${keywords}%`).orWhere('es', 'ILIKE', `%${keywords}%`)
+              })
+          })
+      })
     }
   )
 

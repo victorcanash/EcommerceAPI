@@ -2,7 +2,6 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import Product from 'App/Models/Product'
-import ProductCategory from 'App/Models/ProductCategory'
 import ProductsService from 'App/Services/ProductsService'
 import UsersService from 'App/Services/UsersService'
 import { ProductsResponse, ProductResponse, BasicResponse } from 'App/Controllers/Http/types'
@@ -26,7 +25,6 @@ export default class ProductsController {
 
     const validatedFilterData = await request.validate(FilterProductValidator)
     const keywords = validatedFilterData.keywords || ''
-    const categoryName = validatedFilterData.categoryName || null
     const adminData = validatedFilterData.adminData || false
 
     const validApiToken = await auth.use('api').check()
@@ -37,7 +35,7 @@ export default class ProductsController {
 
     const products = await Product.query()
       .apply((scopes) => {
-        scopes.filter(keywords, categoryName)
+        scopes.filter(keywords)
         scopes.getInventoriesData()
         if (adminData) {
           scopes.getAdminData()
@@ -47,18 +45,12 @@ export default class ProductsController {
       .paginate(page, limit)
     const result = products.toJSON()
 
-    let category: ProductCategory | null = null
-    if (categoryName) {
-      category = await ProductsService.getCategoryByName(categoryName)
-    }
-
     const successMsg = 'Successfully got products'
     logRouteSuccess(request, successMsg)
     return response.ok({
       code: 200,
       message: successMsg,
       products: result.data,
-      category: category,
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
     } as ProductsResponse)

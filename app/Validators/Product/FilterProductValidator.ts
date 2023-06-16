@@ -10,7 +10,6 @@ export default class FilterProductValidator {
 
   public schema = schema.create({
     keywords: schema.string.optional(),
-    categoryName: schema.string.optional(),
     adminData: schema.boolean.optional(),
     bigbuyData: schema.boolean.optional(),
   })
