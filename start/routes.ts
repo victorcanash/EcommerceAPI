@@ -65,6 +65,7 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('products', 'ProductsController')
+    .except(['index', 'show'])
     .middleware({
       '*': ['auth:api', 'admin'],
     })
@@ -85,7 +86,7 @@ Route.group(() => {
     .apiOnly()
 
   Route.resource('product-packs', 'PPacksController')
-    .except(['show'])
+    .except(['index', 'show'])
     .middleware({
       '*': ['auth:api', 'admin'],
     })

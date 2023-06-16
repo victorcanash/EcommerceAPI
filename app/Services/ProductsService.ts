@@ -19,13 +19,13 @@ export default class ProductsService {
     return this.getProductByField('id', id, false, false, false)
   }
 
-  public static async getProductByIdWithInventories(
+  /*public static async getProductByIdWithInventories(
     id: number,
     adminData = false,
     bigbuyData?: boolean
   ) {
     return this.getProductByField('id', id, true, false, adminData, bigbuyData)
-  }
+  }*/
 
   public static async getProductByIdWithVariants(
     id: number,

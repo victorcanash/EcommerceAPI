@@ -1,17 +1,17 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
+//import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import ProductPack from 'App/Models/ProductPack'
 import ProductsService from 'App/Services/ProductsService'
-import { BasicResponse, PPackResponse, PPacksResponse } from 'App/Controllers/Http/types'
-import PaginationValidator from 'App/Validators/List/PaginationValidator'
-import SortValidator from 'App/Validators/List/SortValidator'
+import { BasicResponse, PPackResponse /*, PPacksResponse*/ } from 'App/Controllers/Http/types'
+//import PaginationValidator from 'App/Validators/List/PaginationValidator'
+//import SortValidator from 'App/Validators/List/SortValidator'
 import CreatePPackValidator from 'App/Validators/Product/CreatePPackValidator'
 import UpdatePPackValidator from 'App/Validators/Product/UpdatePPackValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PPacksController {
-  public async index({ request, response }: HttpContextContract) {
+  /*public async index({ request, response }: HttpContextContract) {
     const validatedPaginationData = await request.validate(PaginationValidator)
     const page = validatedPaginationData.page || defaultPage
     const limit = validatedPaginationData.limit || defaultLimit
@@ -32,7 +32,7 @@ export default class PPacksController {
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
     } as PPacksResponse)
-  }
+  }*/
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePPackValidator)

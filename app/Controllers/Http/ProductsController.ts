@@ -1,20 +1,20 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
+//import { defaultPage, defaultLimit, defaultOrder, defaultSortBy } from 'App/Constants/lists'
 import Product from 'App/Models/Product'
 import ProductsService from 'App/Services/ProductsService'
-import UsersService from 'App/Services/UsersService'
-import { ProductsResponse, ProductResponse, BasicResponse } from 'App/Controllers/Http/types'
-import PaginationValidator from 'App/Validators/List/PaginationValidator'
-import SortValidator from 'App/Validators/List/SortValidator'
-import FilterProductValidator from 'App/Validators/Product/FilterProductValidator'
+//import UsersService from 'App/Services/UsersService'
+import { /*ProductsResponse,*/ ProductResponse, BasicResponse } from 'App/Controllers/Http/types'
+//import PaginationValidator from 'App/Validators/List/PaginationValidator'
+//import SortValidator from 'App/Validators/List/SortValidator'
+//import FilterProductValidator from 'App/Validators/Product/FilterProductValidator'
 import CreateProductValidator from 'App/Validators/Product/CreateProductValidator'
 import UpdateProductValidator from 'App/Validators/Product/UpdateProductValidator'
-import PermissionException from 'App/Exceptions/PermissionException'
+//import PermissionException from 'App/Exceptions/PermissionException'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class ProductsController {
-  public async index({ request, response, auth }: HttpContextContract) {
+  /*public async index({ request, response, auth }: HttpContextContract) {
     const validatedPaginationData = await request.validate(PaginationValidator)
     const page = validatedPaginationData.page || defaultPage
     const limit = validatedPaginationData.limit || defaultLimit
@@ -79,7 +79,7 @@ export default class ProductsController {
       message: successMsg,
       product: product,
     } as ProductResponse)
-  }
+  }*/
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateProductValidator)
