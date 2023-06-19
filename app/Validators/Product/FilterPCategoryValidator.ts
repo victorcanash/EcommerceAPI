@@ -10,6 +10,7 @@ export default class FilterLandingValidator {
 
   public schema = schema.create({
     categoryGroups: schema.boolean.optional(),
+    adminData: schema.boolean.optional(),
   })
 
   public messages: CustomMessages = {}

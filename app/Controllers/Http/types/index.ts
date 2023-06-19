@@ -155,6 +155,7 @@ export type PCategoriesResponse = {
   productCategories: ProductCategory | ProductCategoryGroup[]
   totalPages: number
   currentPage: number
+  categoriesWithoutGroup: ProductCategory[] | undefined
 }
 
 /**

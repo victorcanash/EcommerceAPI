@@ -25,14 +25,29 @@ export default class PCategoriesController {
 
     const validatedFilterData = await request.validate(FilterPCategoryValidator)
     const categoryGroups = validatedFilterData.categoryGroups || false
+    const adminData = validatedFilterData.adminData || false
 
     let categories: ModelPaginatorContract<ProductCategory | ProductCategoryGroup> | undefined
     if (categoryGroups) {
-      categories = await ProductCategoryGroup.query().orderBy(sortBy, order).paginate(page, limit)
+      categories = await ProductCategoryGroup.query()
+        .where((query) => {
+          if (adminData) {
+            query.preload('categories')
+          }
+        })
+        .orderBy(sortBy, order)
+        .paginate(page, limit)
     } else {
       categories = await ProductCategory.query().orderBy(sortBy, order).paginate(page, limit)
     }
     const result = categories.toJSON()
+
+    let categoriesWithoutGroup: ProductCategory[] | undefined
+    if (adminData && categoryGroups) {
+      categoriesWithoutGroup = await ProductCategory.query()
+        .whereNull('categoryGroupId')
+        .orderBy(defaultSortBy, defaultOrder)
+    }
 
     const successMsg = 'Successfully got product categories'
     logRouteSuccess(request, successMsg)
@@ -42,6 +57,7 @@ export default class PCategoriesController {
       productCategories: result.data,
       totalPages: Math.ceil(result.meta.total / limit),
       currentPage: result.meta.current_page as number,
+      categoriesWithoutGroup: categoriesWithoutGroup,
     } as PCategoriesResponse)
   }
 
