@@ -56,8 +56,8 @@ export default class PCategoriesController {
 
     const category = await ProductsService.getCategoryBySlug(slug)
 
-    const landingsResult = await ProductsService.getLandingsByCategoryId(
-      category.id,
+    const landingsResult = await ProductsService.getLandingsByCategory(
+      category,
       page,
       limit,
       sortBy,

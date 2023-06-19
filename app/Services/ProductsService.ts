@@ -43,21 +43,30 @@ export default class ProductsService {
     return this.getLandingByField('slug', slug, productsData)
   }
 
-  public static async getLandingsByCategoryId(
-    categoryId: number,
+  public static async getLandingsByCategory(
+    category: ProductCategory | ProductCategoryGroup,
     page = defaultPage,
     limit = defaultLimit,
     sortBy = defaultSortBy,
     order = defaultOrder
   ) {
+    const categoryIds: number[] = []
+    if ((category as ProductCategoryGroup)?.categories) {
+      ;(category as ProductCategoryGroup).categories.forEach((category) => {
+        categoryIds.push(category.id)
+      })
+    } else {
+      categoryIds.push(category.id)
+    }
+
     const landings = await Landing.query()
       .whereHas('products', (query) => {
-        query.where('categoryId', categoryId)
+        query.whereIn('categoryId', categoryIds)
       })
       .orWhereHas('packs', (query) => {
         query.whereHas('inventories', (query) => {
           query.whereHas('product', (query) => {
-            query.where('categoryId', categoryId)
+            query.whereIn('categoryId', categoryIds)
           })
         })
       })
