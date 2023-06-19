@@ -11,6 +11,8 @@ export default class ProductCategoryGroup extends TextsBaseModel {
   public image?: string
 
   @hasMany(() => ProductCategory, {
+    foreignKey: 'categoryGroupId',
+    localKey: 'id',
     onQuery: (query) => {
       query.orderBy('id', 'asc')
     },

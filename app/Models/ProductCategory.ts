@@ -14,7 +14,10 @@ export default class ProductCategory extends TextsBaseModel {
   @column()
   public image?: string
 
-  @belongsTo(() => ProductCategoryGroup)
+  @belongsTo(() => ProductCategoryGroup, {
+    foreignKey: 'categoryGroupId',
+    localKey: 'id',
+  })
   public categoryGroup: BelongsTo<typeof ProductCategoryGroup>
 
   @manyToMany(() => Product, {
