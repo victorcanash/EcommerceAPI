@@ -61,12 +61,16 @@ export default class ProductsService {
 
     const landings = await Landing.query()
       .whereHas('products', (query) => {
-        query.whereIn('categoryId', categoryIds)
+        query.whereHas('categories', (query) => {
+          query.whereIn('category_id', categoryIds)
+        })
       })
       .orWhereHas('packs', (query) => {
         query.whereHas('inventories', (query) => {
           query.whereHas('product', (query) => {
-            query.whereIn('categoryId', categoryIds)
+            query.whereHas('categories', (query) => {
+              query.whereIn('category_id', categoryIds)
+            })
           })
         })
       })
