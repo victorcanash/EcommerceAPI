@@ -83,15 +83,18 @@ export default class ProductsController {
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreateProductValidator)
+    const { categoriesIds, ...createProductData } = validatedData
 
     const textsData = await ProductsService.createLocalizedTexts(
       validatedData.name,
       validatedData.description
     )
     const product = await Product.create({
-      ...validatedData,
+      ...createProductData,
       ...textsData,
     })
+    await product.related('categories').attach(validatedData.categoriesIds)
+    await product.save()
 
     const successMsg = 'Successfully created product'
     logRouteSuccess(request, successMsg)
@@ -106,13 +109,18 @@ export default class ProductsController {
     const product = await ProductsService.getProductById(id)
 
     const validatedData = await request.validate(UpdateProductValidator)
+    const { categoriesIds, ...updateProductData } = validatedData
 
     await ProductsService.updateLocalizedTexts(
       product,
       validatedData.name,
       validatedData.description
     )
-    product.merge(validatedData)
+    product.merge(updateProductData)
+    await product.related('categories').detach()
+    if (validatedData.categoriesIds && validatedData.categoriesIds?.length > 0) {
+      await product.related('categories').attach(validatedData.categoriesIds)
+    }
     await product.save()
 
     const successMsg = `Successfully updated product by id ${id}`

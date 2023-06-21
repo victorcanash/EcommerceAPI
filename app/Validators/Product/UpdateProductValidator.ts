@@ -9,15 +9,11 @@ export default class UpdateProductValidator {
 
   public reporter = CustomReporter
 
-  public refs = schema.refs({
-    id: this.ctx.params.id,
-  })
-
   public schema = schema.create({
     landingId: schema.number.optional([rules.exists({ table: 'landings', column: 'id' })]),
-    categoryId: schema.number.optional([
-      rules.exists({ table: 'product_categories', column: 'id' }),
-    ]),
+    categoriesIds: schema.array
+      .optional([rules.minLength(1)])
+      .members(schema.number([rules.exists({ table: 'product_categories', column: 'id' })])),
     name: optLocalizedTextSchema,
     description: optLocalizedTextSchema,
   })

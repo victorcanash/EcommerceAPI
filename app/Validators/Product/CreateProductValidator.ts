@@ -11,7 +11,9 @@ export default class CreateProductValidator {
 
   public schema = schema.create({
     landingId: schema.number([rules.exists({ table: 'landings', column: 'id' })]),
-    categoryId: schema.number([rules.exists({ table: 'product_categories', column: 'id' })]),
+    categoriesIds: schema
+      .array([rules.minLength(1)])
+      .members(schema.number([rules.exists({ table: 'product_categories', column: 'id' })])),
     name: reqLocalizedTextSchema,
     description: reqLocalizedTextSchema,
   })
