@@ -70,6 +70,9 @@ export default class PCategoriesController {
     const sortBy = validatedSortData.sortBy || defaultSortBy
     const order = validatedSortData.order || defaultOrder
 
+    const validatedFilterData = await request.validate(FilterPCategoryValidator)
+    const adminData = validatedFilterData.adminData || false
+
     const category = await ProductsService.getCategoryBySlug(slug)
 
     const landingsResult = await ProductsService.getLandingsByCategory(
@@ -77,7 +80,8 @@ export default class PCategoriesController {
       page,
       limit,
       sortBy,
-      order
+      order,
+      adminData
     )
 
     const successMsg = `Successfully got product category by slug ${slug}`

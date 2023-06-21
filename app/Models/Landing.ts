@@ -35,10 +35,13 @@ export default class Landing extends TextsBaseModel {
   public packs: HasMany<typeof ProductPack>
 
   public static getProductsData = scope(
-    (query: ModelQueryBuilderContract<typeof Landing, Landing>) => {
+    (query: ModelQueryBuilderContract<typeof Landing, Landing>, adminData?: boolean) => {
       query.preload('products', (query) => {
         query.apply((scopes) => {
           scopes.getInventoriesData()
+          if (adminData) {
+            scopes.getAdminData()
+          }
         })
       })
       query.preload('packs')

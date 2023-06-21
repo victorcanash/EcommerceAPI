@@ -27,12 +27,8 @@ export default class ProductsService {
     return this.getProductByField('id', id, true, false, adminData, bigbuyData)
   }*/
 
-  public static async getProductByIdWithVariants(
-    id: number,
-    adminData = false,
-    bigbuyData?: boolean
-  ) {
-    return this.getProductByField('id', id, false, true, adminData, bigbuyData)
+  public static async getProductByIdWithVariants(id: number) {
+    return this.getProductByField('id', id, true, false, false)
   }
 
   public static async getLandingById(id: string, productsData?: boolean) {
@@ -48,7 +44,8 @@ export default class ProductsService {
     page = defaultPage,
     limit = defaultLimit,
     sortBy = defaultSortBy,
-    order = defaultOrder
+    order = defaultOrder,
+    adminData?: boolean
   ) {
     const categoryIds: number[] = []
     if ((category as ProductCategoryGroup)?.categories) {
@@ -75,7 +72,7 @@ export default class ProductsService {
         })
       })
       .apply((scopes) => {
-        scopes.getProductsData()
+        scopes.getProductsData(adminData)
       })
       .orderBy(sortBy, order)
       .paginate(page, limit)

@@ -122,7 +122,7 @@ export default class Product extends TextsBaseModel {
 
   public static getAdminData = scope(
     (query: ModelQueryBuilderContract<typeof Product, Product>) => {
-      query.preload('discounts')
+      query.preload('discounts').preload('categories')
     }
   )
 }
