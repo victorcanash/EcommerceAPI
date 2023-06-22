@@ -44,7 +44,19 @@ export default class Landing extends TextsBaseModel {
           }
         })
       })
-      query.preload('packs')
+      query.preload('packs', (query) => {
+        if (adminData) {
+          query.preload('inventories', (query) => {
+            query.preload('product', (query) => {
+              query.preload('activeDiscount')
+              query.apply((scopes) => {
+                scopes.getInventoriesData()
+                scopes.getAdminData()
+              })
+            })
+          })
+        }
+      })
     }
   )
 }
