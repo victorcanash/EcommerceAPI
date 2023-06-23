@@ -100,6 +100,7 @@ export default class PCategoriesController {
 
   public async store({ request, response }: HttpContextContract) {
     const validatedData = await request.validate(CreatePCategoryValidator)
+    const { isCategoryGroup, ...createCategoryData } = validatedData
 
     const textsData = await ProductsService.createLocalizedTexts(
       validatedData.name,
@@ -107,14 +108,14 @@ export default class PCategoriesController {
     )
 
     let productCategory: ProductCategory | ProductCategoryGroup | null
-    if (!validatedData.isCategoryGroup) {
+    if (!isCategoryGroup) {
       productCategory = await ProductCategory.create({
-        ...validatedData,
+        ...createCategoryData,
         ...textsData,
       })
     } else {
       productCategory = await ProductCategoryGroup.create({
-        ...validatedData,
+        ...createCategoryData,
         ...textsData,
       })
     }
