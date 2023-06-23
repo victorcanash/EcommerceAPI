@@ -11,7 +11,7 @@ export default class extends BaseSchema {
         .unsigned()
         .references('id')
         .inTable('landings')
-        .onDelete('RESTRICT')
+        .onDelete('CASCADE')
       table
         .integer('name_id')
         .unsigned()
