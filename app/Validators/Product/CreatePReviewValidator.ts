@@ -11,8 +11,7 @@ export default class CreatePReviewValidator {
   public reporter = CustomReporter
 
   public schema = schema.create({
-    productId: schema.number.optional([rules.exists({ table: 'products', column: 'id' })]),
-    packId: schema.number.optional([rules.exists({ table: 'product_packs', column: 'id' })]),
+    landingId: schema.number([rules.exists({ table: 'landings', column: 'id' })]),
     rating: schema.number([rules.range(0, 5)]),
     title: schema.string.optional(),
     description: schema.string(),

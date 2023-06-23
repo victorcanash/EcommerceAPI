@@ -26,8 +26,6 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
       table.float('price', 255).notNullable()
       table.string('image').nullable()
-      table.string('rating', 255).defaultTo('0')
-      table.integer('reviews_count', 255).defaultTo(0)
       table.string('meta_id', 255).nullable()
 
       table.timestamp('created_at', { useTz: true })

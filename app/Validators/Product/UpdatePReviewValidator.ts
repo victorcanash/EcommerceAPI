@@ -12,6 +12,8 @@ export default class UpdatePReviewValidator {
     rating: schema.number.optional([rules.range(0, 5)]),
     title: schema.string.optional(),
     description: schema.string.optional(),
+    publicName: schema.string.optional(),
+    imageUrl: schema.string.optional(),
   })
 
   public messages: CustomMessages = {}

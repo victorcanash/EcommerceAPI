@@ -199,7 +199,7 @@ export type PPacksResponse = {
 /**
  * Create Product review JSON response for Controllers
  */
-export type CreatePReviewResponse = {
+export type PReviewResponse = {
   code: number
   message: string
   productReview: ProductReview
@@ -207,15 +207,6 @@ export type CreatePReviewResponse = {
     rating: string
     reviewsCount: number
   }
-}
-
-/**
- * Product review JSON response for Controllers
- */
-export type PReviewResponse = {
-  code: number
-  message: string
-  productReview: ProductReview
 }
 
 /**

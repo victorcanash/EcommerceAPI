@@ -20,12 +20,6 @@ export default class Product extends TextsBaseModel {
   @column()
   public landingId: number
 
-  @column()
-  public rating: string
-
-  @column()
-  public reviewsCount: number
-
   @manyToMany(() => ProductCategory, {
     pivotTable: 'product_categories_products',
     pivotTimestamps: true,
@@ -109,14 +103,6 @@ export default class Product extends TextsBaseModel {
   public static getInventoriesData = scope(
     (query: ModelQueryBuilderContract<typeof Product, Product>) => {
       query.preload('inventories').preload('activeDiscount')
-    }
-  )
-
-  public static getVariantsData = scope(
-    (query: ModelQueryBuilderContract<typeof Product, Product>) => {
-      query.preload('inventories', (query) => {
-        query.preload('packs')
-      })
     }
   )
 

@@ -21,6 +21,8 @@ export default class extends BaseSchema {
       table.string('slug').notNullable().unique()
       table.jsonb('images').defaultTo([])
       table.jsonb('tutorial_sources').defaultTo([])
+      table.string('rating', 255).defaultTo('0')
+      table.integer('reviews_count', 255).defaultTo(0)
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })

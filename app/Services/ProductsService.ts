@@ -16,7 +16,7 @@ import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
 export default class ProductsService {
   public static async getProductById(id: number) {
-    return this.getProductByField('id', id, false, false, false)
+    return this.getProductByField('id', id, false, false)
   }
 
   /*public static async getProductByIdWithInventories(
@@ -27,11 +27,7 @@ export default class ProductsService {
     return this.getProductByField('id', id, true, false, adminData, bigbuyData)
   }*/
 
-  public static async getProductByIdWithVariants(id: number) {
-    return this.getProductByField('id', id, true, false, false)
-  }
-
-  public static async getLandingById(id: string, productsData?: boolean) {
+  public static async getLandingById(id: number, productsData?: boolean) {
     return this.getLandingByField('id', id, productsData)
   }
 
@@ -101,8 +97,8 @@ export default class ProductsService {
     return this.getPackByField('id', id)
   }
 
-  public static async getReviewById(id: number) {
-    return this.getReviewByField('id', id)
+  public static async getReviewById(id: number, landingData?: boolean) {
+    return this.getReviewByField('id', id, landingData)
   }
 
   public static async createLocalizedTexts(
@@ -140,16 +136,8 @@ export default class ProductsService {
     await productBaseModel.description.save()
   }
 
-  public static async calculateProductRating(product: Product) {
-    return this.calculateRating('productId', product)
-  }
-
-  public static async calculatePackRating(pack: ProductPack) {
-    return this.calculateRating('packId', pack)
-  }
-
-  private static async calculateRating(keyId: string, relatedProduct: Product | ProductPack) {
-    const reviews = await ProductReview.query().where(keyId, relatedProduct.id)
+  public static async calculateLandingRating(landing: Landing) {
+    const reviews = await ProductReview.query().where('landingId', landing.id)
     let total = 0
     let count = 0
     reviews.forEach((review) => {
@@ -159,11 +147,11 @@ export default class ProductsService {
     const rating = (
       total === 0 && count === 0 ? 0 : NP.round(NP.divide(total, count), 2)
     ).toString()
-    relatedProduct.merge({
+    landing.merge({
       rating: rating,
       reviewsCount: count,
     })
-    await relatedProduct.save()
+    await landing.save()
 
     return {
       rating: rating,
@@ -175,7 +163,6 @@ export default class ProductsService {
     field: string,
     value: string | number,
     inventoriesData: boolean,
-    variantsData: boolean,
     adminData: boolean,
     bigbuyData?: boolean
   ) {
@@ -185,9 +172,6 @@ export default class ProductsService {
       .apply((scopes) => {
         if (inventoriesData) {
           scopes.getInventoriesData()
-        }
-        if (variantsData) {
-          scopes.getVariantsData()
         }
         if (adminData) {
           scopes.getAdminData()
@@ -283,9 +267,20 @@ export default class ProductsService {
     return pack
   }
 
-  private static async getReviewByField(field: string, value: string | number) {
+  private static async getReviewByField(
+    field: string,
+    value: string | number,
+    landingData?: boolean
+  ) {
     let review: ProductReview | null = null
-    review = await ProductReview.findBy(field, value)
+    review = await ProductReview.query()
+      .where(field, value)
+      .where((query) => {
+        if (landingData) {
+          query.preload('landing')
+        }
+      })
+      .first()
     if (!review) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product review`)
     }

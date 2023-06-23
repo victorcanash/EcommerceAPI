@@ -6,12 +6,7 @@ import ProductReview from 'App/Models/ProductReview'
 import User from 'App/Models/User'
 import GuestUser from 'App/Models/GuestUser'
 import Order from 'App/Models/Order'
-import {
-  PReviewsResponse,
-  PReviewResponse,
-  CreatePReviewResponse,
-  BasicResponse,
-} from 'App/Controllers/Http/types'
+import { PReviewsResponse, PReviewResponse, BasicResponse } from 'App/Controllers/Http/types'
 import ProductsService from 'App/Services/ProductsService'
 import UsersService from 'App/Services/UsersService'
 import CloudinaryService from 'App/Services/CloudinaryService'
@@ -35,8 +30,7 @@ export default class PReviewsController {
     const order = validatedSortData.order || defaultOrder
 
     const reviews = await ProductReview.query()
-      .preload('product')
-      .preload('pack')
+      .preload('landing')
       .orderBy(sortBy, order)
       .paginate(page, limit)
     const result = reviews.toJSON()
@@ -80,27 +74,26 @@ export default class PReviewsController {
       publicName = `${user.firstName} ${user.lastName}`
     }
 
-    // Get Product
-    const product = validatedData.productId
-      ? await ProductsService.getProductByIdWithVariants(validatedData.productId)
-      : undefined
-    const pack = !product
-      ? await ProductsService.getPackById(validatedData.packId || -1)
-      : undefined
+    // Get Landing
+    const landing = await ProductsService.getLandingById(validatedData.landingId)
 
     // Check if the user has bought the related product
     if (!isAuthAdmin) {
       const order = await Order.query()
         .where(user ? 'userId' : 'guestUserId', user ? user.id : guestUser?.id || -1)
         .where((query) => {
-          if (product) {
-            product.inventories.forEach((inventoryItem, index) => {
-              index === 0
-                ? query.whereJsonSuperset('products', [{ inventoryId: inventoryItem.id }])
-                : query.orWhereJsonSuperset('products', [{ inventoryId: inventoryItem.id }])
+          if (landing.products.length > 0) {
+            landing.products.forEach((product) => {
+              product.inventories.forEach((inventoryItem, index) => {
+                index === 0
+                  ? query.whereJsonSuperset('products', [{ inventoryId: inventoryItem.id }])
+                  : query.orWhereJsonSuperset('products', [{ inventoryId: inventoryItem.id }])
+              })
             })
-          } else if (pack) {
-            query.whereJsonSuperset('products', [{ packId: pack.id }])
+          } else if (landing.packs.length > 0) {
+            landing.packs.forEach((pack) => {
+              query.whereJsonSuperset('products', [{ packId: pack.id }])
+            })
           }
         })
         .first()
@@ -126,8 +119,7 @@ export default class PReviewsController {
     const productReview = await ProductReview.create({
       userId: user?.id,
       guestUserId: guestUser?.id,
-      productId: product?.id,
-      packId: pack?.id,
+      landingId: landing.id,
       rating: validatedData.rating,
       title: validatedData.title,
       description: validatedData.description,
@@ -137,17 +129,7 @@ export default class PReviewsController {
     })
 
     // Recalculate product rating
-    let productRating = {
-      rating: '',
-      reviewsCount: 0,
-    }
-    if (product) {
-      await productReview.load('product')
-      productRating = await ProductsService.calculateProductRating(product)
-    } else if (pack) {
-      await productReview.load('pack')
-      productRating = await ProductsService.calculatePackRating(pack)
-    }
+    const productRating = await ProductsService.calculateLandingRating(landing)
 
     const successMsg = `Successfully created product review by email ${email}`
     logRouteSuccess(request, successMsg)
@@ -156,11 +138,11 @@ export default class PReviewsController {
       message: successMsg,
       productReview: productReview,
       productRating: productRating,
-    } as CreatePReviewResponse)
+    } as PReviewResponse)
   }
 
   public async update({ params: { id }, request, response }: HttpContextContract) {
-    const productReview = await ProductsService.getReviewById(id)
+    const productReview = await ProductsService.getReviewById(id, true)
 
     const validatedData = await request.validate(UpdatePReviewValidator)
 
@@ -168,13 +150,7 @@ export default class PReviewsController {
     await productReview.save()
 
     // Recalculate product rating
-    if (productReview.productId) {
-      await productReview.load('product')
-      await ProductsService.calculateProductRating(productReview.product)
-    } else if (productReview.packId) {
-      await productReview.load('pack')
-      await ProductsService.calculatePackRating(productReview.pack)
-    }
+    const productRating = await ProductsService.calculateLandingRating(productReview.landing)
 
     const successMsg = `Successfully updated product review by id ${id}`
     logRouteSuccess(request, successMsg)
@@ -182,6 +158,7 @@ export default class PReviewsController {
       code: 201,
       message: successMsg,
       productReview: productReview,
+      productRating: productRating,
     } as PReviewResponse)
   }
 

@@ -20,6 +20,12 @@ export default class Landing extends TextsBaseModel {
   })
   public tutorialSources: string[]
 
+  @column()
+  public rating: string
+
+  @column()
+  public reviewsCount: number
+
   @hasMany(() => Product, {
     onQuery: (query) => {
       query.orderBy('id', 'asc')

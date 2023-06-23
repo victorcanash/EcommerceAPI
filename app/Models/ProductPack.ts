@@ -26,12 +26,6 @@ export default class ProductPack extends TextsBaseModel {
   public image?: string
 
   @column()
-  public rating: string
-
-  @column()
-  public reviewsCount: number
-
-  @column()
   public metaId?: string
 
   @manyToMany(() => ProductInventory, {
