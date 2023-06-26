@@ -14,8 +14,9 @@ import { logRouteSuccess } from 'App/Utils/logger'
 import { generateUniqueFilename } from 'App/Utils/uploader'
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
-import CreatePReviewValidator from 'App/Validators/Product/CreatePReviewValidator'
-import UpdatePReviewValidator from 'App/Validators/Product/UpdatePReviewValidator'
+import FilterPReviewValidator from 'App/Validators/ProductReview/FilterPReviewValidator'
+import CreatePReviewValidator from 'App/Validators/ProductReview/CreatePReviewValidator'
+import UpdatePReviewValidator from 'App/Validators/ProductReview/UpdatePReviewValidator'
 import PermissionException from 'App/Exceptions/PermissionException'
 import ModelNotFoundException from 'App/Exceptions/ModelNotFoundException'
 
@@ -29,7 +30,15 @@ export default class PReviewsController {
     const sortBy = validatedSortData.sortBy || defaultSortBy
     const order = validatedSortData.order || defaultOrder
 
+    const validatedFilterData = await request.validate(FilterPReviewValidator)
+    const landingId = validatedFilterData.landingId
+
     const reviews = await ProductReview.query()
+      .where((query) => {
+        if (landingId) {
+          query.where('landingId', landingId)
+        }
+      })
       .preload('landing')
       .orderBy(sortBy, order)
       .paginate(page, limit)
