@@ -23,8 +23,17 @@ export default class LandingsController {
 
     const validatedFilterData = await request.validate(FilterLandingValidator)
     const productsData = validatedFilterData.productsData || false
+    const onlyOffers = validatedFilterData.onlyOffers || false
 
     const landings = await Landing.query()
+      .where((query) => {
+        if (onlyOffers) {
+          query.has('packs')
+          query.orWhereHas('products', (query) => {
+            query.has('activeDiscount')
+          })
+        }
+      })
       .apply((scopes) => {
         if (productsData) {
           scopes.getProductsData()
