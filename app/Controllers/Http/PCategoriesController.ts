@@ -29,14 +29,14 @@ export default class PCategoriesController {
 
     let categories: ModelPaginatorContract<ProductCategory | ProductCategoryGroup> | undefined
     if (categoryGroups) {
-      categories = await ProductCategoryGroup.query()
-        .where((query) => {
-          if (adminData) {
-            query.preload('categories')
-          }
-        })
-        .orderBy(sortBy, order)
-        .paginate(page, limit)
+      if (adminData) {
+        categories = await ProductCategoryGroup.query()
+          .preload('categories')
+          .orderBy(sortBy, order)
+          .paginate(page, limit)
+      } else {
+        categories = await ProductCategoryGroup.query().orderBy(sortBy, order).paginate(page, limit)
+      }
     } else {
       categories = await ProductCategory.query().orderBy(sortBy, order).paginate(page, limit)
     }
