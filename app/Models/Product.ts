@@ -9,16 +9,22 @@ import {
   scope,
   ManyToMany,
   manyToMany,
+  belongsTo,
+  BelongsTo,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import TextsBaseModel from 'App/Models/TextsBaseModel'
 import ProductCategory from 'App/Models/ProductCategory'
 import ProductInventory from 'App/Models/ProductInventory'
 import ProductDiscount from 'App/Models/ProductDiscount'
+import Landing from 'App/Models/Landing'
 
 export default class Product extends TextsBaseModel {
   @column()
   public landingId: number
+
+  @belongsTo(() => Landing)
+  public landing: BelongsTo<typeof Landing>
 
   @manyToMany(() => ProductCategory, {
     pivotTable: 'product_categories_products',

@@ -8,12 +8,15 @@ import {
   afterCreate,
   afterUpdate,
   ModelQueryBuilderContract,
+  belongsTo,
+  BelongsTo,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import NP from 'number-precision'
 
 import TextsBaseModel from 'App/Models/TextsBaseModel'
 import ProductInventory from 'App/Models/ProductInventory'
+import Landing from 'App/Models/Landing'
 
 export default class ProductPack extends TextsBaseModel {
   @column()
@@ -27,6 +30,9 @@ export default class ProductPack extends TextsBaseModel {
 
   @column()
   public metaId?: string
+
+  @belongsTo(() => Landing)
+  public landing: BelongsTo<typeof Landing>
 
   @manyToMany(() => ProductInventory, {
     pivotTable: 'product_packs_inventories',
