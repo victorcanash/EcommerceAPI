@@ -155,26 +155,32 @@ export default class CartsService {
   public static async createGuestCartCheck(items?: GuestCartItem[]) {
     let cart: GuestCartCheck = { items: [] }
     if (items && items.length > 0) {
-      const inventories = await ProductInventory.query().whereIn(
-        'id',
-        items
-          .filter((item) => {
-            return item.inventoryId ? true : false
-          })
-          .map((item) => {
-            return item.inventoryId || -1
-          })
-      )
-      const packs = await ProductPack.query().whereIn(
-        'id',
-        items
-          .filter((item) => {
-            return item.packId ? true : false
-          })
-          .map((item) => {
-            return item.packId || -1
-          })
-      )
+      const inventories = await ProductInventory.query()
+        .whereIn(
+          'id',
+          items
+            .filter((item) => {
+              return item.inventoryId ? true : false
+            })
+            .map((item) => {
+              return item.inventoryId || -1
+            })
+        )
+        .apply((scopes) => {
+          scopes.getProductData(true)
+        })
+      const packs = await ProductPack.query()
+        .whereIn(
+          'id',
+          items
+            .filter((item) => {
+              return item.packId ? true : false
+            })
+            .map((item) => {
+              return item.packId || -1
+            })
+        )
+        .preload('landing')
       if (inventories.length > 0 || packs.length > 0) {
         const cartItems: GuestCartCheckItem[] = []
         items.forEach((item) => {
@@ -222,7 +228,7 @@ export default class CartsService {
 
   private static async getCartByField(field: string, value: string | number) {
     let cart: Cart | null = null
-    cart = await Cart.findBy(field, value)
+    cart = await Cart.query().where(field, value).first()
     if (!cart) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting cart`)
     }
@@ -231,7 +237,7 @@ export default class CartsService {
 
   private static async getCartItemByField(field: string, value: string | number) {
     let cartItem: CartItem | null = null
-    cartItem = await CartItem.findBy(field, value)
+    cartItem = await CartItem.query().where(field, value).first()
     if (!cartItem) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting cart item`)
     }

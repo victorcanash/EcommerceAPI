@@ -110,10 +110,18 @@ export default class ProductPack extends TextsBaseModel {
   }
 
   private static async loadPackDataQuery(query: ModelQueryBuilderContract<typeof ProductPack>) {
-    query.preload('inventories')
+    query.preload('inventories', (query) => {
+      query.apply((scopes) => {
+        scopes.getProductData()
+      })
+    })
   }
 
   private static async loadPackDataModel(model: ProductPack) {
-    await model.load('inventories')
+    await model.load('inventories', (query) => {
+      query.apply((scopes) => {
+        scopes.getProductData()
+      })
+    })
   }
 }

@@ -3,10 +3,10 @@ import {
   belongsTo,
   BelongsTo,
   computed,
-  beforeFetch,
   ModelQueryBuilderContract,
   manyToMany,
   ManyToMany,
+  scope,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import NP from 'number-precision'
@@ -72,10 +72,17 @@ export default class ProductInventory extends TextsBaseModel {
     quantity: 0,
   }
 
-  @beforeFetch()
-  public static beforeFetch(query: ModelQueryBuilderContract<typeof ProductInventory>) {
-    query.preload('product', (query) => {
-      query.preload('activeDiscount')
-    })
-  }
+  public static getProductData = scope(
+    (
+      query: ModelQueryBuilderContract<typeof ProductInventory, ProductInventory>,
+      landingData?: boolean
+    ) => {
+      query.preload('product', (query) => {
+        query.preload('activeDiscount')
+        if (landingData) {
+          query.preload('landing')
+        }
+      })
+    }
+  )
 }

@@ -108,7 +108,13 @@ export default class Product extends TextsBaseModel {
 
   public static getInventoriesData = scope(
     (query: ModelQueryBuilderContract<typeof Product, Product>) => {
-      query.preload('inventories').preload('activeDiscount')
+      query
+        .preload('inventories', (query) => {
+          query.apply((scopes) => {
+            scopes.getProductData()
+          })
+        })
+        .preload('activeDiscount')
     }
   )
 

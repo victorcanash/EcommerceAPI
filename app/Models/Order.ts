@@ -64,7 +64,9 @@ export default class Order extends AppBaseModel {
             return item.inventoryId || -1
           })
         )
-        .preload('product')
+        .apply((scopes) => {
+          scopes.getProductData()
+        })
       const packs = await ProductPack.query().whereIn(
         'id',
         items.map((item) => {
