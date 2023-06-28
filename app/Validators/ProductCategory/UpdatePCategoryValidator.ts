@@ -14,6 +14,7 @@ export default class UpdatePCategoryValidator {
   })
 
   public schema = schema.create({
+    isCategoryGroup: schema.boolean.optional(),
     slug: schema.string.optional({}, [
       rules.unique({ table: 'product_categories', column: 'slug', whereNot: { id: this.refs.id } }),
       rules.unique({

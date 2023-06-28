@@ -81,8 +81,12 @@ export default class ProductsService {
     return this.getCategoryByField('id', id)
   }
 
+  public static async getCategoryGroupById(id: number) {
+    return this.getCategoryGroupByField('id', id)
+  }
+
   public static async getCategoryBySlug(slug: string) {
-    return this.getCategoryByField('slug', slug)
+    return this.getSomeCategoryByField('slug', slug)
   }
 
   public static async getInventoryById(id: number) {
@@ -227,12 +231,30 @@ export default class ProductsService {
     return landing
   }
 
-  private static async getCategoryByField(field: string, value: string | number) {
+  private static async getSomeCategoryByField(field: string, value: string | number) {
     let category: ProductCategory | ProductCategoryGroup | null = null
     category = await ProductCategoryGroup.query().where(field, value).preload('categories').first()
     if (!category) {
       category = await ProductCategory.query().where(field, value).first()
     }
+    if (!category) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting some product category`)
+    }
+    return category
+  }
+
+  private static async getCategoryGroupByField(field: string, value: string | number) {
+    let categoryGroup: ProductCategoryGroup | null = null
+    categoryGroup = await ProductCategoryGroup.findBy(field, value)
+    if (!categoryGroup) {
+      throw new ModelNotFoundException(`Invalid ${field} ${value} getting product category group`)
+    }
+    return categoryGroup
+  }
+
+  private static async getCategoryByField(field: string, value: string | number) {
+    let category: ProductCategory | null = null
+    category = await ProductCategory.findBy(field, value)
     if (!category) {
       throw new ModelNotFoundException(`Invalid ${field} ${value} getting product category`)
     }

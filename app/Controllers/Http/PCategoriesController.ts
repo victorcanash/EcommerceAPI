@@ -9,8 +9,9 @@ import { BasicResponse, PCategoryResponse, PCategoriesResponse } from 'App/Contr
 import PaginationValidator from 'App/Validators/List/PaginationValidator'
 import SortValidator from 'App/Validators/List/SortValidator'
 import FilterPCategoryValidator from 'App/Validators/Product/FilterPCategoryValidator'
-import CreatePCategoryValidator from 'App/Validators/Product/CreatePCategoryValidator'
-import UpdatePCategoryValidator from 'App/Validators/Product/UpdatePCategoryValidator'
+import CreatePCategoryValidator from 'App/Validators/ProductCategory/CreatePCategoryValidator'
+import UpdatePCategoryValidator from 'App/Validators/ProductCategory/UpdatePCategoryValidator'
+import DeletePCategoryValidator from 'App/Validators/ProductCategory/DeletePCategoryValidator'
 import { logRouteSuccess } from 'App/Utils/logger'
 
 export default class PCategoriesController {
@@ -130,16 +131,19 @@ export default class PCategoriesController {
   }
 
   public async update({ params: { id }, request, response }: HttpContextContract) {
-    const productCategory = await ProductsService.getCategoryById(id)
-
     const validatedData = await request.validate(UpdatePCategoryValidator)
+    const { isCategoryGroup, ...updateCategoryData } = validatedData
+
+    const productCategory = isCategoryGroup
+      ? await ProductsService.getCategoryGroupById(id)
+      : await ProductsService.getCategoryById(id)
 
     await ProductsService.updateLocalizedTexts(
       productCategory,
       validatedData.name,
       validatedData.description
     )
-    productCategory.merge(validatedData)
+    productCategory.merge(updateCategoryData)
     await productCategory.save()
 
     const successMsg = `Successfully updated product category by id ${id}`
@@ -152,7 +156,11 @@ export default class PCategoriesController {
   }
 
   public async destroy({ params: { id }, request, response }: HttpContextContract) {
-    const productCategory = await ProductsService.getCategoryById(id)
+    const validatedData = await request.validate(DeletePCategoryValidator)
+
+    const productCategory = validatedData.isCategoryGroup
+      ? await ProductsService.getCategoryGroupById(id)
+      : await ProductsService.getCategoryById(id)
 
     await productCategory.delete()
 
