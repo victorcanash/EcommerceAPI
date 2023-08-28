@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node ace serve --watch",
     "build": "node ace build --production",
-    "postbuild": "node ace swagger:generate && cp -a docs/ build/docs",
+    "postbuild": "node ace migration:run --force && node ace swagger:generate && cp -a docs/ build/docs",
     "start": "node build/server.js",
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write ."
