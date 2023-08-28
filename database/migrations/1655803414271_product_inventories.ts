@@ -12,7 +12,7 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('products')
         .onDelete('CASCADE')
-      table.string('sku', 255).notNullable()
+      table.string('sku', 255).notNullable().unique()
       table
         .integer('name_id')
         .unsigned()
@@ -27,7 +27,6 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
       table.float('price', 255).notNullable()
       table.integer('quantity', 255).defaultTo(0).notNullable()
-      table.string('sku', 255).notNullable().unique()
       table.string('image').nullable()
       table.string('meta_id', 255).nullable()
 
